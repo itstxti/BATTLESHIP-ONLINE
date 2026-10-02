@@ -1,0 +1,968 @@
+:root {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  color: #172033;
+  background: #f4f7fb;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+button {
+  font: inherit;
+}
+
+/* =========================================================
+   APP
+   ========================================================= */
+
+#app {
+  min-height: 100vh;
+  padding: 48px 24px;
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.game-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.game-header h1 {
+  margin: 0;
+  font-size: 42px;
+  letter-spacing: 4px;
+  font-weight: 800;
+}
+
+.subtitle {
+  margin: 8px 0 0;
+  color: #718096;
+  font-size: 15px;
+}
+
+/* =========================================================
+   GAME CONTAINER
+   ========================================================= */
+
+.game-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* =========================================================
+   GAME STATUS
+   ========================================================= */
+
+.game-status {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 32px;
+}
+
+#turn-status {
+  padding: 10px 18px;
+
+  border-radius: 999px;
+
+  background: white;
+  border: 1px solid #dfe5ee;
+
+  color: #172033;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+/* Player turn */
+
+#turn-status.player-turn {
+  background: #ecfdf3;
+  border-color: #bbf7d0;
+  color: #166534;
+
+  box-shadow:
+    0 0 0 3px rgba(34, 197, 94, 0.08);
+}
+
+/* Enemy turn */
+
+#turn-status.enemy-turn {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+
+  box-shadow:
+    0 0 0 3px rgba(239, 68, 68, 0.08);
+}
+
+/* Game over */
+
+#turn-status.game-over {
+  background: #172033;
+  border-color: #172033;
+  color: white;
+
+  box-shadow:
+    0 0 0 3px rgba(23, 32, 51, 0.08);
+}
+
+/* =========================================================
+   MAIN GAME LAYOUT
+   ========================================================= */
+
+.game-layout {
+  display: grid;
+
+  grid-template-columns:
+    190px 403px 403px 190px;
+
+  align-items: center;
+  justify-content: center;
+
+  column-gap: 32px;
+  row-gap: 24px;
+}
+
+/* =========================================================
+   BOARDS
+   ========================================================= */
+
+.board-section {
+  width: 403px;
+  text-align: center;
+}
+
+.board-section h2 {
+  margin: 0 0 16px;
+  font-size: 17px;
+}
+
+.board {
+  display: grid;
+
+  grid-template-columns:
+    20px repeat(10, 34px);
+
+  grid-template-rows:
+    20px repeat(10, 34px);
+
+  gap: 3px;
+
+  width: 403px;
+
+  padding: 8px;
+
+  background: #d9e2ec;
+  border-radius: 10px;
+}
+
+/* =========================================================
+   BOARD COORDINATES
+   ========================================================= */
+
+.board-corner {
+  width: 20px;
+  height: 20px;
+}
+
+.board-label {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 20px;
+  height: 20px;
+
+  color: #718096;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  user-select: none;
+}
+
+/* =========================================================
+   CELLS
+   ========================================================= */
+
+.cell {
+  width: 34px;
+  height: 34px;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 5px;
+
+  background: #ffffff;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.12s ease,
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.cell:hover {
+  background: #edf2f7;
+  transform: scale(1.04);
+}
+
+/* =========================================================
+   PLAYER SHIPS
+   ========================================================= */
+
+.cell.ship {
+  background-color: #172033;
+}
+
+/* =========================================================
+   MOVABLE SHIPS
+   ========================================================= */
+
+.cell.ship.movable {
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.cell.ship.movable:hover {
+  background: #27344d;
+
+  transform: scale(1.06);
+
+  box-shadow:
+    0 0 0 2px rgba(23, 32, 51, 0.12);
+}
+
+/* =========================================================
+   HIT
+   ========================================================= */
+
+.cell.hit {
+  background-color: #dc2626;
+  color: white;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* =========================================================
+   MISS
+   ========================================================= */
+
+.cell.miss {
+  background-color: #e2e8f0;
+  color: #718096;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* =========================================================
+   SUNK
+   ========================================================= */
+
+.cell.sunk {
+  background-color: #7f1d1d;
+  color: white;
+}
+
+/* =========================================================
+   SHOT ANIMATION
+   ========================================================= */
+
+@keyframes shot-impact {
+  0% {
+    transform: scale(0.72);
+    opacity: 0.45;
+  }
+
+  45% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+
+  75% {
+    transform: scale(0.96);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.cell.shot-animation {
+  animation: shot-impact 0.3s ease-out;
+}
+
+.cell.hit.shot-animation {
+  box-shadow:
+    0 0 0 2px rgba(220, 38, 38, 0.18),
+    0 0 14px rgba(220, 38, 38, 0.35);
+}
+
+.cell.miss.shot-animation {
+  box-shadow:
+    0 0 0 2px rgba(113, 128, 150, 0.12);
+}
+
+.cell.sunk.shot-animation {
+  animation: sunk-impact 0.4s ease-out;
+
+  box-shadow:
+    0 0 0 2px rgba(127, 29, 29, 0.2),
+    0 0 16px rgba(127, 29, 29, 0.35);
+}
+
+@keyframes sunk-impact {
+  0% {
+    transform: scale(0.75);
+    opacity: 0.4;
+  }
+
+  35% {
+    transform: scale(1.16);
+    opacity: 1;
+  }
+
+  65% {
+    transform: scale(0.94);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* =========================================================
+   FLEET PANELS
+   ========================================================= */
+
+.fleet-section {
+  width: 190px;
+  min-width: 0;
+}
+
+.fleet-section:nth-child(1) {
+  text-align: right;
+}
+
+.fleet-section:nth-child(4) {
+  text-align: left;
+}
+
+.fleet-section h3 {
+  margin: 0 0 16px;
+
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+
+  color: #718096;
+}
+
+.fleet-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.fleet-section:nth-child(1) .fleet-ship {
+  justify-content: flex-end;
+}
+
+.fleet-section:nth-child(4) .fleet-ship {
+  justify-content: flex-start;
+}
+
+.fleet-ship {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 8px;
+
+  border-radius: 8px;
+
+  background: white;
+  border: 1px solid #dfe5ee;
+
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.fleet-ship-visual {
+  display: flex;
+  gap: 2px;
+
+  flex-shrink: 0;
+}
+
+.ship-segment {
+  width: 13px;
+  height: 9px;
+
+  border-radius: 2px;
+
+  background: #172033;
+}
+
+.fleet-ship-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: #172033;
+}
+
+.fleet-ship.sunk {
+  opacity: 0.45;
+}
+
+.fleet-ship.sunk::after {
+  content: "";
+
+  position: absolute;
+
+  left: 6px;
+  right: 6px;
+
+  top: 50%;
+
+  height: 2px;
+
+  background: #7f1d1d;
+
+  transform: rotate(-8deg);
+}
+
+.fleet-ship.sunk .ship-segment {
+  background: #7f1d1d;
+}
+
+/* =========================================================
+   FLEET PLACEMENT
+   ========================================================= */
+
+.fleet-ship.selectable {
+  cursor: pointer;
+
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.fleet-ship.selectable:hover {
+  transform: translateX(-2px);
+
+  border-color: #b8c4d4;
+
+  box-shadow:
+    0 4px 12px rgba(23, 32, 51, 0.08);
+}
+
+.fleet-ship.selected {
+  transform: translateX(-3px);
+
+  border-color: #172033;
+
+  background: #f8fafc;
+
+  box-shadow:
+    0 0 0 2px rgba(23, 32, 51, 0.1),
+    0 5px 14px rgba(23, 32, 51, 0.08);
+}
+
+.fleet-ship.selected .ship-segment {
+  background: #172033;
+}
+
+/* =========================================================
+   PLACEMENT PREVIEW
+   ========================================================= */
+
+.cell.placement-preview {
+  background: #cbd5e1;
+
+  box-shadow:
+    inset 0 0 0 2px #172033,
+    0 0 8px rgba(23, 32, 51, 0.08);
+
+  transform: scale(1.04);
+}
+
+.cell.placement-invalid {
+  background: #fee2e2;
+
+  box-shadow:
+    inset 0 0 0 2px #dc2626,
+    0 0 8px rgba(220, 38, 38, 0.08);
+
+  transform: scale(1.04);
+}
+
+/* =========================================================
+   SUNK FLEET ANIMATION
+   ========================================================= */
+
+@keyframes fleet-sunk {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.4;
+  }
+
+  45% {
+    transform: scale(1.04);
+    opacity: 1;
+  }
+
+  70% {
+    transform: scale(0.98);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 0.45;
+  }
+}
+
+.fleet-ship.sunk-animation {
+  animation: fleet-sunk 0.5s ease-out;
+}
+
+.fleet-ship.sunk-animation .ship-segment {
+  animation: segment-sunk 0.35s ease-out;
+}
+
+@keyframes segment-sunk {
+  0% {
+    transform: scaleX(0.7);
+    opacity: 0.5;
+  }
+
+  60% {
+    transform: scaleX(1.08);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+/* =========================================================
+   ENEMY BOARD INTERACTION
+   ========================================================= */
+
+.cell.available {
+  cursor: crosshair;
+}
+
+.cell.available:hover {
+  background: #e8f0f8;
+  transform: scale(1.06);
+  box-shadow:
+    0 0 0 2px rgba(23, 32, 51, 0.08);
+}
+
+.cell.disabled {
+  cursor: default;
+  pointer-events: none;
+}
+
+.cell.disabled:hover {
+  background: #ffffff;
+  transform: none;
+  box-shadow: none;
+}
+
+/* =========================================================
+   PLACEMENT CONTROLS
+   ========================================================= */
+
+.placement-controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.placement-button {
+  padding: 9px 16px;
+
+  border: 1px solid #dfe5ee;
+  border-radius: 7px;
+
+  background: white;
+  color: #172033;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.placement-button:hover {
+  background: #f8fafc;
+  border-color: #b8c4d4;
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 3px 8px rgba(23, 32, 51, 0.06);
+}
+
+.placement-button:active {
+  transform: translateY(0);
+}
+
+.placement-button.secondary {
+  color: #718096;
+}
+
+.placement-button:disabled {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* =========================================================
+   NEW GAME BUTTON
+   ========================================================= */
+
+.new-game-button {
+  display: block;
+
+  margin: 40px auto 0;
+
+  padding: 12px 24px;
+
+  border: 0;
+  border-radius: 8px;
+
+  background: #172033;
+  color: white;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.new-game-button:hover {
+  background: #27344d;
+  transform: translateY(-1px);
+}
+
+.new-game-button:active {
+  transform: translateY(0);
+}
+
+.new-game-button:disabled {
+  opacity: 0.45;
+  cursor: default;
+  transform: none;
+}
+
+/* =========================================================
+   LARGE TABLETS / SMALL DESKTOP
+   ========================================================= */
+
+@media (max-width: 1250px) {
+  .game-layout {
+    grid-template-columns:
+      160px 369px 369px 160px;
+
+    column-gap: 28px;
+    row-gap: 24px;
+  }
+
+  .board-section {
+    width: 369px;
+  }
+
+  .fleet-section {
+    width: 160px;
+  }
+
+  .board {
+    grid-template-columns:
+      18px repeat(10, 31px);
+
+    grid-template-rows:
+      18px repeat(10, 31px);
+
+    gap: 3px;
+
+    width: 369px;
+
+    padding: 7px;
+  }
+
+  .board-label {
+    width: 18px;
+    height: 18px;
+
+    font-size: 9px;
+  }
+
+  .board-corner {
+    width: 18px;
+    height: 18px;
+  }
+
+  .cell {
+    width: 31px;
+    height: 31px;
+  }
+
+  .fleet-ship {
+    gap: 6px;
+    padding: 7px;
+  }
+
+  .fleet-ship-name {
+    font-size: 10px;
+  }
+
+  .ship-segment {
+    width: 11px;
+    height: 8px;
+  }
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1050px) {
+  .game-layout {
+    grid-template-columns:
+      150px 349px 349px 150px;
+
+    column-gap: 20px;
+    row-gap: 24px;
+  }
+
+  .board-section {
+    width: 349px;
+  }
+
+  .fleet-section {
+    width: 150px;
+  }
+
+  .board {
+    grid-template-columns:
+      18px repeat(10, 29px);
+
+    grid-template-rows:
+      18px repeat(10, 29px);
+
+    gap: 3px;
+
+    width: 349px;
+
+    padding: 7px;
+  }
+
+  .board-label {
+    width: 18px;
+    height: 18px;
+
+    font-size: 9px;
+  }
+
+  .board-corner {
+    width: 18px;
+    height: 18px;
+  }
+
+  .cell {
+    width: 29px;
+    height: 29px;
+  }
+
+  .fleet-ship-name {
+    font-size: 9px;
+  }
+
+  .ship-segment {
+    width: 10px;
+    height: 7px;
+  }
+}
+
+/* =========================================================
+   MOBILE / NARROW SCREEN
+   ========================================================= */
+
+@media (max-width: 850px) {
+  .game-layout {
+    grid-template-columns: 1fr;
+
+    justify-items: center;
+
+    gap: 28px;
+  }
+
+  .board-section {
+    width: auto;
+  }
+
+  .fleet-section {
+    width: min(280px, 100%);
+  }
+
+  .board-section:nth-child(2) {
+    order: 1;
+  }
+
+  .board-section:nth-child(3) {
+    order: 2;
+  }
+
+  .fleet-section:nth-child(1) {
+    order: 3;
+    text-align: center;
+  }
+
+  .fleet-section:nth-child(4) {
+    order: 4;
+    text-align: center;
+  }
+
+  .fleet-section:nth-child(1) .fleet-ship,
+  .fleet-section:nth-child(4) .fleet-ship {
+    justify-content: center;
+  }
+
+  .fleet-section h3 {
+    text-align: center;
+  }
+}
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 420px) {
+  #app {
+    padding: 32px 12px;
+  }
+
+  .game-header {
+    margin-bottom: 32px;
+  }
+
+  .game-header h1 {
+    font-size: 32px;
+    letter-spacing: 3px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .game-status {
+    margin-bottom: 24px;
+  }
+
+  #turn-status {
+    font-size: 13px;
+    padding: 9px 15px;
+  }
+
+  .board {
+    grid-template-columns:
+      17px repeat(10, 27px);
+
+    grid-template-rows:
+      17px repeat(10, 27px);
+
+    gap: 2px;
+
+    width: 317px;
+
+    padding: 6px;
+  }
+
+  .board-label {
+    width: 17px;
+    height: 17px;
+
+    font-size: 8px;
+  }
+
+  .board-corner {
+    width: 17px;
+    height: 17px;
+  }
+
+  .cell {
+    width: 27px;
+    height: 27px;
+  }
+
+  .board-section h2 {
+    font-size: 15px;
+    margin-bottom: 12px;
+  }
+
+  .placement-controls {
+    gap: 8px;
+    margin-top: 22px;
+  }
+
+  .placement-button {
+    padding: 8px 13px;
+    font-size: 12px;
+  }
+
+  .new-game-button {
+    margin-top: 28px;
+  }
+}
+

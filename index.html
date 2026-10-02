@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <meta name="description" content="Battleship - A classic naval strategy game." />
+
+  <title>Battleship</title>
+</head>
+
+<body>
+  <div id="app">
+    <header class="game-header">
+      <h1>BATTLESHIP</h1>
+      <p class="subtitle">Sink the enemy fleet</p>
+    </header>
+
+    <main class="game-container">
+
+      <section class="game-status">
+        <span id="turn-status">Your turn</span>
+      </section>
+
+      <section class="game-layout">
+
+        <!-- Player Fleet -->
+        <div class="fleet-section">
+          <h3>Your Fleet</h3>
+
+          <div id="player-fleet" class="fleet-list"></div>
+        </div>
+
+        <!-- Player Board -->
+        <div class="board-section">
+          <h2>Your Fleet</h2>
+
+          <div id="player-board" class="board"></div>
+        </div>
+
+        <!-- Enemy Board -->
+        <div class="board-section">
+          <h2>Enemy Fleet</h2>
+
+          <div id="enemy-board" class="board"></div>
+        </div>
+
+        <!-- Enemy Fleet -->
+        <div class="fleet-section">
+          <h3>Enemy Fleet</h3>
+
+          <div id="enemy-fleet" class="fleet-list"></div>
+        </div>
+
+      </section>
+
+      <div class="placement-controls">
+        <button id="rotate-ship" class="placement-button" type="button">
+          Rotate
+        </button>
+
+        <button id="reset-fleet" class="placement-button secondary" type="button">
+          Reset Fleet
+        </button>
+      </div>
+
+      <button id="new-game" class="new-game-button" type="button">
+        Start Battle
+      </button>
+
+    </main>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
+</html>
