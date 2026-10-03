@@ -80,3 +80,6 @@ Then open the game in two browser tabs. Create a room in one tab and join it usi
   <img width="49%" alt="Local multiplayer" src="https://github.com/user-attachments/assets/c10c32ff-4590-4af5-a035-53bb4f16a058" />
   <img width="50%" alt="Online multiplayer" src="https://github.com/user-attachments/assets/e27a7d7c-ddae-4987-97f6-be35adf0fc91" />
 </p>
+
+## License
+Melancholic Synth Ambient Loop - Solitude by SiriusS19YT -- https://freesound.org/s/870146/ -- License: Attribution 4.0
