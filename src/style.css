@@ -35,13 +35,12 @@ button {
 
 .game-header {
   text-align: center;
-  margin-bottom: 40px;
 }
 
 .game-header h1 {
   margin: 0;
-  font-size: 42px;
-  letter-spacing: 4px;
+  font-size: 60px;
+  letter-spacing: 2px;
   font-weight: 800;
 }
 
@@ -1097,13 +1096,9 @@ button {
     padding: 32px 12px;
   }
 
-  .game-header {
-    margin-bottom: 32px;
-  }
-
   .game-header h1 {
-    font-size: 32px;
-    letter-spacing: 3px;
+    font-size: 40px;
+    letter-spacing: 1px;
   }
 
   .subtitle {
