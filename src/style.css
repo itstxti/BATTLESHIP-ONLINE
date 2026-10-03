@@ -1097,8 +1097,7 @@ button {
   }
 
   .game-header h1 {
-    font-size: 40px;
-    letter-spacing: 1px;
+    font-size: 32px;
   }
 
   .subtitle {
@@ -1163,4 +1162,123 @@ button {
   .new-game-button {
     margin-top: 28px;
   }
+}
+/* =========================================================
+   ONLINE LOBBY
+   ========================================================= */
+
+.lobby-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lobby-join {
+  display: flex;
+  gap: 10px;
+}
+
+.lobby-input {
+  flex: 1;
+  min-width: 0;
+
+  padding: 16px 18px;
+
+  border: 1px solid rgba(127, 127, 127, 0.22);
+  border-radius: 14px;
+
+  background: transparent;
+  color: inherit;
+
+  font: inherit;
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.lobby-input::placeholder {
+  letter-spacing: 0.12em;
+  font-weight: 500;
+  opacity: 0.35;
+}
+
+.lobby-input:focus-visible {
+  outline: 2px solid #172033;
+  outline-offset: 2px;
+}
+
+.lobby-join-button {
+  padding: 0 24px;
+
+  border: 0;
+  border-radius: 14px;
+
+  background: #172033;
+  color: white;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.lobby-join-button:hover:not(:disabled) {
+  background: #27344d;
+}
+
+.lobby-join-button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.lobby-code {
+  padding: 28px 16px;
+
+  border: 1px dashed rgba(127, 127, 127, 0.5);
+  border-radius: 14px;
+
+  text-align: center;
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: 0.35em;
+  text-indent: 0.35em;
+
+  user-select: all;
+}
+
+.lobby-body > .lobby-join-button {
+  min-height: 48px;
+}
+
+.lobby-link {
+  align-self: flex-start;
+
+  padding: 8px 0;
+
+  border: 0;
+  background: none;
+  color: #718096;
+
+  cursor: pointer;
+}
+
+.lobby-link:hover {
+  color: #172033;
+}
+
+.lobby-error {
+  margin: 0;
+  padding: 12px 14px;
+
+  border: 1px solid rgba(197, 48, 48, 0.35);
+  border-radius: 10px;
+
+  background: rgba(197, 48, 48, 0.07);
+  color: #c53030;
+
+  font-size: 14px;
 }

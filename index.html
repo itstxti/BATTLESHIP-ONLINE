@@ -84,7 +84,7 @@
 
     <button
       id="mode-online"
-      class="game-mode-button disabled"
+      class="game-mode-button"
       type="button"
     >
       <span class="game-mode-number">03</span>
@@ -99,8 +99,8 @@
         </span>
       </span>
 
-      <span class="game-mode-status">
-        COMING SOON
+      <span class="game-mode-arrow">
+        →
       </span>
     </button>
 
@@ -111,6 +111,13 @@
     <!-- Local multiplayer: hand-off screen (kept separate so the mode menu survives) -->
     <section
       id="pass-device-screen"
+      class="game-mode-menu"
+      hidden
+    ></section>
+
+    <!-- Online multiplayer: lobby (create / join a room) -->
+    <section
+      id="online-screen"
       class="game-mode-menu"
       hidden
     ></section>

@@ -55,6 +55,14 @@ import type {
   MultiplayerEvent
 } from './game/MultiplayerGame';
 
+import {
+  mountLobbyScreen
+} from './online/lobbyScreen';
+
+import type {
+  Match
+} from './online/lobbyClient';
+
 import type {
   ShipName
 } from './game/Ship';
@@ -91,6 +99,11 @@ const modeLocalButton =
 const modeOnlineButton =
   document.querySelector<HTMLButtonElement>(
     '#mode-online'
+  );
+
+const onlineScreen =
+  document.querySelector<HTMLElement>(
+    '#online-screen'
   );
 
 const playerBoardElement =
@@ -188,6 +201,21 @@ let localFlowId = 0;
 let pendingAnimation:
   ShotAnimation | null = null;
 
+/*
+ * Online session. The local player is a single peer of the same
+ * MultiplayerGame protocol used by hot-seat play, but the transport is a
+ * WebSocket to the relay server and the opponent is on another device.
+ */
+let disposeLobbyScreen:
+  (() => void) | null = null;
+
+/* Bumped when the online session ends so late events are ignored. */
+let onlineFlowId = 0;
+
+let onlineReady = false;
+
+let onlineOpponentReady = false;
+
 function isFleetComplete(): boolean {
   return (
     gameState.playerBoard
@@ -222,6 +250,29 @@ function updateUI(): void {
         ? 'Ready · Pass Device'
         : 'Start Battle';
   }
+
+  if (gameMode === 'online') {
+    if (gameState.phase === 'placement') {
+      rotateShipButton!.disabled = onlineReady;
+      resetFleetButton!.disabled = onlineReady;
+
+      newGameButton!.textContent =
+        onlineReady
+          ? 'Waiting for opponent…'
+          : 'Ready';
+
+      newGameButton!.disabled =
+        onlineReady || !isFleetComplete();
+    } else if (gameState.phase === 'battle') {
+      newGameButton!.textContent = 'Forfeit';
+    } else {
+      newGameButton!.textContent = 'Back to Menu';
+    }
+  }
+}
+
+function isPlacementLocked(): boolean {
+  return gameMode === 'online' && onlineReady;
 }
 
 function getPlacementOptions() {
@@ -288,6 +339,10 @@ function renderPlayerBoard(): void {
 
       onPlacedShipSelect:
         (row, column) => {
+          if (isPlacementLocked()) {
+            return;
+          }
+
           selectPlacedShip(
             row,
             column,
@@ -297,6 +352,10 @@ function renderPlayerBoard(): void {
 
       onPlacement:
         (row, column) => {
+          if (isPlacementLocked()) {
+            return;
+          }
+
           handlePlacement(
             row,
             column,
@@ -305,6 +364,10 @@ function renderPlayerBoard(): void {
         },
 
       onRotate: () => {
+        if (isPlacementLocked()) {
+          return;
+        }
+
         rotateShip(
           getPlacementOptions()
         );
@@ -321,6 +384,10 @@ function renderPlayerFleet(): void {
     gameState.phase,
     placementState.selectedShip,
     (ship) => {
+      if (isPlacementLocked()) {
+        return;
+      }
+
       selectShip(
         ship,
         getPlacementOptions()
@@ -887,9 +954,358 @@ function startLocalGame(): void {
   activateLocalSeat(0);
 }
 
+/* =========================================================
+   ONLINE MULTIPLAYER
+   ========================================================= */
+
+function showModeMenu(): void {
+  disposeOnlineGame();
+  disposeLocalGame();
+
+  gameMode = 'ai';
+
+  onlineScreen!.hidden = true;
+  passDeviceScreen!.hidden = true;
+  gameScreen!.hidden = true;
+  gameModeMenu!.hidden = false;
+}
+
+function disposeOnlineGame(): void {
+  onlineFlowId++;
+
+  disposeLobbyScreen?.();
+  disposeLobbyScreen = null;
+
+  if (gameMode === 'online') {
+    gameState.multiplayerGame?.dispose();
+  }
+
+  onlineReady = false;
+  onlineOpponentReady = false;
+  pendingAnimation = null;
+}
+
+function startOnlineLobby(): void {
+  disposeLocalGame();
+  disposeOnlineGame();
+
+  gameMode = 'online';
+
+  gameModeMenu!.hidden = true;
+  passDeviceScreen!.hidden = true;
+  gameScreen!.hidden = true;
+  onlineScreen!.hidden = false;
+
+  disposeLobbyScreen =
+    mountLobbyScreen(
+      onlineScreen!,
+      {
+        onMatched: startOnlineGame,
+        onBack: showModeMenu
+      }
+    );
+}
+
+function startOnlineGame(
+  match: Match
+): void {
+  disposeLobbyScreen?.();
+  disposeLobbyScreen = null;
+
+  const flowId = ++onlineFlowId;
+
+  onlineReady = false;
+  onlineOpponentReady = false;
+
+  gameMode = 'online';
+
+  gameState =
+    createGameState(
+      STANDARD_FLEET,
+      'online',
+      match.transport,
+      match.startsFirst
+    );
+
+  placementState =
+    createPlacementState();
+
+  gameState.multiplayerGame?.subscribe(
+    (event) => {
+      if (flowId !== onlineFlowId) {
+        return;
+      }
+
+      handleOnlineEvent(event);
+    }
+  );
+
+  syncTurn(gameState);
+
+  onlineScreen!.hidden = true;
+  gameModeMenu!.hidden = true;
+  passDeviceScreen!.hidden = true;
+  gameScreen!.hidden = false;
+
+  setTurnStatus(
+    'Opponent found! Place your fleet',
+    'player'
+  );
+
+  renderGame();
+}
+
+function confirmOnlinePlacement(): void {
+  if (
+    onlineReady ||
+    !isFleetComplete()
+  ) {
+    return;
+  }
+
+  if (
+    !gameState.multiplayerGame?.markReady()
+  ) {
+    return;
+  }
+
+  onlineReady = true;
+
+  placementState.selectedShip = null;
+  placementState.movingShipOriginalPositions = null;
+
+  setTurnStatus(
+    onlineOpponentReady
+      ? 'Starting battle…'
+      : 'Fleet locked. Waiting for your opponent…',
+    'player'
+  );
+
+  renderGame();
+}
+
+function handleOnlineButton(): void {
+  if (gameState.phase === 'placement') {
+    confirmOnlinePlacement();
+    return;
+  }
+
+  if (gameState.phase === 'battle') {
+    if (
+      window.confirm(
+        'Forfeit this game? Your opponent will win.'
+      )
+    ) {
+      gameState.multiplayerGame?.forfeit();
+    }
+
+    return;
+  }
+
+  showModeMenu();
+}
+
+function handleOnlineEvent(
+  event: MultiplayerEvent
+): void {
+  const game = gameState.multiplayerGame;
+
+  if (!game) {
+    return;
+  }
+
+  switch (event.type) {
+    case 'opponent-ready': {
+      onlineOpponentReady = true;
+
+      if (!onlineReady) {
+        setTurnStatus(
+          'Opponent is ready. Place your fleet!',
+          'player'
+        );
+      }
+
+      return;
+    }
+
+    case 'battle-start': {
+      gameState.phase = 'battle';
+      gameState.gameOver = false;
+
+      placementState.selectedShip = null;
+      placementState.movingShipOriginalPositions = null;
+
+      syncTurn(gameState);
+
+      setTurnStatus(
+        event.turn === 'me'
+          ? 'Your turn — fire!'
+          : "Opponent's turn…",
+        event.turn === 'me'
+          ? 'player'
+          : 'enemy'
+      );
+
+      renderGame();
+
+      return;
+    }
+
+    case 'shot-fired': {
+      syncTurn(gameState);
+
+      setTurnStatus(
+        'Firing…',
+        'enemy'
+      );
+
+      renderGame();
+
+      return;
+    }
+
+    case 'shot-resolved': {
+      syncTurn(gameState);
+
+      pendingAnimation = {
+        target: 'enemy',
+        row: event.row,
+        column: event.column,
+        sunkShip: event.sunk?.name
+      };
+
+      /* Final blow: the game-over event renders the end state. */
+      if (game.isGameOver()) {
+        return;
+      }
+
+      if (event.result === 'hit') {
+        setTurnStatus(
+          event.sunk
+            ? `You sunk the enemy ${event.sunk.name}! Shoot again.`
+            : 'Hit! Shoot again.',
+          'player'
+        );
+      } else {
+        setTurnStatus(
+          "Miss! Opponent's turn…",
+          'enemy'
+        );
+      }
+
+      renderGame();
+
+      return;
+    }
+
+    case 'incoming-shot': {
+      syncTurn(gameState);
+
+      pendingAnimation = {
+        target: 'player',
+        row: event.row,
+        column: event.column,
+        sunkShip: event.sunk?.name
+      };
+
+      if (game.isGameOver()) {
+        return;
+      }
+
+      if (event.result === 'hit') {
+        setTurnStatus(
+          event.sunk
+            ? `Opponent sunk your ${event.sunk.name}!`
+            : 'Opponent hit your ship!',
+          'enemy'
+        );
+      } else {
+        setTurnStatus(
+          'Opponent missed! Your turn',
+          'player'
+        );
+      }
+
+      renderGame();
+
+      return;
+    }
+
+    case 'shot-rejected': {
+      syncTurn(gameState);
+
+      setTurnStatus(
+        `Shot rejected (${event.reason}). Try another cell.`,
+        'player'
+      );
+
+      renderGame();
+
+      return;
+    }
+
+    case 'game-over': {
+      const duringPlacement =
+        gameState.phase === 'placement';
+
+      gameState.gameOver = true;
+      gameState.phase = 'game-over';
+      gameState.playerTurn = false;
+
+      let message: string;
+
+      if (event.winner === 'me') {
+        message =
+          event.reason === 'disconnect'
+            ? (
+              duringPlacement
+                ? 'Opponent left before the battle started.'
+                : 'Opponent disconnected — you win!'
+            )
+            : event.reason === 'forfeit'
+              ? 'Opponent forfeited — you win!'
+              : 'You win! Enemy fleet destroyed.';
+      } else {
+        message =
+          event.reason === 'forfeit'
+            ? 'You forfeited the game.'
+            : 'You lose! Your fleet was sunk.';
+      }
+
+      setTurnStatus(
+        message,
+        'game-over'
+      );
+
+      renderGame();
+
+      /* The match is over: free the socket (and the room) right away. */
+      game.dispose();
+
+      return;
+    }
+
+    case 'protocol-error': {
+      console.warn(
+        `[multiplayer] ${event.detail}`
+      );
+
+      return;
+    }
+  }
+}
+
 function startSelectedMode(
   selectedMode: GameMode
 ): void {
+  if (selectedMode === 'online') {
+    startOnlineLobby();
+
+    return;
+  }
+
+  disposeOnlineGame();
+
   gameMode =
     selectedMode;
 
@@ -924,10 +1340,6 @@ function startSelectedMode(
     return;
   }
 
-  setTurnStatus(
-    'Online multiplayer coming soon.',
-    'player'
-  );
 }
 
 const gameController =
@@ -979,13 +1391,18 @@ modeLocalButton?.addEventListener(
 modeOnlineButton?.addEventListener(
   'click',
   () => {
-    return;
+    startSelectedMode('online');
   }
 );
 
 newGameButton?.addEventListener(
   'click',
   () => {
+    if (gameMode === 'online') {
+      handleOnlineButton();
+      return;
+    }
+
     if (
       gameState.phase === 'placement'
     ) {
@@ -1031,6 +1448,10 @@ newGameButton?.addEventListener(
 rotateShipButton?.addEventListener(
   'click',
   () => {
+    if (isPlacementLocked()) {
+      return;
+    }
+
     rotateShip(
       getPlacementOptions()
     );
@@ -1041,7 +1462,8 @@ resetFleetButton?.addEventListener(
   'click',
   () => {
     if (
-      gameState.phase !== 'placement'
+      gameState.phase !== 'placement' ||
+      isPlacementLocked()
     ) {
       return;
     }
@@ -1058,7 +1480,8 @@ document.addEventListener(
   'keydown',
   (event) => {
     if (
-      gameState.phase !== 'placement'
+      gameState.phase !== 'placement' ||
+      isPlacementLocked()
     ) {
       return;
     }
@@ -1092,6 +1515,7 @@ if (
   resetFleetButton &&
   gameModeMenu &&
   passDeviceScreen &&
+  onlineScreen &&
   gameScreen &&
   modeAIButton &&
   modeLocalButton &&
