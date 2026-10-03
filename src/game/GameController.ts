@@ -4,8 +4,13 @@ import {
 } from './GameState';
 
 import type {
-  FleetDefinition
+  FleetDefinition,
+  GameMode
 } from './types';
+
+import type {
+  GameTransport
+} from './GameTransport';
 
 import type {
   PlacementState
@@ -38,11 +43,21 @@ type GameControllerOptions = {
 export function createGameController(
   options: GameControllerOptions
 ) {
-  function startGame(): void {
+  function startGame(
+    gameMode: GameMode = 'ai',
+    transport: GameTransport | null = null,
+    playerStarts: boolean = true
+  ): void {
     const gameState =
       createGameState(
-        options.fleet
+        options.fleet,
+        gameMode,
+        transport,
+        playerStarts
       );
+
+    gameState.playerTurn =
+      playerStarts;
 
     const placementState =
       createPlacementState();
@@ -77,8 +92,12 @@ export function createGameController(
     gameState.phase =
       'battle';
 
-    gameState.playerTurn =
-      true;
+    if (
+      gameState.gameMode === 'ai'
+    ) {
+      gameState.playerTurn =
+        true;
+    }
 
     gameState.gameOver =
       false;
@@ -115,4 +134,3 @@ export function createGameController(
     checkPlacementComplete
   };
 }
-

@@ -1,44 +1,45 @@
 import type { GameState } from '../game/GameState';
 
-import {
-  renderBoard
-} from '../ui/boardRenderer';
-
-import {
-  renderFleet
-} from '../ui/fleetRenderer';
-
-import {
-  setTurnStatus
-} from '../ui/status';
+import { renderBoard } from '../ui/boardRenderer';
+import { renderFleet } from '../ui/fleetRenderer';
+import { setTurnStatus } from '../ui/status';
 
 type BattleOptions = {
   gameState: GameState;
-
   playerBoardElement: HTMLDivElement;
-
   enemyBoardElement: HTMLDivElement;
-
   playerFleetElement: HTMLDivElement;
-
   enemyFleetElement: HTMLDivElement;
 };
-
 
 export function handleEnemyShot(
   row: number,
   column: number,
   options: BattleOptions
 ): void {
-  const {
-    gameState
-  } = options;
+  const { gameState } = options;
 
   if (
     !gameState.playerTurn ||
     gameState.gameOver ||
     gameState.phase !== 'battle'
   ) {
+    return;
+  }
+
+  if (
+    gameState.gameMode === 'local' ||
+    gameState.gameMode === 'online'
+  ) {
+    /*
+     * Multiplayer: just fire. The outcome comes back from the defender
+     * as an event and the view is refreshed from there, never optimistically.
+     */
+    gameState.multiplayerGame?.shoot(
+      row,
+      column
+    );
+
     return;
   }
 
@@ -54,18 +55,14 @@ export function handleEnemyShot(
     return;
   }
 
-  if (
-    result === 'hit'
-  ) {
+  if (result === 'hit') {
     const ship =
       gameState.enemyBoard.getShipAt(
         row,
         column
       );
 
-    if (
-      ship?.isSunk()
-    ) {
+    if (ship?.isSunk()) {
       setTurnStatus(
         `You sunk the enemy ${ship.name}! Shoot again.`,
         'player'
@@ -82,18 +79,10 @@ export function handleEnemyShot(
       gameState.enemyBoard,
       {
         isEnemyBoard: true,
-
-        gamePhase:
-          gameState.phase,
-
+        gamePhase: gameState.phase,
         selectedShip: null,
-
-        orientation:
-          'horizontal',
-
-        playerBoard:
-          gameState.playerBoard,
-
+        orientation: 'horizontal',
+        playerBoard: gameState.playerBoard,
         onEnemyShot: (
           nextRow,
           nextColumn
@@ -104,7 +93,6 @@ export function handleEnemyShot(
             options
           );
         },
-
         animatedShot: {
           row,
           column
@@ -128,9 +116,7 @@ export function handleEnemyShot(
       gameState.enemyBoard
         .allShipsSunk()
     ) {
-      gameState.gameOver =
-        true;
-
+      gameState.gameOver = true;
       gameState.phase =
         'game-over';
 
@@ -155,18 +141,10 @@ export function handleEnemyShot(
     gameState.enemyBoard,
     {
       isEnemyBoard: true,
-
-      gamePhase:
-        gameState.phase,
-
+      gamePhase: gameState.phase,
       selectedShip: null,
-
-      orientation:
-        'horizontal',
-
-      playerBoard:
-        gameState.playerBoard,
-
+      orientation: 'horizontal',
+      playerBoard: gameState.playerBoard,
       onEnemyShot: (
         nextRow,
         nextColumn
@@ -177,7 +155,6 @@ export function handleEnemyShot(
           options
         );
       },
-
       animatedShot: {
         row,
         column
@@ -198,18 +175,20 @@ export function handleEnemyShot(
     false;
 
   setTimeout(() => {
-    handleAITurn(
-      options
-    );
+    handleAITurn(options);
   }, 700);
 }
 
 export function handleAITurn(
   options: BattleOptions
 ): void {
-  const {
-    gameState
-  } = options;
+  const { gameState } = options;
+
+  if (
+    gameState.gameMode !== 'ai'
+  ) {
+    return;
+  }
 
   if (
     gameState.gameOver ||
@@ -224,7 +203,7 @@ export function handleAITurn(
   );
 
   const shot =
-    gameState.ai.shoot(
+    gameState.opponent.shoot(
       gameState.playerBoard
     );
 
@@ -239,18 +218,10 @@ export function handleAITurn(
     gameState.playerBoard,
     {
       isEnemyBoard: false,
-
-      gamePhase:
-        gameState.phase,
-
+      gamePhase: gameState.phase,
       selectedShip: null,
-
-      orientation:
-        'horizontal',
-
-      playerBoard:
-        gameState.playerBoard,
-
+      orientation: 'horizontal',
+      playerBoard: gameState.playerBoard,
       animatedShot: {
         row: shot.row,
         column: shot.column
@@ -274,9 +245,7 @@ export function handleAITurn(
     gameState.playerBoard
       .allShipsSunk()
   ) {
-    gameState.gameOver =
-      true;
-
+    gameState.gameOver = true;
     gameState.phase =
       'game-over';
 
@@ -288,12 +257,8 @@ export function handleAITurn(
     return;
   }
 
-  if (
-    shot.result === 'hit'
-  ) {
-    if (
-      ship?.isSunk()
-    ) {
+  if (shot.result === 'hit') {
+    if (ship?.isSunk()) {
       setTurnStatus(
         `Enemy sunk your ${ship.name}!`,
         'enemy'
@@ -306,15 +271,11 @@ export function handleAITurn(
     }
 
     setTimeout(() => {
-      if (
-        gameState.gameOver
-      ) {
+      if (gameState.gameOver) {
         return;
       }
 
-      handleAITurn(
-        options
-      );
+      handleAITurn(options);
     }, 700);
 
     return;
@@ -346,18 +307,10 @@ export function handleAITurn(
       gameState.enemyBoard,
       {
         isEnemyBoard: true,
-
-        gamePhase:
-          gameState.phase,
-
+        gamePhase: gameState.phase,
         selectedShip: null,
-
-        orientation:
-          'horizontal',
-
-        playerBoard:
-          gameState.playerBoard,
-
+        orientation: 'horizontal',
+        playerBoard: gameState.playerBoard,
         onEnemyShot: (
           row,
           column

@@ -5,19 +5,122 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <meta name="description" content="Battleship - A classic naval strategy game." />
+  <meta
+    name="description"
+    content="Battleship - A classic naval strategy game."
+  />
 
   <title>Battleship</title>
 </head>
 
 <body>
   <div id="app">
+
     <header class="game-header">
       <h1>BATTLESHIP</h1>
       <p class="subtitle">Sink the enemy fleet</p>
     </header>
 
-    <main class="game-container">
+    <!-- Game Mode Selection -->
+    <section id="game-mode-menu" class="game-mode-menu">
+
+  <div class="game-mode-header">
+    <span class="game-mode-eyebrow">GAME MODE</span>
+
+    <h2>Choose your battle</h2>
+
+    <p>
+      Select how you want to play.
+    </p>
+  </div>
+
+  <div class="game-mode-options">
+
+    <button
+      id="mode-ai"
+      class="game-mode-button"
+      type="button"
+    >
+      <span class="game-mode-number">01</span>
+
+      <span class="game-mode-content">
+        <span class="game-mode-title">
+          Solo
+        </span>
+
+        <span class="game-mode-description">
+          Battle against the AI
+        </span>
+      </span>
+
+      <span class="game-mode-arrow">
+        →
+      </span>
+    </button>
+
+
+    <button
+      id="mode-local"
+      class="game-mode-button"
+      type="button"
+    >
+      <span class="game-mode-number">02</span>
+
+      <span class="game-mode-content">
+        <span class="game-mode-title">
+          Local Multiplayer
+        </span>
+
+        <span class="game-mode-description">
+          Two players · Same device
+        </span>
+      </span>
+
+      <span class="game-mode-arrow">
+        →
+      </span>
+    </button>
+
+
+    <button
+      id="mode-online"
+      class="game-mode-button disabled"
+      type="button"
+    >
+      <span class="game-mode-number">03</span>
+
+      <span class="game-mode-content">
+        <span class="game-mode-title">
+          Online Multiplayer
+        </span>
+
+        <span class="game-mode-description">
+          Play with friends online
+        </span>
+      </span>
+
+      <span class="game-mode-status">
+        COMING SOON
+      </span>
+    </button>
+
+  </div>
+
+</section>
+
+    <!-- Local multiplayer: hand-off screen (kept separate so the mode menu survives) -->
+    <section
+      id="pass-device-screen"
+      class="game-mode-menu"
+      hidden
+    ></section>
+
+    <!-- Game -->
+    <main
+      id="game-screen"
+      class="game-container"
+      hidden
+    >
 
       <section class="game-status">
         <span id="turn-status">Your turn</span>
@@ -29,50 +132,80 @@
         <div class="fleet-section">
           <h3>Your Fleet</h3>
 
-          <div id="player-fleet" class="fleet-list"></div>
+          <div
+            id="player-fleet"
+            class="fleet-list"
+          ></div>
         </div>
 
         <!-- Player Board -->
         <div class="board-section">
           <h2>Your Fleet</h2>
 
-          <div id="player-board" class="board"></div>
+          <div
+            id="player-board"
+            class="board"
+          ></div>
         </div>
 
         <!-- Enemy Board -->
         <div class="board-section">
           <h2>Enemy Fleet</h2>
 
-          <div id="enemy-board" class="board"></div>
+          <div
+            id="enemy-board"
+            class="board"
+          ></div>
         </div>
 
         <!-- Enemy Fleet -->
         <div class="fleet-section">
           <h3>Enemy Fleet</h3>
 
-          <div id="enemy-fleet" class="fleet-list"></div>
+          <div
+            id="enemy-fleet"
+            class="fleet-list"
+          ></div>
         </div>
 
       </section>
 
       <div class="placement-controls">
-        <button id="rotate-ship" class="placement-button" type="button">
+
+        <button
+          id="rotate-ship"
+          class="placement-button"
+          type="button"
+        >
           Rotate
         </button>
 
-        <button id="reset-fleet" class="placement-button secondary" type="button">
+        <button
+          id="reset-fleet"
+          class="placement-button secondary"
+          type="button"
+        >
           Reset Fleet
         </button>
+
       </div>
 
-      <button id="new-game" class="new-game-button" type="button">
+      <button
+        id="new-game"
+        class="new-game-button"
+        type="button"
+      >
         Start Battle
       </button>
 
     </main>
+
   </div>
 
-  <script type="module" src="/src/main.ts"></script>
+  <script
+    type="module"
+    src="/src/main.ts"
+  ></script>
 </body>
 
 </html>

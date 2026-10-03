@@ -3,6 +3,11 @@ export type GamePhase =
   | 'battle'
   | 'game-over';
 
+export type GameMode =
+  | 'ai'
+  | 'local'
+  | 'online';
+
 export type FleetDefinition = {
   name:
     | 'Carrier'

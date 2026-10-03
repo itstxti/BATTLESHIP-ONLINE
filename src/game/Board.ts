@@ -259,6 +259,105 @@ export class Board {
         return 'miss';
     }
 
+    /**
+     * Fog-of-war API. A tracking board represents what we KNOW about the
+     * enemy fleet: it never contains ships up front, only shot outcomes
+     * reported by the defender.
+     */
+    recordShot(
+        row: number,
+        column: number,
+        result: 'hit' | 'miss'
+    ): boolean {
+        if (!this.isInsideBoard(row, column)) {
+            return false;
+        }
+
+        const cell = this.grid[row][column];
+
+        if (cell === 'hit' || cell === 'miss') {
+            return false;
+        }
+
+        this.grid[row][column] = result;
+
+        return true;
+    }
+
+    /**
+     * Reveals a ship the defender reported as sunk. Only accepted when it
+     * is consistent with what we already know (every cell is a recorded hit,
+     * contiguous, straight, and the ship was not revealed before).
+     */
+    markSunk(
+        name: ShipName,
+        size: number,
+        positions: Position[]
+    ): boolean {
+        if (
+            this.hasShip(name) ||
+            positions.length !== size ||
+            !this.isStraightLine(positions)
+        ) {
+            return false;
+        }
+
+        const allKnownHits = positions.every(
+            (position) =>
+                this.isInsideBoard(position.row, position.column) &&
+                this.grid[position.row][position.column] === 'hit'
+        );
+
+        if (!allKnownHits) {
+            return false;
+        }
+
+        const ship = new Ship(
+            name,
+            size,
+            positions.map((position) => ({
+                row: position.row,
+                column: position.column
+            }))
+        );
+
+        for (const position of positions) {
+            ship.hit(position.row, position.column);
+        }
+
+        this.ships.push(ship);
+
+        return true;
+    }
+
+    private isStraightLine(positions: Position[]): boolean {
+        if (positions.length === 0) {
+            return false;
+        }
+
+        const sameRow = positions.every(
+            (position) => position.row === positions[0].row
+        );
+
+        const sameColumn = positions.every(
+            (position) => position.column === positions[0].column
+        );
+
+        if (!sameRow && !sameColumn) {
+            return false;
+        }
+
+        const axis = sameRow ? 'column' : 'row';
+
+        const sorted = positions
+            .map((position) => position[axis])
+            .sort((a, b) => a - b);
+
+        return sorted.every(
+            (value, index) => index === 0 || value === sorted[index - 1] + 1
+        );
+    }
+
     allShipsSunk(): boolean {
         return (
             this.ships.length > 0 &&
@@ -296,7 +395,7 @@ export class Board {
         );
     }
 
-    private isInsideBoard(
+    isInsideBoard(
         row: number,
         column: number
     ): boolean {

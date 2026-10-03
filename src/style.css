@@ -60,6 +60,210 @@ button {
   margin: 0 auto;
 }
 
+/* ========================================
+   GAME MODE MENU
+   ======================================== */
+
+.game-mode-menu {
+  width: min(680px, 100%);
+  margin: 0 auto;
+  padding: 72px 24px 40px;
+}
+
+.game-mode-header {
+  margin-bottom: 32px;
+}
+
+.game-mode-eyebrow {
+  display: block;
+  margin-bottom: 10px;
+
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+
+  opacity: 0.5;
+}
+
+.game-mode-header h2 {
+  margin: 0;
+
+  font-size: clamp(32px, 6vw, 48px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.game-mode-header p {
+  margin: 10px 0 0;
+
+  font-size: 15px;
+  opacity: 0.55;
+}
+
+
+/* Mode list */
+
+.game-mode-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+
+/* Mode button */
+
+.game-mode-button {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+  min-height: 92px;
+
+  padding: 20px 22px;
+
+  border: 1px solid rgba(127, 127, 127, 0.22);
+  border-radius: 14px;
+
+  background: transparent;
+  color: inherit;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.game-mode-button:hover {
+  border-color: rgba(127, 127, 127, 0.5);
+
+  background: rgba(127, 127, 127, 0.05);
+
+  transform: translateY(-2px);
+}
+
+.game-mode-button:active {
+  transform: translateY(0);
+}
+
+
+/* Number */
+
+.game-mode-number {
+  width: 48px;
+
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+
+  opacity: 0.35;
+}
+
+
+/* Content */
+
+.game-mode-content {
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+
+  min-width: 0;
+}
+
+.game-mode-title {
+  font-size: 17px;
+  font-weight: 650;
+}
+
+.game-mode-description {
+  font-size: 13px;
+  opacity: 0.5;
+}
+
+
+/* Arrow */
+
+.game-mode-arrow {
+  margin-left: auto;
+
+  font-size: 22px;
+
+  opacity: 0.3;
+
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.game-mode-button:hover .game-mode-arrow {
+  opacity: 0.8;
+  transform: translateX(4px);
+}
+
+
+/* Online / unavailable */
+
+.game-mode-button.disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.game-mode-button.disabled:hover {
+  border-color: rgba(127, 127, 127, 0.22);
+  background: transparent;
+  transform: none;
+}
+
+.game-mode-status {
+  margin-left: auto;
+
+  padding: 5px 8px;
+
+  border: 1px solid rgba(127, 127, 127, 0.2);
+  border-radius: 6px;
+
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+
+  opacity: 0.55;
+}
+
+
+/* Mobile */
+
+@media (max-width: 600px) {
+
+  .game-mode-menu {
+    padding: 48px 16px 32px;
+  }
+
+  .game-mode-button {
+    min-height: 84px;
+    padding: 18px;
+  }
+
+  .game-mode-number {
+    width: 38px;
+  }
+
+  .game-mode-title {
+    font-size: 16px;
+  }
+
+  .game-mode-description {
+    font-size: 12px;
+  }
+
+}
+
 /* =========================================================
    GAME STATUS
    ========================================================= */
@@ -965,4 +1169,3 @@ button {
     margin-top: 28px;
   }
 }
-
