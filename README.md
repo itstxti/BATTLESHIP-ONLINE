@@ -22,19 +22,6 @@ A browser-based version of the classic Battleship game featuring AI, local multi
 > [!WARNING]
 > Online multiplayer uses Render's free plan. The relay may sleep after periods of inactivity, so the first connection can take up to a minute while the server wakes up.
 
-## Project Structure
-
-```text
-src/
-  game/        Game rules, AI and multiplayer protocol
-  online/      Online lobby and relay client
-  placement/   Fleet placement
-  battle/      Battle logic
-  ui/          Rendering
-server/        WebSocket relay
-docs/          Screenshots
-```
-
 ## Installation
 
 Requires Node.js 22 or newer.
@@ -82,4 +69,15 @@ Then open the game in two browser tabs. Create a room in one tab and join it usi
 </p>
 
 ## License
-Melancholic Synth Ambient Loop - Solitude by SiriusS19YT -- https://freesound.org/s/870146/ -- License: Attribution 4.0
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+### Audio Attribution
+
+The following audio asset is used under the Creative Commons Attribution 4.0 International License (CC BY 4.0):
+
+**"Melancholic Synth Ambient Loop - Solitude"** by **SiriusS19YT**
+https://freesound.org/s/870146/
+
+License: **CC BY 4.0**
+
