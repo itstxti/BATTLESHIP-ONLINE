@@ -361,16 +361,11 @@ function toggleSoundPanel(): void {
   }
 
   setSoundPanelOpen(
-    soundPanel.hidden
+    !soundPanel.hidden
   );
 }
 
-
 function handleBackToMenu(): void {
-  const hasActiveGame =
-    gameScreen &&
-    !gameScreen.hidden;
-
   setSoundPanelOpen(false);
 
   showModeMenu();
