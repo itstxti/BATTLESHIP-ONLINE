@@ -16,7 +16,8 @@ body {
   min-width: 320px;
 }
 
-button {
+button,
+input {
   font: inherit;
 }
 
@@ -26,7 +27,7 @@ button {
 
 #app {
   min-height: 100vh;
-  padding: 48px 24px;
+  padding: 20px 20px;
 }
 
 /* =========================================================
@@ -45,7 +46,7 @@ button {
 }
 
 .subtitle {
-  margin: 0px 0px 20px 0px;
+  margin: 0 0 20px 0;
   color: #718096;
   font-size: 15px;
 }
@@ -55,18 +56,250 @@ button {
    ========================================================= */
 
 .game-container {
+  position: relative;
   max-width: 1400px;
   margin: 0 auto;
 }
 
-/* ========================================
-   GAME MODE MENU
-   ======================================== */
+/* =========================================================
+   GAME TOPBAR
+   ========================================================= */
+
+.game-topbar {
+  position: relative;
+  z-index: 100;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  width: 100%;
+  min-height: 44px; 
+}
+
+/* =========================================================
+   GAME ICON BUTTON
+   ========================================================= */
+
+.game-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 40px;
+
+  width: 40px;
+  height: 40px;
+
+  margin: 0;
+  padding: 0;
+
+  box-sizing: border-box;
+
+  border: 1px solid #dfe5ee;
+  border-radius: 10px;
+
+  background: rgba(255, 255, 255, 0.92);
+  color: #172033;
+
+  cursor: pointer;
+
+  appearance: none;
+  -webkit-appearance: none;
+
+  box-shadow:
+    0 2px 8px rgba(23, 32, 51, 0.05);
+
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.game-icon-button:hover {
+  background: #ffffff;
+  border-color: #b8c4d4;
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 4px 12px rgba(23, 32, 51, 0.08);
+}
+
+.game-icon-button:active {
+  transform: translateY(0);
+}
+
+.game-icon-button:focus-visible {
+  outline: 2px solid #172033;
+  outline-offset: 2px;
+}
+
+/* =========================================================
+   TOPBAR SVG ICONS
+   ========================================================= */
+
+.game-icon-button svg {
+  display: block;
+
+  width: 18px;
+  height: 18px;
+
+  flex: 0 0 18px;
+
+  overflow: visible;
+
+  fill: none;
+  stroke: currentColor;
+
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* =========================================================
+   SOUND CONTROLS
+   ========================================================= */
+
+.sound-controls {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  margin-left: auto;
+}
+
+/* =========================================================
+   SOUND PANEL
+   ========================================================= */
+
+.sound-panel {
+  position: absolute;
+
+  top: calc(100% + 10px);
+  right: 0;
+
+  z-index: 200;
+
+  width: 250px;
+
+  padding: 18px;
+
+  box-sizing: border-box;
+
+  border: 1px solid #dfe5ee;
+  border-radius: 14px;
+
+  background: rgba(255, 255, 255, 0.98);
+
+  box-shadow:
+    0 12px 32px rgba(23, 32, 51, 0.12);
+}
+
+.sound-panel[hidden] {
+  display: none;
+}
+
+.sound-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 18px;
+
+  color: #172033;
+
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.sound-control {
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+
+  margin-top: 14px;
+}
+
+.sound-control-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  color: #718096;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sound-control input[type="range"] {
+  display: block;
+
+  width: 100%;
+  height: 4px;
+
+  margin: 0;
+  padding: 0;
+
+  cursor: pointer;
+
+  accent-color: #172033;
+}
+
+/* =========================================================
+   SOUND MUTE BUTTON
+   ========================================================= */
+
+.sound-mute-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  min-height: 36px;
+
+  margin-top: 18px;
+  padding: 8px 12px;
+
+  border: 1px solid #dfe5ee;
+  border-radius: 8px;
+
+  background: #f7f9fc;
+  color: #172033;
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.sound-mute-button:hover {
+  background: #ffffff;
+  border-color: #b8c4d4;
+}
+
+.sound-mute-button:focus-visible {
+  outline: 2px solid #172033;
+  outline-offset: 2px;
+}
+
+/* =========================================================
+   APP / MODE MENU
+   ========================================================= */
 
 .game-mode-menu {
   width: min(680px, 100%);
   margin: 0 auto;
-  padding: 72px 24px 40px;
+  padding: 20px 24px 20px;
 }
 
 .game-mode-header {
@@ -100,8 +333,9 @@ button {
   opacity: 0.55;
 }
 
-
-/* Mode list */
+/* =========================================================
+   MODE LIST
+   ========================================================= */
 
 .game-mode-options {
   display: flex;
@@ -109,8 +343,9 @@ button {
   gap: 12px;
 }
 
-
-/* Mode button */
+/* =========================================================
+   MODE BUTTON
+   ========================================================= */
 
 .game-mode-button {
   position: relative;
@@ -151,8 +386,9 @@ button {
   transform: translateY(0);
 }
 
-
-/* Number */
+/* =========================================================
+   MODE NUMBER
+   ========================================================= */
 
 .game-mode-number {
   width: 48px;
@@ -164,8 +400,9 @@ button {
   opacity: 0.35;
 }
 
-
-/* Content */
+/* =========================================================
+   MODE CONTENT
+   ========================================================= */
 
 .game-mode-content {
   display: flex;
@@ -186,8 +423,9 @@ button {
   opacity: 0.5;
 }
 
-
-/* Arrow */
+/* =========================================================
+   MODE ARROW
+   ========================================================= */
 
 .game-mode-arrow {
   margin-left: auto;
@@ -206,8 +444,9 @@ button {
   transform: translateX(4px);
 }
 
-
-/* Online / unavailable */
+/* =========================================================
+   ONLINE / UNAVAILABLE
+   ========================================================= */
 
 .game-mode-button.disabled {
   cursor: default;
@@ -233,34 +472,6 @@ button {
   letter-spacing: 0.12em;
 
   opacity: 0.55;
-}
-
-
-/* Mobile */
-
-@media (max-width: 600px) {
-
-  .game-mode-menu {
-    padding: 48px 16px 32px;
-  }
-
-  .game-mode-button {
-    min-height: 84px;
-    padding: 18px;
-  }
-
-  .game-mode-number {
-    width: 38px;
-  }
-
-  .game-mode-title {
-    font-size: 16px;
-  }
-
-  .game-mode-description {
-    font-size: 12px;
-  }
-
 }
 
 /* =========================================================
@@ -294,7 +505,9 @@ button {
     transform 0.2s ease;
 }
 
-/* Player turn */
+/* =========================================================
+   PLAYER TURN
+   ========================================================= */
 
 #turn-status.player-turn {
   background: #ecfdf3;
@@ -305,7 +518,9 @@ button {
     0 0 0 3px rgba(34, 197, 94, 0.08);
 }
 
-/* Enemy turn */
+/* =========================================================
+   ENEMY TURN
+   ========================================================= */
 
 #turn-status.enemy-turn {
   background: #fef2f2;
@@ -316,7 +531,9 @@ button {
     0 0 0 3px rgba(239, 68, 68, 0.08);
 }
 
-/* Game over */
+/* =========================================================
+   GAME OVER
+   ========================================================= */
 
 #turn-status.game-over {
   background: #172033;
@@ -797,6 +1014,7 @@ button {
 .cell.available:hover {
   background: #e8f0f8;
   transform: scale(1.06);
+
   box-shadow:
     0 0 0 2px rgba(23, 32, 51, 0.08);
 }
@@ -907,6 +1125,126 @@ button {
   opacity: 0.45;
   cursor: default;
   transform: none;
+}
+
+/* =========================================================
+   ONLINE LOBBY
+   ========================================================= */
+
+.lobby-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lobby-join {
+  display: flex;
+  gap: 10px;
+}
+
+.lobby-input {
+  flex: 1;
+  min-width: 0;
+
+  padding: 16px 18px;
+
+  border: 1px solid rgba(127, 127, 127, 0.22);
+  border-radius: 14px;
+
+  background: transparent;
+  color: inherit;
+
+  font: inherit;
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.lobby-input::placeholder {
+  letter-spacing: 0.12em;
+  font-weight: 500;
+  opacity: 0.35;
+}
+
+.lobby-input:focus-visible {
+  outline: 2px solid #172033;
+  outline-offset: 2px;
+}
+
+.lobby-join-button {
+  padding: 0 24px;
+
+  border: 0;
+  border-radius: 14px;
+
+  background: #172033;
+  color: white;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.lobby-join-button:hover:not(:disabled) {
+  background: #27344d;
+}
+
+.lobby-join-button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.lobby-code {
+  padding: 28px 16px;
+
+  border: 1px dashed rgba(127, 127, 127, 0.5);
+  border-radius: 14px;
+
+  text-align: center;
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: 0.35em;
+  text-indent: 0.35em;
+
+  user-select: all;
+}
+
+.lobby-body > .lobby-join-button {
+  min-height: 48px;
+}
+
+.lobby-link {
+  align-self: flex-start;
+
+  padding: 8px 0;
+
+  border: 0;
+  background: none;
+  color: #718096;
+
+  cursor: pointer;
+}
+
+.lobby-link:hover {
+  color: #172033;
+}
+
+.lobby-error {
+  margin: 0;
+  padding: 12px 14px;
+
+  border: 1px solid rgba(197, 48, 48, 0.35);
+  border-radius: 10px;
+
+  background: rgba(197, 48, 48, 0.07);
+  color: #c53030;
+
+  font-size: 14px;
 }
 
 /* =========================================================
@@ -1043,6 +1381,14 @@ button {
    ========================================================= */
 
 @media (max-width: 850px) {
+  #app {
+    padding-top: 32px;
+  }
+
+  .game-topbar {
+    margin-bottom: 4px;
+  }
+
   .game-layout {
     grid-template-columns: 1fr;
 
@@ -1085,6 +1431,11 @@ button {
   .fleet-section h3 {
     text-align: center;
   }
+
+  .sound-panel {
+    right: 0;
+    width: 230px;
+  }
 }
 
 /* =========================================================
@@ -1093,15 +1444,37 @@ button {
 
 @media (max-width: 420px) {
   #app {
-    padding: 32px 12px;
+    padding: 24px 12px;
   }
 
   .game-header h1 {
-    font-size: 32px;
+    font-size: 30px;
   }
 
   .subtitle {
     font-size: 14px;
+  }
+
+  .game-topbar {
+    min-height: 40px;
+  }
+
+  .game-icon-button {
+    width: 36px;
+    height: 36px;
+
+    flex-basis: 36px;
+  }
+
+  .game-icon-button svg {
+    width: 17px;
+    height: 17px;
+
+    flex-basis: 17px;
+  }
+
+  .sound-panel {
+    width: min(230px, calc(100vw - 24px));
   }
 
   .game-status {
@@ -1163,122 +1536,4 @@ button {
     margin-top: 28px;
   }
 }
-/* =========================================================
-   ONLINE LOBBY
-   ========================================================= */
 
-.lobby-body {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.lobby-join {
-  display: flex;
-  gap: 10px;
-}
-
-.lobby-input {
-  flex: 1;
-  min-width: 0;
-
-  padding: 16px 18px;
-
-  border: 1px solid rgba(127, 127, 127, 0.22);
-  border-radius: 14px;
-
-  background: transparent;
-  color: inherit;
-
-  font: inherit;
-  font-size: 17px;
-  font-weight: 650;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-}
-
-.lobby-input::placeholder {
-  letter-spacing: 0.12em;
-  font-weight: 500;
-  opacity: 0.35;
-}
-
-.lobby-input:focus-visible {
-  outline: 2px solid #172033;
-  outline-offset: 2px;
-}
-
-.lobby-join-button {
-  padding: 0 24px;
-
-  border: 0;
-  border-radius: 14px;
-
-  background: #172033;
-  color: white;
-
-  font-weight: 600;
-
-  cursor: pointer;
-
-  transition:
-    background-color 0.15s ease,
-    opacity 0.15s ease;
-}
-
-.lobby-join-button:hover:not(:disabled) {
-  background: #27344d;
-}
-
-.lobby-join-button:disabled {
-  opacity: 0.45;
-  cursor: default;
-}
-
-.lobby-code {
-  padding: 28px 16px;
-
-  border: 1px dashed rgba(127, 127, 127, 0.5);
-  border-radius: 14px;
-
-  text-align: center;
-  font-size: 40px;
-  font-weight: 800;
-  letter-spacing: 0.35em;
-  text-indent: 0.35em;
-
-  user-select: all;
-}
-
-.lobby-body > .lobby-join-button {
-  min-height: 48px;
-}
-
-.lobby-link {
-  align-self: flex-start;
-
-  padding: 8px 0;
-
-  border: 0;
-  background: none;
-  color: #718096;
-
-  cursor: pointer;
-}
-
-.lobby-link:hover {
-  color: #172033;
-}
-
-.lobby-error {
-  margin: 0;
-  padding: 12px 14px;
-
-  border: 1px solid rgba(197, 48, 48, 0.35);
-  border-radius: 10px;
-
-  background: rgba(197, 48, 48, 0.07);
-  color: #c53030;
-
-  font-size: 14px;
-}

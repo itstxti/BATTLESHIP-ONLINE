@@ -26,6 +26,11 @@ import {
   setTurnStatus
 } from '../ui/status';
 
+import {
+  audio
+} from '../audio/audio';
+
+
 type PlacementOptions = {
   gameState: GameState;
 
@@ -37,6 +42,7 @@ type PlacementOptions = {
 
   onPlacementComplete: () => void;
 };
+
 
 export function getShipPositions(
   row: number,
@@ -62,6 +68,7 @@ export function getShipPositions(
 
   return positions;
 }
+
 
 export function selectShip(
   ship: FleetDefinition,
@@ -149,6 +156,7 @@ export function selectShip(
   );
 }
 
+
 export function selectPlacedShip(
   row: number,
   column: number,
@@ -174,7 +182,9 @@ export function selectPlacedShip(
       column
     );
 
-  if (!ship) return;
+  if (!ship) {
+    return;
+  }
 
   if (
     state.selectedShip &&
@@ -288,6 +298,7 @@ export function selectPlacedShip(
   );
 }
 
+
 export function handlePlacement(
   row: number,
   column: number,
@@ -307,7 +318,9 @@ export function handlePlacement(
     playerFleetElement
   } = options;
 
-  if (!state.selectedShip) return;
+  if (!state.selectedShip) {
+    return;
+  }
 
   const positions =
     getShipPositions(
@@ -323,13 +336,17 @@ export function handlePlacement(
       positions
     );
 
-  if (!valid) return;
+  if (!valid) {
+    return;
+  }
 
   gameState.playerBoard.placeShip(
     state.selectedShip.name,
     state.selectedShip.size,
     positions
   );
+
+  audio.playSfx('place');
 
   state.movingShipOriginalPositions =
     null;
@@ -422,6 +439,7 @@ export function handlePlacement(
     'player'
   );
 }
+
 
 export function restoreMovingShip(
   options: PlacementOptions
@@ -516,6 +534,7 @@ export function restoreMovingShip(
   );
 }
 
+
 export function rotateShip(
   options: PlacementOptions
 ): void {
@@ -579,6 +598,7 @@ export function rotateShip(
     }
   );
 }
+
 
 export function resetFleet(
   options: PlacementOptions
@@ -677,6 +697,7 @@ export function resetFleet(
     }
   );
 }
+
 
 export function cancelPlacement(
   options: PlacementOptions

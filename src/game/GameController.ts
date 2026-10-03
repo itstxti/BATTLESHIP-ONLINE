@@ -20,6 +20,11 @@ import {
   createPlacementState
 } from '../placement/PlacementState';
 
+import {
+  audio
+} from '../audio/audio';
+
+
 type GameControllerOptions = {
   fleet: FleetDefinition[];
 
@@ -39,6 +44,7 @@ type GameControllerOptions = {
 
   onPlacementComplete: () => void;
 };
+
 
 export function createGameController(
   options: GameControllerOptions
@@ -70,8 +76,11 @@ export function createGameController(
       placementState
     );
 
+    audio.playMusic('menu');
+
     options.onPhaseChange();
   }
+
 
   function startBattle(): void {
     const gameState =
@@ -97,6 +106,8 @@ export function createGameController(
     ) {
       gameState.playerTurn =
         true;
+
+      audio.playMusic('battle');
     }
 
     gameState.gameOver =
@@ -111,6 +122,7 @@ export function createGameController(
 
     options.onPhaseChange();
   }
+
 
   function checkPlacementComplete(): void {
     const gameState =
@@ -127,6 +139,7 @@ export function createGameController(
 
     options.onPlacementComplete();
   }
+
 
   return {
     startGame,

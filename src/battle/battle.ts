@@ -1,5 +1,7 @@
 import type { GameState } from '../game/GameState';
 
+import { audio } from '../audio/audio';
+
 import { renderBoard } from '../ui/boardRenderer';
 import { renderFleet } from '../ui/fleetRenderer';
 import { setTurnStatus } from '../ui/status';
@@ -43,6 +45,8 @@ export function handleEnemyShot(
     return;
   }
 
+  audio.playSfx('fire');
+
   const result =
     gameState.enemyBoard.shoot(
       row,
@@ -63,11 +67,15 @@ export function handleEnemyShot(
       );
 
     if (ship?.isSunk()) {
+      audio.playSfx('sunk');
+
       setTurnStatus(
         `You sunk the enemy ${ship.name}! Shoot again.`,
         'player'
       );
     } else {
+      audio.playSfx('hit');
+
       setTurnStatus(
         'Hit! Shoot again.',
         'player'
@@ -120,6 +128,8 @@ export function handleEnemyShot(
       gameState.phase =
         'game-over';
 
+      audio.playSfx('win');
+
       setTurnStatus(
         'You win!',
         'game-over'
@@ -130,6 +140,8 @@ export function handleEnemyShot(
 
     return;
   }
+
+  audio.playSfx('miss');
 
   setTurnStatus(
     'Miss! Enemy turn...',
@@ -202,6 +214,8 @@ export function handleAITurn(
     'enemy'
   );
 
+  audio.playSfx('fire');
+
   const shot =
     gameState.opponent.shoot(
       gameState.playerBoard
@@ -249,6 +263,8 @@ export function handleAITurn(
     gameState.phase =
       'game-over';
 
+    audio.playSfx('lose');
+
     setTurnStatus(
       'You lose!',
       'game-over'
@@ -259,11 +275,15 @@ export function handleAITurn(
 
   if (shot.result === 'hit') {
     if (ship?.isSunk()) {
+      audio.playSfx('sunk');
+
       setTurnStatus(
         `Enemy sunk your ${ship.name}!`,
         'enemy'
       );
     } else {
+      audio.playSfx('hit');
+
       setTurnStatus(
         'Enemy hit!',
         'enemy'
@@ -280,6 +300,8 @@ export function handleAITurn(
 
     return;
   }
+
+  audio.playSfx('miss');
 
   setTurnStatus(
     'Enemy missed! Your turn',
@@ -325,4 +347,3 @@ export function handleAITurn(
     );
   }, 700);
 }
-
