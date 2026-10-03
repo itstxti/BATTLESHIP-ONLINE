@@ -76,7 +76,7 @@ Then open the game in two browser tabs. Create a room in one tab and join it usi
 ## Screenshots
 
 <p align="center">
-  <img width="33%" alt="Solo game" src="https://github.com/user-attachments/assets/9780d272-bdf4-4aa9-99f0-4f30a8e75571" />
-  <img width="33%" alt="Local multiplayer" src="https://github.com/user-attachments/assets/c10c32ff-4590-4af5-a035-53bb4f16a058" />
-  <img width="33%" alt="Online multiplayer" src="https://github.com/user-attachments/assets/e27a7d7c-ddae-4987-97f6-be35adf0fc91" />
+  <img width="49%" alt="Solo game" src="https://github.com/user-attachments/assets/9780d272-bdf4-4aa9-99f0-4f30a8e75571" />
+  <img width="49%" alt="Local multiplayer" src="https://github.com/user-attachments/assets/c10c32ff-4590-4af5-a035-53bb4f16a058" />
+  <img width="50%" alt="Online multiplayer" src="https://github.com/user-attachments/assets/e27a7d7c-ddae-4987-97f6-be35adf0fc91" />
 </p>
