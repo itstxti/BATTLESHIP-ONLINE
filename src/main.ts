@@ -361,7 +361,7 @@ function toggleSoundPanel(): void {
   }
 
   setSoundPanelOpen(
-    !soundPanel.hidden
+    Boolean(soundPanel.hidden)
   );
 }
 
