@@ -25,16 +25,15 @@
 </p>
 
 <p align="center">
-     ───────────────────
+  ───────────────────
 </p>
 
 ## Features
 
-* **Three game modes** — Solo, Local Multiplayer and Online Multiplayer with room-based matchmaking.
-* **Three AI levels** — in Solo you choose Easy (random search), Medium (checkerboard search) or Hard (probability heat map). All levels finish a ship methodically once they hit it.
-* **Hit streaks** — Landing a hit lets you continue your turn.
-* **Match statistics** — Track shots, hits, accuracy, ships sunk and match duration.
-* **Match results** — Review your performance when the match ends.
+* **Three game modes** — Solo, Local Multiplayer and Online Multiplayer.
+* **Three AI levels** — Easy, Medium and Hard, each using a different search strategy.
+* **Match statistics** — Review your shots, hits, ships sunk, hit streaks, accuracy and duration after each match.
+* **Match history** — Review your 20 most recent matches.
 * **Audio feedback** — Sound effects and background music during gameplay.
 
 ## Tech Stack
@@ -56,44 +55,40 @@ The WebSocket relay has **zero external dependencies**.
 
 Requires **Node.js 22.12 or newer**.
 
-Clone the repository:
-
 ```bash
 git clone https://github.com/itstxti/battleship-online.git
 cd battleship-online
-```
-
-Install the dependencies:
-
-```bash
 npm install
-```
-
-Start the development server:
-
-```bash
 npm run dev
 ```
 
 ## Online Multiplayer
 
-To use online multiplayer locally, start the WebSocket relay in a second terminal:
+Start the WebSocket relay in a second terminal:
 
 ```bash
 npm run server
 ```
 
-Then open the game in two browser tabs.
-
-Create a room in one tab and join it using the generated room code in the other.
+Open the game in two browser tabs, create a room in one and join it using the generated room code in the other.
 
 ## How to Play
 
 1. Place your five ships on the board.
 2. Press **Ready** to lock your fleet.
-3. Take turns firing at the enemy board.
-4. A successful hit gives you another shot.
+3. Fire at the enemy board.
+4. A hit lets you fire again.
 5. Sink all enemy ships to win.
+
+### AI Levels
+
+All levels use the same targeting system. After a hit, the AI targets neighbouring cells; the difference between levels is how they search for targets.
+
+| Level      | Hunt strategy                                               |
+| ---------- | ----------------------------------------------------------- |
+| **Easy**   | Fires at random available cells.                            |
+| **Medium** | Uses a checkerboard search pattern.                         |
+| **Hard**   | Uses a probability heat map based on legal ship placements. |
 
 ### Controls
 
@@ -105,42 +100,33 @@ Create a room in one tab and join it using the generated room code in the other.
 | Cancel placement | `Esc`                           |
 | Fire             | Click a cell on the enemy board |
 
-### Match Results
-
-When a match ends, a results screen shows **Victory** or **Defeat** with shots, hits, accuracy, ships sunk and match duration, plus a **New Game** button.
-
-Stats cover the current match only and work in Solo, Local and Online modes.
-
-In Local multiplayer the winner's stats are shown. In Online mode, **New Game** returns to the lobby to find a new opponent.
-
 ## Screenshots
 
 <p align="center">
   <img width="49%" alt="Intro menu" src="https://github.com/user-attachments/assets/fc5d4a16-50b0-453e-abf8-68f85b80240b" />
-  <img width="49%" alt="Mode menu" src="https://github.com/user-attachments/assets/79ec80cd-b265-44c7-88e0-6d365e9b5271" />
+  <img width="49%" alt="Game modes" src="https://github.com/user-attachments/assets/79ec80cd-b265-44c7-88e0-6d365e9b5271" />
 </p>
 
 <p align="center">
-  <img width="49%" alt="Online lobby" src="https://github.com/user-attachments/assets/87f96606-0fea-4def-8ac6-1ac8ca9cf054" />
-  <img width="49%" alt="Match results" src="https://github.com/user-attachments/assets/3cd593cb-ccfd-4b0a-a8a4-fd82a2f08c01" />
-</p>
-
-<p align="center">
-  <img width="49%" alt="Ship placement" src="https://github.com/user-attachments/assets/061bbed3-b10c-48ee-9f0b-6228869c5d4b" />
+  <img width="49%" alt="Ship placement" src="https://github.com/user-attachments/assets/e9e4f731-4ebb-4d5c-8888-4e2362400390" />
   <img width="49%" alt="Game" src="https://github.com/user-attachments/assets/a506df6f-c2da-4b3b-87b2-a928ae876354" />
 </p>
 
+<p align="center">
+  <img width="49%" alt="Match results" src="https://github.com/user-attachments/assets/3cd593cb-ccfd-4b0a-a8a4-fd82a2f08c01" />
+  <img width="49%" alt="Match history" src="https://github.com/user-attachments/assets/b9a57414-223a-434a-95a0-7e690a881902" />
+</p>
+
+
 ## Development
 
-The project includes automated tests using **Vitest** and **jsdom**.
-
-Run the test suite with:
+Run the test suite:
 
 ```bash
 npm test
 ```
 
-For a production build:
+Build for production:
 
 ```bash
 npm run build
@@ -152,10 +138,8 @@ This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) f
 
 ### Audio Attribution
 
-The following audio asset is used under the **Creative Commons Attribution 4.0 International License (CC BY 4.0)**:
-
 **"Melancholic Synth Ambient Loop - Solitude"** by **SiriusS19YT**
 
-https://freesound.org/s/870146/
+Used under the **Creative Commons Attribution 4.0 International License (CC BY 4.0)**.
 
-License: **CC BY 4.0**
+[Source on Freesound](https://freesound.org/s/870146/)
