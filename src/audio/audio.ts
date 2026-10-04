@@ -10,6 +10,25 @@ const STORAGE_KEY =
   'battleship-audio';
 
 
+/*
+ * HTMLMediaElement.play() returns a Promise in modern browsers, but older
+ * browsers and some test environments return undefined (or throw
+ * synchronously). Normalise every case into a Promise: undefined counts as
+ * "playback started" and a synchronous throw counts as a rejection.
+ */
+function tryPlay(
+  element: HTMLMediaElement
+): Promise<void> {
+  try {
+    return Promise.resolve(
+      element.play()
+    );
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
+
 interface AudioSettings {
   muted: boolean;
   musicVolume: number;
@@ -245,10 +264,7 @@ class AudioManager {
   ): void {
     audio.volume = 0;
 
-    const playPromise =
-      audio.play();
-
-    playPromise
+    tryPlay(audio)
       .then(() => {
         if (
           this.music !== audio
@@ -329,8 +345,7 @@ class AudioManager {
         this.settings.sfxVolume
       );
 
-    audio
-      .play()
+    tryPlay(audio)
       .catch(() => {
         /*
          * Ignore individual SFX failures.

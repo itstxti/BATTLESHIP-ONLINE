@@ -204,11 +204,19 @@ describe('results screen through the real UI', () => {
         '17 hits',
         '100.0% accuracy',
         '5 ships sunk',
+        '17 hits in a row',
+        '0 shots', // the AI never got a turn
+        '0 hits',
+        '0.0% accuracy',
+        '0 ships sunk',
+        '0 hits in a row',
         '02:43 duration'
       ]);
 
-      // Keyboard users land on the only action.
-      expect(document.activeElement).toBe($('#results-new-game'));
+      // Screen readers announce the outcome: focus lands on the headline
+      // (programmatically focusable only), New Game is one Tab away.
+      expect(document.activeElement).toBe($('#results-headline'));
+      expect($('#results-headline').getAttribute('tabindex')).toBe('-1');
 
       now.mockRestore();
       vi.useRealTimers();
@@ -278,6 +286,12 @@ describe('results screen through the real UI', () => {
         '0 hits',
         '0.0% accuracy',
         '0 ships sunk',
+        '0 hits in a row',
+        '17 shots',
+        '17 hits',
+        '100.0% accuracy',
+        '5 ships sunk',
+        '17 hits in a row', // the AI never missed
         '02:05 duration'
       ]);
 
@@ -394,11 +408,22 @@ describe('results screen through the real UI', () => {
       expect(visible('#pass-device-screen')).toBe(false);
       expect(headline()).toBe('VICTORY');
       expect(detail()).toBe('Player 1 destroyed the enemy fleet.');
+      expect(
+        [...document.querySelectorAll('#results-screen .results-group-title')].map(
+          (title) => title.textContent
+        )
+      ).toEqual(['Player 1', 'Player 2', 'Match']);
       expect(resultRows()).toEqual([
         '18 shots', // 1 miss + 17 hits: only Player 1's own shots
         '17 hits',
         '94.4% accuracy',
         '5 ships sunk',
+        '17 hits in a row', // the early miss does not break the final run
+        '1 shot', // Player 2 fired once, and missed
+        '0 hits',
+        '0.0% accuracy',
+        '0 ships sunk',
+        '0 hits in a row',
         '01:01 duration'
       ]);
 
@@ -492,6 +517,12 @@ describe('results screen through the real UI', () => {
         '17 hits',
         '100.0% accuracy',
         '5 ships sunk',
+        '17 hits in a row',
+        '0 shots',
+        '0 hits',
+        '0.0% accuracy',
+        '0 ships sunk',
+        '0 hits in a row',
         '01:30 duration'
       ]);
 

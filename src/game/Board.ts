@@ -10,11 +10,24 @@ export type CellState =
     | 'hit'
     | 'miss';
 
+export type ShotRecord = {
+    row: number;
+    column: number;
+    result: 'hit' | 'miss';
+};
+
 export class Board {
     readonly size = 10;
 
     private grid: CellState[][];
     private ships: Ship[] = [];
+
+    /**
+     * Every shot that landed on this board, in the order it happened.
+     * The grid only knows WHAT was hit, not WHEN; the order is what makes
+     * stats like the longest hit streak derivable after the fact.
+     */
+    private shotHistory: ShotRecord[] = [];
 
     constructor() {
         this.grid = this.createEmptyGrid();
@@ -250,13 +263,30 @@ export class Board {
                 );
             }
 
+            this.shotHistory.push({
+                row,
+                column,
+                result: 'hit'
+            });
+
             return 'hit';
         }
 
         this.grid[row][column] =
             'miss';
 
+        this.shotHistory.push({
+            row,
+            column,
+            result: 'miss'
+        });
+
         return 'miss';
+    }
+
+    /** Shots that landed on this board, oldest first. */
+    getShotHistory(): readonly ShotRecord[] {
+        return this.shotHistory;
     }
 
     /**
@@ -280,6 +310,12 @@ export class Board {
         }
 
         this.grid[row][column] = result;
+
+        this.shotHistory.push({
+            row,
+            column,
+            result
+        });
 
         return true;
     }

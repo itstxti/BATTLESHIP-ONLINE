@@ -1,4 +1,4 @@
-import type { Board } from './Board';
+import { Board, type ShotRecord } from './Board';
 
 export type MatchOutcome = 'victory' | 'defeat';
 
@@ -15,6 +15,24 @@ export type MatchStats = {
   /** Enemy ships destroyed by the local player. */
   shipsSunk: number;
 
+  /** Longest run of consecutive hits among the local player's shots. */
+  longestStreak: number;
+
+  /** The opponent's shots at the local player's fleet. */
+  enemyShots: number;
+
+  /** Opponent shots that hit one of the local player's ships. */
+  enemyHits: number;
+
+  /** Percentage in the 0-100 range. 0 when the opponent never fired. */
+  enemyAccuracy: number;
+
+  /** Local player's ships the opponent destroyed (the opponent's "ships sunk"). */
+  enemyShipsSunk: number;
+
+  /** Longest run of consecutive hits among the opponent's shots. */
+  enemyLongestStreak: number;
+
   durationMs: number;
 };
 
@@ -26,20 +44,71 @@ export type MatchStats = {
  *  - Local / Online: it is the fog-of-war tracking board, filled only
  *    from the defender's replies (`recordShot` / `markSunk`).
  *
+ * The opponent's side is derived the same way from the player's own board,
+ * which receives the opponent's shots in every mode.
+ *
  * Boards are created per match, so the numbers can never leak from a
  * previous game, and there is no parallel counter that could drift out of
- * sync with what the player sees on screen.
+ * sync with what the player sees on screen. The one thing the grid cannot
+ * tell is the ORDER of shots, so boards keep an ordered shot log
+ * (`getShotHistory`) from which the hit streak is read.
  */
 export function computeMatchStats(
   enemyBoard: Board,
-  durationMs: number
+  durationMs: number,
+  playerBoard: Board = new Board()
 ): MatchStats {
+  const { hits, misses } = tallyShots(enemyBoard);
+  const incoming = tallyShots(playerBoard);
+
+  const shots = hits + misses;
+  const enemyShots = incoming.hits + incoming.misses;
+
+  return {
+    shots,
+    hits,
+    accuracy: shots === 0 ? 0 : (hits / shots) * 100,
+    shipsSunk: countSunk(enemyBoard),
+    longestStreak: longestHitStreak(enemyBoard.getShotHistory()),
+    enemyShots,
+    enemyHits: incoming.hits,
+    enemyAccuracy:
+      enemyShots === 0 ? 0 : (incoming.hits / enemyShots) * 100,
+    enemyShipsSunk: countSunk(playerBoard),
+    enemyLongestStreak: longestHitStreak(playerBoard.getShotHistory()),
+    durationMs: Math.max(0, durationMs)
+  };
+}
+
+/**
+ * Looks at the same match from the other side: the opponent's numbers become
+ * the "player" ones and vice versa. Used by Local mode, where the stats are
+ * computed from the winner's seat but must always be shown as Player 1 / Player 2.
+ */
+export function swapPerspective(stats: MatchStats): MatchStats {
+  return {
+    shots: stats.enemyShots,
+    hits: stats.enemyHits,
+    accuracy: stats.enemyAccuracy,
+    shipsSunk: stats.enemyShipsSunk,
+    longestStreak: stats.enemyLongestStreak,
+    enemyShots: stats.shots,
+    enemyHits: stats.hits,
+    enemyAccuracy: stats.accuracy,
+    enemyShipsSunk: stats.shipsSunk,
+    enemyLongestStreak: stats.longestStreak,
+    durationMs: stats.durationMs
+  };
+}
+
+/** Hits and misses currently marked on a board. */
+function tallyShots(board: Board): { hits: number; misses: number } {
   let hits = 0;
   let misses = 0;
 
-  for (let row = 0; row < enemyBoard.size; row++) {
-    for (let column = 0; column < enemyBoard.size; column++) {
-      const cell = enemyBoard.getCell(row, column);
+  for (let row = 0; row < board.size; row++) {
+    for (let column = 0; column < board.size; column++) {
+      const cell = board.getCell(row, column);
 
       if (cell === 'hit') {
         hits++;
@@ -49,17 +118,25 @@ export function computeMatchStats(
     }
   }
 
-  const shots = hits + misses;
+  return { hits, misses };
+}
 
-  return {
-    shots,
-    hits,
-    accuracy: shots === 0 ? 0 : (hits / shots) * 100,
-    shipsSunk: enemyBoard
-      .getShips()
-      .filter((ship) => ship.isSunk()).length,
-    durationMs: Math.max(0, durationMs)
-  };
+function countSunk(board: Board): number {
+  return board.getShips().filter((ship) => ship.isSunk()).length;
+}
+
+/** The longest run of consecutive hits in a shot log. */
+export function longestHitStreak(history: readonly ShotRecord[]): number {
+  let longest = 0;
+  let current = 0;
+
+  for (const shot of history) {
+    current = shot.result === 'hit' ? current + 1 : 0;
+
+    longest = Math.max(longest, current);
+  }
+
+  return longest;
 }
 
 /** "52.9%". One decimal place, always. */
@@ -82,34 +159,118 @@ export function formatDuration(durationMs: number): string {
     : `${pad(minutes)}:${pad(seconds)}`;
 }
 
-/** The label for each stat row, e.g. "1 shot" vs "17 shots". */
-export function describeStats(stats: MatchStats): {
+export type StatRow = {
   value: string;
+
+  /** Reads naturally after the value: "17 shots", "1 hit in a row". */
   label: string;
-}[] {
+
+  /** 0-100. When present the row is drawn with a progress bar. */
+  meter?: number;
+};
+
+/** Who each column of the results belongs to. */
+export type StatNames = {
+  /** The local player: "You" in Solo/Online, "Player 1" in Local. */
+  player: string;
+
+  /** The other side: "Enemy" in Solo/Online, "Player 2" in Local. */
+  opponent: string;
+};
+
+export const DEFAULT_STAT_NAMES: StatNames = {
+  player: 'You',
+  opponent: 'Enemy'
+};
+
+export type StatGroup = {
+  id: 'attack' | 'defense' | 'match';
+  title: string;
+  rows: StatRow[];
+};
+
+const clampPercent = (value: number): number =>
+  Math.max(0, Math.min(100, value));
+
+/** The stat rows, grouped and in display order, with singular/plural labels. */
+export function describeStatGroups(
+  stats: MatchStats,
+  names: StatNames = DEFAULT_STAT_NAMES
+): StatGroup[] {
   const plural = (count: number, singular: string, many: string): string =>
     count === 1 ? singular : many;
 
   return [
     {
-      value: String(stats.shots),
-      label: plural(stats.shots, 'shot', 'shots')
+      id: 'attack',
+      title: names.player,
+      rows: [
+        {
+          value: String(stats.shots),
+          label: plural(stats.shots, 'shot', 'shots')
+        },
+        {
+          value: String(stats.hits),
+          label: plural(stats.hits, 'hit', 'hits')
+        },
+        {
+          value: formatAccuracy(stats.accuracy),
+          label: 'accuracy',
+          meter: clampPercent(stats.accuracy)
+        },
+        {
+          value: String(stats.shipsSunk),
+          label: plural(stats.shipsSunk, 'ship sunk', 'ships sunk')
+        },
+        {
+          value: String(stats.longestStreak),
+          label: plural(
+            stats.longestStreak,
+            'hit in a row',
+            'hits in a row'
+          )
+        }
+      ]
     },
     {
-      value: String(stats.hits),
-      label: plural(stats.hits, 'hit', 'hits')
+      id: 'defense',
+      title: names.opponent,
+      rows: [
+        {
+          value: String(stats.enemyShots),
+          label: plural(stats.enemyShots, 'shot', 'shots')
+        },
+        {
+          value: String(stats.enemyHits),
+          label: plural(stats.enemyHits, 'hit', 'hits')
+        },
+        {
+          value: formatAccuracy(stats.enemyAccuracy),
+          label: 'accuracy',
+          meter: clampPercent(stats.enemyAccuracy)
+        },
+        {
+          value: String(stats.enemyShipsSunk),
+          label: plural(stats.enemyShipsSunk, 'ship sunk', 'ships sunk')
+        },
+        {
+          value: String(stats.enemyLongestStreak),
+          label: plural(
+            stats.enemyLongestStreak,
+            'hit in a row',
+            'hits in a row'
+          )
+        }
+      ]
     },
     {
-      value: formatAccuracy(stats.accuracy),
-      label: 'accuracy'
-    },
-    {
-      value: String(stats.shipsSunk),
-      label: plural(stats.shipsSunk, 'ship sunk', 'ships sunk')
-    },
-    {
-      value: formatDuration(stats.durationMs),
-      label: 'duration'
+      id: 'match',
+      title: 'Match duration',
+      rows: [
+        {
+          value: formatDuration(stats.durationMs),
+        }
+      ]
     }
   ];
 }

@@ -59,11 +59,13 @@ import type {
 
 import {
   computeMatchStats,
+  swapPerspective,
   getMatchDurationMs,
   hasMatchStarted,
   startMatchClock,
   stopMatchClock,
-  type MatchOutcome
+  type MatchOutcome,
+  type StatNames
 } from './game/matchStats';
 
 import {
@@ -848,6 +850,12 @@ type MatchEnd = {
   outcome: MatchOutcome;
   detail: string;
   delayMs: number;
+
+  /**
+   * Local (hot-seat) matches have no enemy: the results are shown as
+   * Player 1 vs Player 2, whichever seat won.
+   */
+  localWinnerSeat?: LocalSeatIndex;
 };
 
 
@@ -909,6 +917,61 @@ function presentResults(
     state
   );
 
+  const isLocalMatch =
+    end.localWinnerSeat !== undefined &&
+    localSeats !== null;
+
+  // Stats are always computed from the point of view of `state`.
+  let stats =
+    computeMatchStats(
+      state.enemyBoard,
+      getMatchDurationMs(
+        state
+      ),
+      state.playerBoard
+    );
+
+  let names: StatNames | undefined;
+
+  let boards = {
+    player:
+      state.playerBoard,
+
+    enemy:
+      state.enemyBoard
+  };
+
+  if (
+    isLocalMatch &&
+    localSeats
+  ) {
+    // Always Player 1 on the left and Player 2 on the right.
+    if (
+      end.localWinnerSeat === 1
+    ) {
+      stats =
+        swapPerspective(
+          stats
+        );
+    }
+
+    names = {
+      player:
+        localSeats[0].label,
+
+      opponent:
+        localSeats[1].label
+    };
+
+    boards = {
+      player:
+        localSeats[0].gameState.playerBoard,
+
+      enemy:
+        localSeats[1].gameState.playerBoard
+    };
+  }
+
   const view = {
     outcome:
       end.outcome,
@@ -916,13 +979,11 @@ function presentResults(
     detail:
       end.detail,
 
-    stats:
-      computeMatchStats(
-        state.enemyBoard,
-        getMatchDurationMs(
-          state
-        )
-      )
+    stats,
+
+    names,
+
+    boards
   };
 
   const flowId =
@@ -949,7 +1010,7 @@ function presentResults(
     onlineScreen!.hidden =
       true;
 
-    const newGame =
+    const headline =
       renderResultsScreen(
         resultsScreen,
         view,
@@ -970,7 +1031,9 @@ function presentResults(
         : 'lose'
     );
 
-    newGame.focus();
+    // Focus the headline (not the button) so screen readers announce the
+    // outcome; New Game is one Tab away.
+    headline.focus();
   };
 
   if (
@@ -1575,7 +1638,10 @@ function handleLocalEvent(
             `${seat.label} destroyed the enemy fleet.`,
 
           delayMs:
-            RESULTS_DELAY_MS
+            RESULTS_DELAY_MS,
+
+          localWinnerSeat:
+            index
         }
       );
 

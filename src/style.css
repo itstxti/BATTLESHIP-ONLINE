@@ -458,7 +458,7 @@ input {
   letter-spacing: 0.18em;
   text-transform: uppercase;
 
-  opacity: 0.5;
+  opacity: 0.8;
 }
 
 .game-mode-header h2 {
@@ -473,7 +473,6 @@ input {
   margin: 10px 0 0;
 
   font-size: 15px;
-  opacity: 0.55;
 }
 
 /* =========================================================
@@ -1249,8 +1248,8 @@ input {
    ========================================================= */
 
 .results-screen {
-  margin-top: 45px;
-
+  /* One fixed width, so nothing reflows when the boards are shown/hidden. */
+  width: min(900px, 100%);
   text-align: center;
 }
 
@@ -1263,6 +1262,12 @@ input {
   line-height: 1;
 }
 
+/* Focused programmatically so screen readers announce the outcome; it is
+   not interactive, so no focus ring. */
+.results-headline:focus {
+  outline: none;
+}
+
 .results-headline--victory {
   color: #20904b;
 }
@@ -1271,39 +1276,144 @@ input {
   color: #991b1b;
 }
 
-.results-stats {
+/* Two cards side by side (your attack / enemy attack), duration below. */
+.results-groups {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
 
   margin: 36px 0 0;
-  padding: 0;
 
-  list-style: none;
+  text-align: left;
 }
 
-/* Row 1: shots, hits, accuracy. Row 2: ships sunk, duration. */
-.results-stat {
-  grid-column: span 2;
-
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-
-  padding: 18px 12px;
+.results-group {
+  padding: 10px 22px 8px;
 
   border: 1px solid rgba(127, 127, 127, 0.22);
   border-radius: 14px;
 }
 
-.results-stat:nth-child(n + 4) {
-  grid-column: span 3;
+.results-group--match {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.results-group--match .results-group-title {
+  margin: 0;
+}
+
+.results-group--match .results-stats {
+  flex: 1;
+}
+
+/* Each side has its own colour (green = you / Player 1, red = enemy /
+   Player 2): accent bar on top, soft tint, and a coloured name. */
+.results-group--attack,
+.results-group--defense {
+  border-top: 4px solid var(--side-color);
+
+  background: color-mix(in srgb, var(--side-color) 7%, transparent);
+}
+
+.results-group--attack {
+  /*--side-color: #20904b;
+  --meter-color: #20904b;*/
+  --side-color: #5B8DEF;
+  --meter-color: #5B8DEF;
+}
+
+.results-group--defense {
+  /*--side-color: #991b1b;
+  --meter-color: #991b1b;*/
+  --side-color: #9B8AFB;
+  --meter-color: #9B8AFB;
+}
+
+.results-player--one {
+  color: #5B8DEF;
+  font-weight: 600;
+}
+
+.results-player--two {
+  color: #9B8AFB;
+  font-weight: 600;
+}
+
+.results-group-title {
+  margin: 0 0 6px;
+
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+
+  opacity: 0.5;
+}
+
+/* The side's name is the first thing you read in the card. */
+.results-group--attack .results-group-title,
+.results-group--defense .results-group-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  margin-bottom: 8px;
+
+  color: var(--side-color);
+  font-size: 15px;
+  letter-spacing: 0.1em;
+
+  opacity: 1;
+}
+
+.results-group--attack .results-group-title::before,
+.results-group--defense .results-group-title::before {
+  content: '';
+
+  width: 10px;
+  height: 10px;
+
+  background: var(--side-color);
+  border-radius: 50%;
+}
+
+.results-stats {
+  margin: 0;
+  padding: 0;
+
+  list-style: none;
+}
+
+/*
+ * The DOM reads "17 shots" (value, then label) for screen readers; the
+ * visual order is flipped so the label sits left and the number right.
+ */
+.results-stat {
+  position: relative;
+
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+
+  padding: 12px 0;
+
+  border-top: 1px solid rgba(127, 127, 127, 0.16);
+}
+
+.results-stat:first-child {
+  border-top: 0;
 }
 
 .results-stat-value {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
   letter-spacing: -0.03em;
+  line-height: 1.1;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1313,15 +1423,51 @@ input {
   letter-spacing: 0.14em;
   text-transform: uppercase;
 
-  opacity: 0.5;
+  opacity: 0.55;
 }
 
-.results-new-game {
-  display: block;
+/* Accuracy is drawn as a thin bar under the row (--meter is 0-100). */
+.results-stat--meter {
+  padding-bottom: 18px;
+}
 
-  width: 100%;
-  min-height: 56px;
+.results-stat--meter::before,
+.results-stat--meter::after {
+  content: '';
+
+  position: absolute;
+  left: 0;
+  bottom: 8px;
+
+  height: 4px;
+
+  border-radius: 999px;
+}
+
+.results-stat--meter::before {
+  right: 0;
+
+  background: rgba(127, 127, 127, 0.18);
+}
+
+.results-stat--meter::after {
+  width: calc(var(--meter, 0) * 1%);
+
+  background: var(--meter-color, #20904b);
+}
+
+.results-actions {
+  display: flex;
+  gap: 12px;
+
   margin-top: 24px;
+}
+
+.results-new-game,
+.results-view-boards {
+  flex: 1;
+
+  min-height: 56px;
   padding: 16px 22px;
 
   border: 1px solid #172033;
@@ -1346,13 +1492,123 @@ input {
   transform: translateY(-2px);
 }
 
-.results-new-game:active {
+.results-view-boards {
+  border: 1px solid rgba(127, 127, 127, 0.45);
+  border-radius: 14px;
+
+  background: transparent;
+  color: inherit;
+
+  font-size: 16px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background-color 180ms ease,
+    transform 180ms ease;
+}
+
+.results-view-boards:hover {
+  background: rgba(127, 127, 127, 0.12);
+
+  transform: translateY(-2px);
+}
+
+.results-new-game:active,
+.results-view-boards:active {
   transform: translateY(0);
 }
 
-.results-new-game:focus-visible {
+.results-new-game:focus-visible,
+.results-view-boards:focus-visible {
   outline: 3px solid rgba(32, 144, 75, 0.55);
   outline-offset: 3px;
+}
+
+/* Read-only snapshot of both boards behind "View boards". */
+/* Always two columns: the boards shrink with the available width instead
+   of wrapping onto separate rows. */
+.results-boards {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: clamp(8px, 2vw, 16px);
+
+  /* Compact: the two boards together take about half of the screen width. */
+  max-width: 520px;
+
+  margin: 28px auto 0;
+}
+
+/* Same 16px gutter as the stat cards, so both edges line up with them. */
+.results-boards .board-section {
+  flex: 1 1 0;
+
+  width: auto;
+  min-width: 0;
+}
+
+.results-boards[hidden] {
+  display: none;
+}
+
+.results-board-title {
+  margin: 0 0 8px;
+
+  font-size: 14px;
+}
+
+/* Same colour code as the stat cards above. */
+.board-section--player .results-board-title {
+  color: #20904b;
+}
+
+.board-section--opponent .results-board-title {
+  color: #991b1b;
+}
+
+.results-boards .board {
+  box-sizing: border-box;
+
+  /* minmax(0, …): tracks may shrink below their content, so the boards
+     scale down with the screen instead of overflowing it. */
+  grid-template-columns: minmax(0, 1.4fr) repeat(10, minmax(0, 3fr));
+  grid-template-rows: auto;
+
+  gap: clamp(1px, 0.5vw, 3px);
+
+  width: 100%;
+  padding: clamp(3px, 1.2vw, 8px);
+}
+
+.results-boards .board-corner {
+  width: auto;
+  height: auto;
+}
+
+.board--readonly .cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: auto;
+  min-height: 0;
+
+  aspect-ratio: 1;
+
+  /* The × / • marks shrink with the cell instead of stretching its row. */
+  overflow: hidden;
+  font-size: clamp(6px, 1.6vw, 10px);
+  line-height: 1;
+
+  pointer-events: none;
+  cursor: default;
+}
+
+.results-boards .board-label {
+  font-size: clamp(5px, 1.2vw, 8px);
 }
 
 @keyframes results-enter {
@@ -1373,18 +1629,19 @@ input {
   }
 }
 
+@media (max-width: 640px) {
+  .results-groups {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .results-group--match {
+    grid-column: auto;
+  }
+}
+
 @media (max-width: 480px) {
-  .results-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .results-stat,
-  .results-stat:nth-child(n + 4) {
-    grid-column: span 1;
-  }
-
-  .results-stat:last-child {
-    grid-column: span 2;
+  .results-actions {
+    flex-direction: column;
   }
 }
 

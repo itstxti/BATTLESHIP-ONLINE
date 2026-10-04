@@ -39,6 +39,12 @@ type BoardRendererOptions = {
   ) => void;
 
   animatedShot?: ShotPosition;
+
+  /**
+   * Renders a non-interactive snapshot (e.g. on the results screen):
+   * cells are plain labelled elements instead of buttons, with no handlers.
+   */
+  readOnly?: boolean;
 };
 
 /* =========================================================
@@ -175,6 +181,44 @@ export function renderPlacementPreview(
 }
 
 /* =========================================================
+   CELL DESCRIPTION (read-only boards)
+   ========================================================= */
+
+function describeCell(
+  board: Board,
+  row: number,
+  column: number,
+  isEnemyBoard: boolean
+): string {
+  const state =
+    board.getCell(
+      row,
+      column
+    );
+
+  if (state === 'hit') {
+    return board.getShipAt(
+      row,
+      column
+    )?.isSunk()
+      ? 'hit, ship sunk'
+      : 'hit';
+  }
+
+  if (state === 'miss') {
+    return 'miss';
+  }
+
+  if (isEnemyBoard) {
+    return 'not fired at';
+  }
+
+  return state === 'ship'
+    ? 'ship'
+    : 'water';
+}
+
+/* =========================================================
    BOARD
    ========================================================= */
 
@@ -193,7 +237,8 @@ export function renderBoard(
     onPlacement,
     onRotate,
     onEnemyShot,
-    animatedShot
+    animatedShot,
+    readOnly = false
   } = options;
 
   element.innerHTML = '';
@@ -271,9 +316,15 @@ export function renderBoard(
       column++
     ) {
       const cell =
-        document.createElement('button');
+        document.createElement(
+          readOnly ? 'div' : 'button'
+        );
 
-      cell.type = 'button';
+      if (
+        cell instanceof HTMLButtonElement
+      ) {
+        cell.type = 'button';
+      }
 
       cell.classList.add(
         'cell'
@@ -284,6 +335,23 @@ export function renderBoard(
           row,
           column
         );
+
+      if (readOnly) {
+        cell.setAttribute(
+          'role',
+          'img'
+        );
+
+        cell.setAttribute(
+          'aria-label',
+          `${String.fromCharCode(65 + column)}${row + 1}: ${describeCell(
+            board,
+            row,
+            column,
+            isEnemyBoard
+          )}`
+        );
+      }
 
       /*
        * Player ships.
@@ -355,6 +423,7 @@ export function renderBoard(
        * Placement interaction.
        */
       if (
+        !readOnly &&
         !isEnemyBoard &&
         gamePhase === 'placement'
       ) {
@@ -432,6 +501,7 @@ export function renderBoard(
        * Enemy board interaction.
        */
       if (
+        !readOnly &&
         isEnemyBoard &&
         gamePhase === 'battle' &&
         state !== 'hit' &&
