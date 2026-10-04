@@ -21,6 +21,10 @@ import {
 } from '../placement/PlacementState';
 
 import {
+  startMatchClock
+} from './matchStats';
+
+import {
   audio
 } from '../audio/audio';
 
@@ -100,6 +104,10 @@ export function createGameController(
 
     gameState.phase =
       'battle';
+
+    startMatchClock(
+      gameState
+    );
 
     if (
       gameState.gameMode === 'ai'

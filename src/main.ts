@@ -36,6 +36,7 @@ import {
 } from './game/GameState';
 
 import {
+  cancelBattleTimers,
   handleEnemyShot
 } from './battle/battle';
 
@@ -52,8 +53,22 @@ import {
 } from './game/LocalGameTransport';
 
 import type {
+  GameEndReason,
   MultiplayerEvent
 } from './game/MultiplayerGame';
+
+import {
+  computeMatchStats,
+  getMatchDurationMs,
+  hasMatchStarted,
+  startMatchClock,
+  stopMatchClock,
+  type MatchOutcome
+} from './game/matchStats';
+
+import {
+  renderResultsScreen
+} from './ui/resultsScreen';
 
 import {
   mountLobbyScreen
@@ -99,6 +114,11 @@ const gameScreen =
 const passDeviceScreen =
   document.querySelector<HTMLElement>(
     '#pass-device-screen'
+  );
+
+const resultsScreen =
+  document.querySelector<HTMLElement>(
+    '#results-screen'
   );
 
 const modeAIButton =
@@ -273,6 +293,12 @@ let onlineReady = false;
 
 let onlineOpponentReady = false;
 
+/*
+ * Bumped whenever the results screen is shown, dismissed or superseded, so a
+ * delayed presentation that is no longer wanted can tell and do nothing.
+ */
+let resultsFlowId = 0;
+
 
 /* =========================================================
    SOUND CONTROLS
@@ -379,6 +405,12 @@ function toggleSoundPanel(): void {
 function handleBackToMenu(): void {
   setSoundPanelOpen(false);
 
+  // From the results screen, go back to game mode selection.
+  if (!resultsScreen!.hidden) {
+    showModeMenu();
+    return;
+  }
+
   // If we are in the game, go back to game mode selection.
   if (!gameScreen!.hidden) {
     showModeMenu();
@@ -402,6 +434,12 @@ function handleBackToMenu(): void {
 
 function handleBackToEntry(): void {
   setSoundPanelOpen(false);
+
+  hideResultsScreen();
+
+  cancelBattleTimers(
+    gameState
+  );
 
   entryScreen?.classList.remove(
     'hidden'
@@ -548,8 +586,28 @@ function getPlacementOptions() {
 
 
 function getBattleOptions() {
+  // Pinned now: a callback from a finished-off match must not act on the next one.
+  const state = gameState;
+
   return {
-    gameState,
+    gameState: state,
+
+    onGameOver:
+      (outcome: MatchOutcome) => {
+        presentResults(
+          state,
+          {
+            outcome,
+            detail:
+              describeMatchEnd(
+                outcome === 'victory' ? 'me' : 'opponent',
+                'fleet-sunk'
+              ),
+            delayMs:
+              RESULTS_DELAY_MS
+          }
+        );
+      },
 
     playerBoardElement:
       playerBoardElement!,
@@ -772,6 +830,161 @@ function handlePlacementComplete(): void {
   );
 
   updateUI();
+}
+
+
+/* =========================================================
+   RESULTS SCREEN
+   ========================================================= */
+
+/*
+ * Lets the final explosion and the win/lose jingle land before the
+ * screen changes. Skipped when nothing visible just happened (forfeit,
+ * disconnect).
+ */
+const RESULTS_DELAY_MS = 1500;
+
+type MatchEnd = {
+  outcome: MatchOutcome;
+  detail: string;
+  delayMs: number;
+};
+
+
+function describeMatchEnd(
+  winner: 'me' | 'opponent',
+  reason: GameEndReason
+): string {
+  if (winner === 'me') {
+    return reason === 'disconnect'
+      ? 'Your opponent disconnected.'
+      : reason === 'forfeit'
+        ? 'Your opponent forfeited.'
+        : 'Enemy fleet destroyed.';
+  }
+
+  return reason === 'forfeit'
+    ? 'You forfeited the match.'
+    : 'Your fleet was sunk.';
+}
+
+
+function hideResultsScreen(): void {
+  resultsFlowId++;
+
+  resultsScreen!.hidden =
+    true;
+
+  resultsScreen!.replaceChildren();
+}
+
+
+/**
+ * The single entry point every game-over path goes through (Solo, Local
+ * and Online), so they cannot diverge.
+ *
+ * The numbers are frozen immediately; only the screen swap is delayed.
+ */
+function presentResults(
+  state: GameState,
+  end: MatchEnd
+): void {
+  if (
+    !resultsScreen ||
+    state !== gameState
+  ) {
+    // A leftover callback from a match that was already replaced.
+    return;
+  }
+
+  if (
+    !hasMatchStarted(state)
+  ) {
+    // No battle took place (e.g. the opponent left during placement):
+    // there is no match to summarise.
+    return;
+  }
+
+  stopMatchClock(
+    state
+  );
+
+  const view = {
+    outcome:
+      end.outcome,
+
+    detail:
+      end.detail,
+
+    stats:
+      computeMatchStats(
+        state.enemyBoard,
+        getMatchDurationMs(
+          state
+        )
+      )
+  };
+
+  const flowId =
+    ++resultsFlowId;
+
+  const show = (): void => {
+    if (
+      flowId !== resultsFlowId ||
+      state !== gameState
+    ) {
+      // Dismissed, or a new match already replaced this one.
+      return;
+    }
+
+    gameScreen!.hidden =
+      true;
+
+    gameModeMenu!.hidden =
+      true;
+
+    passDeviceScreen!.hidden =
+      true;
+
+    onlineScreen!.hidden =
+      true;
+
+    const newGame =
+      renderResultsScreen(
+        resultsScreen,
+        view,
+        handleResultsNewGame
+      );
+
+    resultsScreen.hidden =
+      false;
+
+    newGame.focus();
+  };
+
+  if (
+    end.delayMs > 0
+  ) {
+    setTimeout(
+      show,
+      end.delayMs
+    );
+
+    return;
+  }
+
+  show();
+}
+
+
+/*
+ * Starts another match in the same mode. Online has no opponent yet, so
+ * that means going back to the lobby to be paired again.
+ */
+function handleResultsNewGame(): void {
+  startSelectedMode(
+    gameMode
+  );
 }
 
 
@@ -1101,6 +1314,10 @@ function handleLocalEvent(
         item.gameState.phase =
           'battle';
 
+        startMatchClock(
+          item.gameState
+        );
+
         item.gameState.gameOver =
           false;
 
@@ -1341,6 +1558,20 @@ function handleLocalEvent(
 
       renderGame();
 
+      presentResults(
+        seat.gameState,
+        {
+          outcome:
+            'victory',
+
+          detail:
+            `${seat.label} destroyed the enemy fleet.`,
+
+          delayMs:
+            RESULTS_DELAY_MS
+        }
+      );
+
       return;
     }
 
@@ -1418,6 +1649,12 @@ function startLocalGame(): void {
    ========================================================= */
 
 function showModeMenu(): void {
+  hideResultsScreen();
+
+  cancelBattleTimers(
+    gameState
+  );
+
   disposeOnlineGame();
   disposeLocalGame();
 
@@ -1682,6 +1919,10 @@ function handleOnlineEvent(
       gameState.phase =
         'battle';
 
+      startMatchClock(
+        gameState
+      );
+
       gameState.gameOver =
         false;
 
@@ -1922,6 +2163,27 @@ function handleOnlineEvent(
 
       renderGame();
 
+      presentResults(
+        gameState,
+        {
+          outcome:
+            event.winner === 'me'
+              ? 'victory'
+              : 'defeat',
+
+          detail:
+            describeMatchEnd(
+              event.winner,
+              event.reason
+            ),
+
+          delayMs:
+            event.reason === 'fleet-sunk'
+              ? RESULTS_DELAY_MS
+              : 0
+        }
+      );
+
       game.dispose();
 
       return;
@@ -1946,6 +2208,8 @@ function handleOnlineEvent(
 function startSelectedMode(
   selectedMode: GameMode
 ): void {
+  hideResultsScreen();
+
   if (
     selectedMode ===
     'online'
@@ -2018,6 +2282,11 @@ const gameController =
 
     setGameState:
       (newGameState) => {
+        // The match being replaced must not keep playing in the background.
+        cancelBattleTimers(
+          gameState
+        );
+
         gameState =
           newGameState;
       },

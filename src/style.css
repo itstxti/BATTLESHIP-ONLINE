@@ -1245,6 +1245,150 @@ input {
 }
 
 /* =========================================================
+   RESULTS SCREEN
+   ========================================================= */
+
+.results-screen {
+  margin-top: 45px;
+
+  text-align: center;
+}
+
+.results-headline {
+  margin: 0;
+
+  font-size: clamp(52px, 13vw, 96px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.results-headline--victory {
+  color: #20904b;
+}
+
+.results-headline--defeat {
+  color: #991b1b;
+}
+
+.results-stats {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+
+  margin: 36px 0 0;
+  padding: 0;
+
+  list-style: none;
+}
+
+/* Row 1: shots, hits, accuracy. Row 2: ships sunk, duration. */
+.results-stat {
+  grid-column: span 2;
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  padding: 18px 12px;
+
+  border: 1px solid rgba(127, 127, 127, 0.22);
+  border-radius: 14px;
+}
+
+.results-stat:nth-child(n + 4) {
+  grid-column: span 3;
+}
+
+.results-stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.results-stat-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+
+  opacity: 0.5;
+}
+
+.results-new-game {
+  display: block;
+
+  width: 100%;
+  min-height: 56px;
+  margin-top: 24px;
+  padding: 16px 22px;
+
+  border: 1px solid #172033;
+  border-radius: 14px;
+
+  background: #172033;
+  color: white;
+
+  font-size: 16px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background-color 180ms ease,
+    transform 180ms ease;
+}
+
+.results-new-game:hover {
+  background: #26324d;
+
+  transform: translateY(-2px);
+}
+
+.results-new-game:active {
+  transform: translateY(0);
+}
+
+.results-new-game:focus-visible {
+  outline: 3px solid rgba(32, 144, 75, 0.55);
+  outline-offset: 3px;
+}
+
+@keyframes results-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .results-screen:not([hidden]) {
+    animation: results-enter 320ms ease-out;
+  }
+}
+
+@media (max-width: 480px) {
+  .results-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .results-stat,
+  .results-stat:nth-child(n + 4) {
+    grid-column: span 1;
+  }
+
+  .results-stat:last-child {
+    grid-column: span 2;
+  }
+}
+
+/* =========================================================
    ONLINE LOBBY
    ========================================================= */
 

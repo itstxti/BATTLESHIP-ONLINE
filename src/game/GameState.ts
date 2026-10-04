@@ -17,12 +17,16 @@ import type {
 } from './GameTransport';
 
 import type {
+  MatchClock
+} from './matchStats';
+
+import type {
   FleetDefinition,
   GameMode,
   GamePhase
 } from './types';
 
-export type GameState = {
+export type GameState = MatchClock & {
   phase: GamePhase;
   gameMode: GameMode;
   playerTurn: boolean;
@@ -87,6 +91,8 @@ export function createGameState(
     enemyBoard: opponentBoard,
     opponent,
     multiplayerGame,
-    fleet
+    fleet,
+    battleStartedAt: null,
+    battleEndedAt: null
   };
 }

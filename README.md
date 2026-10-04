@@ -80,6 +80,14 @@ Create a room in one tab and join it using the generated room code in the other.
 | Cancel placement | `Esc`                           |
 | Fire             | Click a cell on the enemy board |
 
+### Match Results
+
+When a match ends, a results screen shows **Victory** or **Defeat** with shots,
+hits, accuracy, ships sunk and match duration, plus a **New Game** button.
+Stats cover the current match only and work in Solo, Local and Online modes.
+In Local multiplayer the winner's stats are shown. In Online mode, New Game
+returns to the lobby to find a new opponent.
+
 ## Screenshots
 
 <p align="center">

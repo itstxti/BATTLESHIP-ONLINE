@@ -1,4 +1,5 @@
 import type { GameState } from '../game/GameState';
+import type { MatchOutcome } from '../game/matchStats';
 
 import { audio } from '../audio/audio';
 
@@ -12,7 +13,56 @@ type BattleOptions = {
   enemyBoardElement: HTMLDivElement;
   playerFleetElement: HTMLDivElement;
   enemyFleetElement: HTMLDivElement;
+
+  /** Solo only: called once when the match ends. */
+  onGameOver?: (outcome: MatchOutcome) => void;
 };
+
+/*
+ * Solo only. Every delayed step of a match (the AI's reply, its chained
+ * shots, handing the turn back) is registered under the match that owns it,
+ * so that match can be cancelled as a unit. Without this, an abandoned game
+ * (New Game, Back to menu) keeps firing shots and redrawing boards over
+ * whatever the player is looking at now.
+ */
+const pendingTimers = new WeakMap<
+  GameState,
+  Set<ReturnType<typeof setTimeout>>
+>();
+
+function schedule(
+  gameState: GameState,
+  callback: () => void,
+  delayMs: number
+): void {
+  let timers = pendingTimers.get(gameState);
+
+  if (!timers) {
+    timers = new Set();
+    pendingTimers.set(gameState, timers);
+  }
+
+  const owned = timers;
+
+  const id = setTimeout(() => {
+    owned.delete(id);
+    callback();
+  }, delayMs);
+
+  owned.add(id);
+}
+
+/** Stops every pending step of `gameState`'s match. Safe to call any time. */
+export function cancelBattleTimers(gameState: GameState): void {
+  const timers = pendingTimers.get(gameState);
+
+  if (!timers) {
+    return;
+  }
+
+  timers.forEach((id) => clearTimeout(id));
+  timers.clear();
+}
 
 export function handleEnemyShot(
   row: number,
@@ -135,6 +185,8 @@ export function handleEnemyShot(
         'game-over'
       );
 
+      options.onGameOver?.('victory');
+
       return;
     }
 
@@ -186,7 +238,7 @@ export function handleEnemyShot(
   gameState.playerTurn =
     false;
 
-  setTimeout(() => {
+  schedule(gameState, () => {
     handleAITurn(options);
   }, 700);
 }
@@ -270,6 +322,8 @@ export function handleAITurn(
       'game-over'
     );
 
+    options.onGameOver?.('defeat');
+
     return;
   }
 
@@ -290,7 +344,7 @@ export function handleAITurn(
       );
     }
 
-    setTimeout(() => {
+    schedule(gameState, () => {
       if (gameState.gameOver) {
         return;
       }
@@ -308,7 +362,7 @@ export function handleAITurn(
     'player'
   );
 
-  setTimeout(() => {
+  schedule(gameState, () => {
     if (
       gameState.gameOver ||
       gameState.phase !== 'battle'
