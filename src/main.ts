@@ -85,6 +85,10 @@ const entryScreen =
     '#entry-screen'
   );
 
+const modeMenuBackButton =
+  document.querySelector<HTMLButtonElement>(
+    '#mode-menu-back'
+  );
 
 const gameModeMenu =
   document.querySelector<HTMLElement>(
@@ -380,10 +384,6 @@ function handleBackToMenu(): void {
   setSoundPanelOpen(false);
 
   showModeMenu();
-
-  entryScreen?.classList.remove(
-    'hidden'
-  );
 }
 
 
@@ -396,10 +396,6 @@ function enterGame(): void {
     return;
   }
 
-  /*
-   * This pointer interaction is a user gesture.
-   * The browser therefore allows audio playback.
-   */
   audio.playMusic(
     'menu'
   );
@@ -408,6 +404,32 @@ function enterGame(): void {
     'hidden'
   );
 }
+
+function handleBackToEntry(): void {
+  setSoundPanelOpen(false);
+
+  entryScreen?.classList.remove(
+    'hidden'
+  );
+
+  gameModeMenu!.hidden =
+    true;
+
+  gameScreen!.hidden =
+    true;
+
+  passDeviceScreen!.hidden =
+    true;
+
+  onlineScreen!.hidden =
+    true;
+}
+
+
+entryScreen?.addEventListener(
+  'pointerdown',
+  enterGame
+);
 
 
 entryScreen?.addEventListener(
@@ -2153,6 +2175,18 @@ backToMenuButton?.addEventListener(
   }
 );
 
+modeMenuBackButton?.addEventListener(
+  'click',
+  (event) => {
+    event.stopPropagation();
+
+    audio.playSfx(
+      'click'
+    );
+
+    handleBackToEntry();
+  }
+);
 
 modeAIButton?.addEventListener(
   'click',
