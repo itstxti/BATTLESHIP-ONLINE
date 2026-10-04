@@ -380,6 +380,10 @@ function handleBackToMenu(): void {
   setSoundPanelOpen(false);
 
   showModeMenu();
+
+  entryScreen?.classList.remove(
+    'hidden'
+  );
 }
 
 
@@ -408,10 +412,7 @@ function enterGame(): void {
 
 entryScreen?.addEventListener(
   'pointerdown',
-  enterGame,
-  {
-    once: true
-  }
+  enterGame
 );
 
 
@@ -1091,7 +1092,7 @@ function handleLocalEvent(
       audio.playMusic(
         'battle'
       );
-      
+
       showPassDeviceScreen({
         seatIndex:
           first,
