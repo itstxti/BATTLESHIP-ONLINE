@@ -1314,22 +1314,21 @@ input {
 .results-group--attack,
 .results-group--defense {
   border-top: 4px solid var(--side-color);
-
-  background: color-mix(in srgb, var(--side-color) 7%, transparent);
+  background: transparent;
 }
 
 .results-group--attack {
   /*--side-color: #20904b;
   --meter-color: #20904b;*/
   --side-color: #5B8DEF;
-  --meter-color: transparent;
+  --meter-color: #5B8DEF;
 }
 
 .results-group--defense {
   /*--side-color: #991b1b;
   --meter-color: #991b1b;*/
   --side-color: #9B8AFB;
-  --meter-color: transparent;
+  --meter-color: #9B8AFB;
 }
 
 .results-player--one {
