@@ -1,5 +1,7 @@
 import { Board } from './Board';
 
+import { STANDARD_FLEET } from './fleet';
+
 import type {
   Opponent,
   ShotResult
@@ -10,78 +12,76 @@ type Shot = {
   column: number;
 };
 
+/**
+ * What the AI knows about a cell. It is built only from public
+ * information (shots already fired and ships already announced as sunk),
+ * never from where unsunk ships really are.
+ */
+type Knowledge =
+  | 'unknown'
+  | 'miss'
+  | 'hit'
+  | 'sunk';
+
+/**
+ * Probability-density AI.
+ *
+ * On every turn it counts, for each ship still afloat, every position
+ * where that ship could still fit given the shots so far, and fires at
+ * the cell that appears in the most of them.
+ *
+ * - Hunting (no open hits): the density naturally favours the centre
+ *   and a checkerboard spaced to the smallest ship left.
+ * - Targeting (open hits): only placements that cover an unsunk hit
+ *   count, and placements covering several hits weigh much more, so it
+ *   follows a line and finishes it from both ends.
+ * - A sunk ship's cells are removed from the picture, so hits that
+ *   belong to a neighbouring ship stay open and are pursued next.
+ *
+ * The AI keeps no state between shots: it re-reads the board each turn,
+ * so it always stays in sync with the game.
+ */
 export class AI implements Opponent {
-  private availableShots: Shot[] = [];
-
-  private targetShots: Shot[] = [];
-
-  private hits: Shot[] = [];
-
   private boardSize: number;
 
-  constructor(boardSize: number) {
+  private fleetSizes: number[];
+
+  constructor(
+    boardSize: number,
+    fleetSizes: number[] = STANDARD_FLEET.map(
+      (ship) => ship.size
+    )
+  ) {
     this.boardSize = boardSize;
 
-    this.createShotList();
-  }
-
-  private createShotList(): void {
-    this.availableShots = [];
-
-    for (
-      let row = 0;
-      row < this.boardSize;
-      row++
-    ) {
-      for (
-        let column = 0;
-        column < this.boardSize;
-        column++
-      ) {
-        this.availableShots.push({
-          row,
-          column
-        });
-      }
-    }
+    this.fleetSizes = [...fleetSizes];
   }
 
   shoot(board: Board): ShotResult {
-    const shot =
-      this.getNextShot();
+    const shot = this.chooseShot(board);
 
-    const result =
-      board.shoot(
-        shot.row,
-        shot.column
+    const result = board.shoot(
+      shot.row,
+      shot.column
+    );
+
+    if (result === 'already-shot') {
+      // Should be unreachable; stay safe instead of looping forever.
+      const fallback = this.firstUnknownCell(board);
+
+      const fallbackResult = board.shoot(
+        fallback.row,
+        fallback.column
       );
 
-    if (
-      result === 'already-shot'
-    ) {
-      return this.shoot(board);
-    }
-
-    if (
-      result === 'hit'
-    ) {
-      const ship =
-        board.getShipAt(
-          shot.row,
-          shot.column
-        );
-
-      this.hits.push(
-        shot
-      );
-
-      if (
-        ship?.isSunk()
-      ) {
-        this.resetTargeting();
-      } else {
-        this.updateTargets();
-      }
+      return {
+        row: fallback.row,
+        column: fallback.column,
+        result:
+          fallbackResult === 'hit'
+            ? 'hit'
+            : 'miss'
+      };
     }
 
     return {
@@ -91,274 +91,249 @@ export class AI implements Opponent {
     };
   }
 
-  private getNextShot(): Shot {
-    if (
-      this.targetShots.length > 0
-    ) {
-      const shot =
-        this.targetShots.shift()!;
+  private chooseShot(board: Board): Shot {
+    const knowledge = this.readKnowledge(board);
 
-      this.removeAvailableShot(
-        shot
-      );
+    const remaining = this.remainingSizes(board);
 
-      return shot;
-    }
-
-    const preferredShots =
-      this.availableShots.filter(
-        (shot) =>
-          (shot.row +
-            shot.column) %
-            2 ===
-          0
-      );
-
-    const pool =
-      preferredShots.length > 0
-        ? preferredShots
-        : this.availableShots;
-
-    const index =
-      Math.floor(
-        Math.random() *
-          pool.length
-      );
-
-    const shot =
-      pool[index];
-
-    this.removeAvailableShot(
-      shot
+    const hasOpenHits = knowledge.some((line) =>
+      line.includes('hit')
     );
 
-    return shot;
-  }
+    let weights = this.computeWeights(
+      knowledge,
+      remaining,
+      hasOpenHits
+    );
 
-  private updateTargets(): void {
-    if (
-      this.hits.length === 1
-    ) {
-      this.addAdjacentTargets(
-        this.hits[0]
+    let best = this.bestCells(knowledge, weights);
+
+    if (best.length === 0 && hasOpenHits) {
+      // Open hits that no remaining ship can explain: ignore them.
+      weights = this.computeWeights(
+        knowledge,
+        remaining,
+        false
       );
 
-      return;
+      best = this.bestCells(knowledge, weights);
     }
 
-    const sameRow =
-      this.hits.every(
-        (hit) =>
-          hit.row ===
-          this.hits[0].row
-      );
-
-    const sameColumn =
-      this.hits.every(
-        (hit) =>
-          hit.column ===
-          this.hits[0].column
-      );
-
-    if (sameRow) {
-      this.targetShots = [];
-
-      const row =
-        this.hits[0].row;
-
-      const columns =
-        this.hits.map(
-          (hit) =>
-            hit.column
-        );
-
-      const minColumn =
-        Math.min(
-          ...columns
-        );
-
-      const maxColumn =
-        Math.max(
-          ...columns
-        );
-
-      this.addTarget({
-        row,
-        column:
-          minColumn - 1
-      });
-
-      this.addTarget({
-        row,
-        column:
-          maxColumn + 1
-      });
-
-      return;
+    if (best.length === 0) {
+      return this.firstUnknownCell(board);
     }
 
-    if (sameColumn) {
-      this.targetShots = [];
-
-      const column =
-        this.hits[0].column;
-
-      const rows =
-        this.hits.map(
-          (hit) =>
-            hit.row
-        );
-
-      const minRow =
-        Math.min(
-          ...rows
-        );
-
-      const maxRow =
-        Math.max(
-          ...rows
-        );
-
-      this.addTarget({
-        row:
-          minRow - 1,
-        column
-      });
-
-      this.addTarget({
-        row:
-          maxRow + 1,
-        column
-      });
-    }
-  }
-
-  private addAdjacentTargets(
-    shot: Shot
-  ): void {
-    const directions: Shot[] = [
-      {
-        row:
-          shot.row - 1,
-        column:
-          shot.column
-      },
-      {
-        row:
-          shot.row + 1,
-        column:
-          shot.column
-      },
-      {
-        row:
-          shot.row,
-        column:
-          shot.column - 1
-      },
-      {
-        row:
-          shot.row,
-        column:
-          shot.column + 1
-      }
+    return best[
+      Math.floor(Math.random() * best.length)
     ];
+  }
 
-    directions.sort(
+  private readKnowledge(
+    board: Board
+  ): Knowledge[][] {
+    const knowledge: Knowledge[][] = Array.from(
+      { length: this.boardSize },
+      (_, row) =>
+        Array.from(
+          { length: this.boardSize },
+          (_, column): Knowledge => {
+            const cell = board.getCell(row, column);
+
+            if (cell === 'hit') {
+              return 'hit';
+            }
+
+            if (cell === 'miss') {
+              return 'miss';
+            }
+
+            // 'empty' and 'ship' look the same from here.
+            return 'unknown';
+          }
+        )
+    );
+
+    for (const ship of board.getShips()) {
+      if (!ship.isSunk()) {
+        continue;
+      }
+
+      for (const position of ship.positions) {
+        knowledge[position.row][position.column] =
+          'sunk';
+      }
+    }
+
+    return knowledge;
+  }
+
+  private remainingSizes(board: Board): number[] {
+    const remaining = [...this.fleetSizes];
+
+    for (const ship of board.getShips()) {
+      if (!ship.isSunk()) {
+        continue;
+      }
+
+      const index = remaining.indexOf(ship.size);
+
+      if (index !== -1) {
+        remaining.splice(index, 1);
+      }
+    }
+
+    return remaining;
+  }
+
+  private computeWeights(
+    knowledge: Knowledge[][],
+    sizes: number[],
+    requireHit: boolean
+  ): number[][] {
+    const weights = Array.from(
+      { length: this.boardSize },
       () =>
-        Math.random() -
-        0.5
+        Array<number>(this.boardSize).fill(0)
     );
 
-    for (
-      const target of directions
-    ) {
-      this.addTarget(
-        target
-      );
+    for (const size of sizes) {
+      for (const horizontal of [true, false]) {
+        const maxRow = horizontal
+          ? this.boardSize
+          : this.boardSize - size + 1;
+
+        const maxColumn = horizontal
+          ? this.boardSize - size + 1
+          : this.boardSize;
+
+        for (let row = 0; row < maxRow; row++) {
+          for (
+            let column = 0;
+            column < maxColumn;
+            column++
+          ) {
+            this.addPlacement(
+              knowledge,
+              weights,
+              { row, column },
+              size,
+              horizontal,
+              requireHit
+            );
+          }
+        }
+      }
     }
+
+    return weights;
   }
 
-  private addTarget(
-    target: Shot
+  private addPlacement(
+    knowledge: Knowledge[][],
+    weights: number[][],
+    start: Shot,
+    size: number,
+    horizontal: boolean,
+    requireHit: boolean
   ): void {
-    if (
-      !this.isInsideBoard(
-        target
-      )
-    ) {
+    const cells: Shot[] = [];
+
+    let coveredHits = 0;
+
+    for (let i = 0; i < size; i++) {
+      const row = horizontal
+        ? start.row
+        : start.row + i;
+
+      const column = horizontal
+        ? start.column + i
+        : start.column;
+
+      const state = knowledge[row][column];
+
+      if (state === 'miss' || state === 'sunk') {
+        return;
+      }
+
+      if (state === 'hit') {
+        coveredHits++;
+      }
+
+      cells.push({ row, column });
+    }
+
+    if (requireHit && coveredHits === 0) {
       return;
     }
 
-    const isAvailable =
-      this.availableShots.some(
-        (shot) =>
-          shot.row ===
-            target.row &&
-          shot.column ===
-            target.column
-      );
+    // Covering more open hits is far more likely than covering one.
+    const weight =
+      requireHit
+        ? 4 ** (coveredHits - 1)
+        : 1;
 
-    if (!isAvailable) {
-      return;
-    }
-
-    const alreadyTargeted =
-      this.targetShots.some(
-        (shot) =>
-          shot.row ===
-            target.row &&
-          shot.column ===
-            target.column
-      );
-
-    if (
-      alreadyTargeted
-    ) {
-      return;
-    }
-
-    this.targetShots.push(
-      target
-    );
-  }
-
-  private removeAvailableShot(
-    shot: Shot
-  ): void {
-    const index =
-      this.availableShots.findIndex(
-        (availableShot) =>
-          availableShot.row ===
-            shot.row &&
-          availableShot.column ===
-            shot.column
-      );
-
-    if (index !== -1) {
-      this.availableShots.splice(
-        index,
-        1
-      );
+    for (const cell of cells) {
+      if (
+        knowledge[cell.row][cell.column] ===
+        'unknown'
+      ) {
+        weights[cell.row][cell.column] += weight;
+      }
     }
   }
 
-  private resetTargeting(): void {
-    this.targetShots = [];
+  private bestCells(
+    knowledge: Knowledge[][],
+    weights: number[][]
+  ): Shot[] {
+    let best = 0;
 
-    this.hits = [];
+    let cells: Shot[] = [];
+
+    for (let row = 0; row < this.boardSize; row++) {
+      for (
+        let column = 0;
+        column < this.boardSize;
+        column++
+      ) {
+        if (knowledge[row][column] !== 'unknown') {
+          continue;
+        }
+
+        const weight = weights[row][column];
+
+        if (weight <= 0) {
+          continue;
+        }
+
+        if (weight > best) {
+          best = weight;
+
+          cells = [{ row, column }];
+        } else if (weight === best) {
+          cells.push({ row, column });
+        }
+      }
+    }
+
+    return cells;
   }
 
-  private isInsideBoard(
-    shot: Shot
-  ): boolean {
-    return (
-      shot.row >= 0 &&
-      shot.row <
-        this.boardSize &&
-      shot.column >= 0 &&
-      shot.column <
-        this.boardSize
-    );
+  private firstUnknownCell(board: Board): Shot {
+    for (let row = 0; row < this.boardSize; row++) {
+      for (
+        let column = 0;
+        column < this.boardSize;
+        column++
+      ) {
+        const cell = board.getCell(row, column);
+
+        if (cell !== 'hit' && cell !== 'miss') {
+          return { row, column };
+        }
+      }
+    }
+
+    throw new Error('The AI has no cells left to shoot at.');
   }
 }
-
