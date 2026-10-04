@@ -76,6 +76,16 @@ import {
 } from './audio/audio';
 
 
+/* =========================================================
+   ENTRY SCREEN
+   ========================================================= */
+
+const entryScreen =
+  document.querySelector<HTMLElement>(
+    '#entry-screen'
+  );
+
+
 const gameModeMenu =
   document.querySelector<HTMLElement>(
     '#game-mode-menu'
@@ -365,11 +375,44 @@ function toggleSoundPanel(): void {
   );
 }
 
+
 function handleBackToMenu(): void {
   setSoundPanelOpen(false);
 
   showModeMenu();
 }
+
+
+/* =========================================================
+   ENTRY SCREEN
+   ========================================================= */
+
+function enterGame(): void {
+  if (!entryScreen) {
+    return;
+  }
+
+  /*
+   * This pointer interaction is a user gesture.
+   * The browser therefore allows audio playback.
+   */
+  audio.playMusic(
+    'menu'
+  );
+
+  entryScreen.classList.add(
+    'hidden'
+  );
+}
+
+
+entryScreen?.addEventListener(
+  'pointerdown',
+  enterGame,
+  {
+    once: true
+  }
+);
 
 
 /* =========================================================
@@ -2036,6 +2079,7 @@ sfxVolumeSlider?.addEventListener(
     audio.setSfxVolume(
       value
     );
+
     audio.playSfx('click');
     updateSoundUI();
   }
@@ -2313,9 +2357,4 @@ if (
     true;
 
   updateSoundUI();
-
-  audio.playMusic(
-    'menu'
-  );
 }
-

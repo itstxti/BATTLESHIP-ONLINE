@@ -3,6 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
+
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0"
@@ -17,9 +18,39 @@
 </head>
 
 <body>
+
+  <!-- Entry screen -->
+
+  <div
+    id="entry-screen"
+    class="entry-screen"
+  >
+
+    <div class="entry-content">
+
+      <span class="entry-eyebrow">
+        BATTLESHIP
+      </span>
+
+      <h1>
+        READY FOR BATTLE
+      </h1>
+
+      <p>
+        Click anywhere to enter
+      </p>
+
+      <span class="entry-line"></span>
+
+    </div>
+
+  </div>
+
+
   <div id="app">
 
     <header class="game-header">
+
       <!-- Game Controls -->
 
       <div class="game-topbar">
@@ -33,10 +64,12 @@
           aria-label="Back to main menu"
           title="Back to main menu"
         >
+
           <svg
             viewBox="0 0 24 24"
             aria-hidden="true"
           >
+
             <path
               d="M19 12H5"
             />
@@ -44,7 +77,9 @@
             <path
               d="M12 19l-7-7 7-7"
             />
+
           </svg>
+
         </button>
 
 
@@ -66,6 +101,7 @@
               viewBox="0 0 24 24"
               aria-hidden="true"
             >
+
               <path
                 d="M11 5L6 9H3v6h3l5 4V5z"
               />
@@ -77,6 +113,7 @@
               <path
                 d="M18 6a9 9 0 010 12"
               />
+
             </svg>
 
           </button>
@@ -91,15 +128,18 @@
           >
 
             <div class="sound-panel-header">
+
               <span>
                 SOUND
               </span>
+
             </div>
 
 
             <div class="sound-control">
 
               <div class="sound-control-label">
+
                 <span>
                   Music
                 </span>
@@ -107,6 +147,7 @@
                 <span id="music-volume-value">
                   30%
                 </span>
+
               </div>
 
               <input
@@ -125,6 +166,7 @@
             <div class="sound-control">
 
               <div class="sound-control-label">
+
                 <span>
                   Effects
                 </span>
@@ -132,6 +174,7 @@
                 <span id="sfx-volume-value">
                   70%
                 </span>
+
               </div>
 
               <input
@@ -160,8 +203,16 @@
         </div>
 
       </div>
-      <h1>BATTLESHIP</h1>
-      <p class="subtitle">Sink the enemy fleet</p>
+
+
+      <h1>
+        BATTLESHIP
+      </h1>
+
+      <p class="subtitle">
+        Sink the enemy fleet
+      </p>
+
     </header>
 
 
@@ -173,6 +224,7 @@
     >
 
       <div class="game-mode-header">
+
         <span class="game-mode-eyebrow">
           GAME MODE
         </span>
@@ -184,6 +236,7 @@
         <p>
           Select how you want to play.
         </p>
+
       </div>
 
 
@@ -194,11 +247,13 @@
           class="game-mode-button"
           type="button"
         >
+
           <span class="game-mode-number">
             01
           </span>
 
           <span class="game-mode-content">
+
             <span class="game-mode-title">
               Solo
             </span>
@@ -206,11 +261,13 @@
             <span class="game-mode-description">
               Battle against the AI
             </span>
+
           </span>
 
           <span class="game-mode-arrow">
             →
           </span>
+
         </button>
 
 
@@ -219,11 +276,13 @@
           class="game-mode-button"
           type="button"
         >
+
           <span class="game-mode-number">
             02
           </span>
 
           <span class="game-mode-content">
+
             <span class="game-mode-title">
               Local Multiplayer
             </span>
@@ -231,11 +290,13 @@
             <span class="game-mode-description">
               Two players · Same device
             </span>
+
           </span>
 
           <span class="game-mode-arrow">
             →
           </span>
+
         </button>
 
 
@@ -244,11 +305,13 @@
           class="game-mode-button"
           type="button"
         >
+
           <span class="game-mode-number">
             03
           </span>
 
           <span class="game-mode-content">
+
             <span class="game-mode-title">
               Online Multiplayer
             </span>
@@ -256,11 +319,13 @@
             <span class="game-mode-description">
               Play with friends online
             </span>
+
           </span>
 
           <span class="game-mode-arrow">
             →
           </span>
+
         </button>
 
       </div>
@@ -297,9 +362,11 @@
       <!-- Turn status -->
 
       <section class="game-status">
+
         <span id="turn-status">
           Your turn
         </span>
+
       </section>
 
 
@@ -417,3 +484,4 @@
 </body>
 
 </html>
+
