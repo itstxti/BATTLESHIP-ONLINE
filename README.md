@@ -34,6 +34,7 @@
 * **Three AI levels** — Easy, Medium and Hard, each using a different search strategy.
 * **Match statistics** — Review your shots, hits, ships sunk, hit streaks, accuracy and duration after each match.
 * **Match history** — Review your 20 most recent matches.
+* **Persistent statistics** — Lifetime totals saved in your browser, split into Global, VS AI (Easy, Medium, Hard and an overview) and Online Multiplayer. Local Multiplayer is not counted.
 * **Audio feedback** — Sound effects and background music during gameplay.
 
 ## Tech Stack

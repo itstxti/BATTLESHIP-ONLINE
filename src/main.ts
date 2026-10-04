@@ -77,6 +77,10 @@ import {
 } from './ui/historyScreen';
 
 import {
+  renderStatsScreen
+} from './ui/statsScreen';
+
+import {
   confirmDialog,
   dismissConfirmDialog
 } from './ui/confirmDialog';
@@ -87,6 +91,12 @@ import {
   createMatchRecord,
   loadHistory
 } from './game/matchHistory';
+
+import {
+  clearPlayerStats,
+  loadPlayerStats,
+  recordMatchStats
+} from './game/playerStats';
 
 import {
   mountLobbyScreen
@@ -158,6 +168,11 @@ const modeLocalButton =
 const historyScreen =
   document.querySelector<HTMLElement>(
     '#history-screen'
+  );
+
+const statsToggleButton =
+  document.querySelector<HTMLButtonElement>(
+    '#stats-toggle'
   );
 
 const historyToggleButton =
@@ -1061,6 +1076,23 @@ function presentResults(
   if (!recordedMatches.has(state)) {
     recordedMatches.add(state);
 
+    // Persistent statistics: Solo and Online only. Local matches are skipped
+    // inside recordMatchStats (no stable player identity on a shared device).
+    recordMatchStats({
+      mode:
+        gameMode,
+
+      difficulty:
+        gameMode === 'ai'
+          ? aiDifficulty
+          : undefined,
+
+      outcome:
+        end.outcome,
+
+      stats
+    });
+
     addMatchRecord(
       createMatchRecord({
         mode:
@@ -1867,8 +1899,19 @@ function showModeMenu(): void {
 }
 
 
-function showHistoryScreen(): void {
-  // Opening the history from inside a match abandons it, so ask first.
+/*
+ * Statistics and match history share one screen element; this says which of
+ * the two it is currently showing (only meaningful while it is visible).
+ */
+type RecordsView = 'stats' | 'history';
+
+let recordsView: RecordsView = 'history';
+
+
+function showRecordsScreen(
+  view: RecordsView
+): void {
+  // Opening it from inside a match abandons it, so ask first.
   const matchInProgress =
     gameState.phase === 'battle' &&
     !gameState.gameOver &&
@@ -1890,33 +1933,46 @@ function showHistoryScreen(): void {
         confirmed &&
         state === gameState
       ) {
-        openHistoryScreen();
+        openRecordsScreen(view);
       }
     });
 
     return;
   }
 
-  openHistoryScreen();
+  openRecordsScreen(view);
 }
 
 
-function openHistoryScreen(): void {
+function openRecordsScreen(
+  view: RecordsView
+): void {
   // Shared clean-up (timers, results, music, other screens).
   showModeMenu();
 
   gameModeMenu!.hidden =
     true;
 
-  renderHistoryScreen(
-    historyScreen!,
-    loadHistory(),
-    () => {
-      clearHistory();
+  recordsView =
+    view;
 
-      showHistoryScreen();
-    }
-  );
+  if (view === 'stats') {
+    renderStatsScreen(
+      historyScreen!,
+      loadPlayerStats,
+      clearPlayerStats
+    );
+  } else {
+    renderHistoryScreen(
+      historyScreen!,
+      loadHistory(),
+      () => {
+        clearHistory();
+
+        openRecordsScreen('history');
+      }
+    );
+  }
 
   historyScreen!.hidden =
     false;
@@ -2779,19 +2835,31 @@ modeLocalButton?.addEventListener(
  * No stopPropagation here: the click sound comes from the global button
  * listener on `document`, which a stopped event would never reach.
  */
+/* A second click on the same button closes the screen again. */
+function toggleRecordsScreen(
+  view: RecordsView
+): void {
+  setSoundPanelOpen(false);
+
+  if (
+    !historyScreen!.hidden &&
+    recordsView === view
+  ) {
+    showModeMenu();
+    return;
+  }
+
+  showRecordsScreen(view);
+}
+
+statsToggleButton?.addEventListener(
+  'click',
+  () => toggleRecordsScreen('stats')
+);
+
 historyToggleButton?.addEventListener(
   'click',
-  () => {
-    setSoundPanelOpen(false);
-
-    // Second click closes it again.
-    if (!historyScreen!.hidden) {
-      showModeMenu();
-      return;
-    }
-
-    showHistoryScreen();
-  }
+  () => toggleRecordsScreen('history')
 );
 
 

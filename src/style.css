@@ -2279,3 +2279,212 @@ input {
     width: 100%;
   }
 }
+
+
+/* =========================================================
+   STATISTICS
+   ========================================================= */
+
+.stats-segments {
+  position: relative;
+
+  display: inline-flex;
+  align-self: flex-start;
+  gap: 4px;
+  max-width: 100%;
+
+  padding: 4px;
+
+  border: 1px solid rgba(127, 127, 127, 0.3);
+  border-radius: 999px;
+
+  background: rgba(127, 127, 127, 0.08);
+}
+
+/* An inline-flex display would override the hidden attribute. */
+.stats-segments[hidden] {
+  display: none;
+}
+
+/* One pill that slides under whichever option is selected. */
+.stats-indicator {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 0;
+
+  width: 0;
+
+  border-radius: 999px;
+
+  background: #20904b;
+
+  box-shadow: 0 2px 8px rgba(32, 144, 75, 0.35);
+
+  transition:
+    transform 280ms cubic-bezier(0.4, 0, 0.2, 1),
+    width 280ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stats-segment {
+  position: relative;
+  z-index: 1;
+
+  padding: 8px 18px;
+
+  border: 0;
+  border-radius: 999px;
+
+  background: transparent;
+  color: inherit;
+
+  font: inherit;
+  font-weight: 700;
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  opacity: 0.75;
+
+  transition:
+    color 200ms ease,
+    opacity 200ms ease,
+    background-color 200ms ease;
+}
+
+.stats-segment:hover {
+  background: rgba(127, 127, 127, 0.16);
+
+  opacity: 1;
+}
+
+/* The indicator provides the background; the text turns white over it. */
+.stats-segment[aria-selected='true'],
+.stats-segment[aria-selected='true']:hover {
+  background: transparent;
+  color: #fff;
+
+  opacity: 1;
+}
+
+.stats-segment:focus-visible {
+  outline: 3px solid rgba(32, 144, 75, 0.55);
+  outline-offset: 2px;
+}
+
+/* The level filter slides in from the section filter when VS AI is picked. */
+@keyframes stats-reveal {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.stats-segments--reveal {
+  animation: stats-reveal 260ms ease-out;
+}
+
+/* Section filter with the AI level filter to its right (wraps below on phones). */
+.stats-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.history-screen .history-note {
+  margin: 4px 0 16px;
+
+  font-size: 15px;
+
+  opacity: 0.8;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+
+  margin: 0;
+}
+
+.stats-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  padding: 14px 16px 16px;
+  overflow: hidden;
+
+  border: 1px solid rgba(127, 127, 127, 0.22);
+  border-radius: 12px;
+}
+
+.stats-card-label {
+  font-size: 13px;
+
+  opacity: 0.75;
+}
+
+.stats-card-value {
+  margin: 0;
+
+  font-size: 26px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Win rate and accuracy are drawn as a thin bar (--meter is 0-100). */
+.stats-card--meter::before,
+.stats-card--meter::after {
+  content: '';
+
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 4px;
+}
+
+.stats-card--meter::before {
+  right: 0;
+
+  background: rgba(127, 127, 127, 0.22);
+}
+
+.stats-card--meter::after {
+  width: calc(var(--meter, 0) * 1%);
+
+  background: #5b8def;
+
+  transition: width 450ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stats-indicator,
+  .stats-segment,
+  .stats-card--meter::after {
+    transition: none;
+  }
+
+  .stats-segments--reveal {
+    animation: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stats-segment {
+    padding: 8px 14px;
+  }
+}
