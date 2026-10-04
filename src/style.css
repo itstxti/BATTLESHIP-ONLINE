@@ -191,19 +191,6 @@ input {
   text-align: center;
 }
 
-.game-header h1 {
-  margin: 0;
-  font-size: 60px;
-  letter-spacing: 2px;
-  font-weight: 800;
-}
-
-.subtitle {
-  margin: 0 0 20px 0;
-  color: #718096;
-  font-size: 15px;
-}
-
 /* =========================================================
    GAME CONTAINER
    ========================================================= */
@@ -1598,14 +1585,6 @@ input {
 @media (max-width: 420px) {
   #app {
     padding: 24px 12px;
-  }
-
-  .game-header h1 {
-    font-size: 30px;
-  }
-
-  .subtitle {
-    font-size: 14px;
   }
 
   .game-topbar {
