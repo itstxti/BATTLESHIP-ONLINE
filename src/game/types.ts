@@ -19,3 +19,7 @@ export type FleetDefinition = {
   size: number;
 };
 
+export type AIDifficulty =
+  | 'easy'
+  | 'medium'
+  | 'hard';

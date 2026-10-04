@@ -4,6 +4,7 @@ import {
 } from './GameState';
 
 import type {
+  AIDifficulty,
   FleetDefinition,
   GameMode
 } from './types';
@@ -36,6 +37,8 @@ type GameControllerOptions = {
 
   getPlacementState: () => PlacementState;
 
+  getDifficulty?: () => AIDifficulty;
+
   setGameState: (
     gameState: GameState
   ) => void;
@@ -63,7 +66,10 @@ export function createGameController(
         options.fleet,
         gameMode,
         transport,
-        playerStarts
+        playerStarts,
+        null,
+        null,
+        options.getDifficulty?.()
       );
 
     gameState.playerTurn =

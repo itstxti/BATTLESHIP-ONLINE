@@ -21,6 +21,7 @@ import type {
 } from './matchStats';
 
 import type {
+  AIDifficulty,
   FleetDefinition,
   GameMode,
   GamePhase
@@ -44,7 +45,8 @@ export function createGameState(
   transport: GameTransport | null = null,
   playerStarts: boolean = true,
   playerBoard: Board | null = null,
-  enemyBoard: Board | null = null
+  enemyBoard: Board | null = null,
+  difficulty: AIDifficulty = 'hard'
 ): GameState {
   const isMultiplayer =
     gameMode === 'local' ||
@@ -68,7 +70,8 @@ export function createGameState(
 
   const opponent =
     new AI(
-      ownBoard.size
+      ownBoard.size,
+      difficulty
     );
 
   const multiplayerGame =

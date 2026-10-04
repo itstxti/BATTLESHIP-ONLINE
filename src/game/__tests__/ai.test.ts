@@ -3,13 +3,14 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AI } from '../AI';
 import { Board } from '../Board';
 import { Ship, type ShipName } from '../Ship';
+import type { AIDifficulty } from '../types';
 
-function playGame(): { shots: number; cells: Set<string> } {
+function playGame(difficulty?: AIDifficulty): { shots: number; cells: Set<string> } {
   const board = new Board();
 
   board.placeFleetRandomly();
 
-  const ai = new AI(board.size);
+  const ai = new AI(board.size, difficulty);
 
   const cells = new Set<string>();
 
@@ -60,6 +61,23 @@ function mulberry32(seed: number): () => number {
 
 /** Every seed replays the same game; the scenarios below hold for all. */
 const SEEDS = Array.from({ length: 100 }, (_, index) => index + 1);
+
+const LEVELS: AIDifficulty[] = ['easy', 'medium', 'hard'];
+
+/** Every level shares the same target mode, so its scenarios run on all. */
+const LEVEL_SEEDS = LEVELS.flatMap((level) =>
+  SEEDS.map((seed) => [level, seed] as const)
+);
+
+function averageShots(difficulty: AIDifficulty, games: number): number {
+  let total = 0;
+
+  for (let game = 0; game < games; game++) {
+    total += playGame(difficulty).shots;
+  }
+
+  return total / games;
+}
 
 /**
  * The AI only knows what its own shots revealed, so a scenario cannot be
@@ -151,19 +169,19 @@ describe('AI', () => {
   });
 
   it('follows a line after two hits', () => {
-    for (const seed of SEEDS) {
+    for (const [difficulty, seed] of LEVEL_SEEDS) {
       vi.spyOn(Math, 'random').mockImplementation(mulberry32(seed));
 
       // The AI hits twice (a ship it has not sunk), then fires a third time.
       const { board, fired } = scriptedBoard(['Carrier', 'Carrier', null]);
-      const ai = new AI(board.size);
+      const ai = new AI(board.size, difficulty);
 
       ai.shoot(board);
       ai.shoot(board);
       ai.shoot(board);
 
       const [first, second, third] = fired;
-      const note = `seed ${seed}`;
+      const note = `${difficulty}, seed ${seed}`;
 
       // After one hit it probes right next to it...
       expect(distance(first, second), note).toBe(1);
@@ -195,7 +213,7 @@ describe('AI', () => {
     // hit below, so going back to hunting could not land next to it by luck.
     const warmUp = Array<null>(8).fill(null);
 
-    for (const seed of SEEDS) {
+    for (const [difficulty, seed] of LEVEL_SEEDS) {
       vi.spyOn(Math, 'random').mockImplementation(mulberry32(seed));
 
       // The first hit is on the Cruiser and stays open while the next two
@@ -208,7 +226,7 @@ describe('AI', () => {
         null
       ];
       const { board, fired } = scriptedBoard(script);
-      const ai = new AI(board.size);
+      const ai = new AI(board.size, difficulty);
 
       for (let shot = 0; shot < script.length; shot++) {
         ai.shoot(board);
@@ -217,10 +235,98 @@ describe('AI', () => {
       const openHit = fired[warmUp.length];
       const nextShot = fired[script.length - 1];
 
+      // A random warm-up can already have fired at every neighbour of the
+      // open hit (e.g. in a corner); then there is nothing left to probe.
+      const earlier = fired.slice(0, script.length - 1);
+      const hasFreeNeighbour = [
+        { row: openHit.row - 1, column: openHit.column },
+        { row: openHit.row + 1, column: openHit.column },
+        { row: openHit.row, column: openHit.column - 1 },
+        { row: openHit.row, column: openHit.column + 1 }
+      ].some(
+        (near) =>
+          near.row >= 0 &&
+          near.row < 10 &&
+          near.column >= 0 &&
+          near.column < 10 &&
+          !earlier.some((cell) => cell.row === near.row && cell.column === near.column)
+      );
+
+      if (!hasFreeNeighbour) {
+        vi.restoreAllMocks();
+
+        continue;
+      }
+
       // Sinking the Destroyer forgets only its own hits: the Cruiser's open
       // hit still drives the next shot to a cell right next to it, instead
       // of going back to hunting.
-      expect(distance(nextShot, openHit), `seed ${seed}`).toBe(1);
+      expect(distance(nextShot, openHit), `${difficulty}, seed ${seed}`).toBe(1);
+
+      vi.restoreAllMocks();
+    }
+  });
+
+  it.each(LEVELS)('%s never fires twice and always finishes the game', (level) => {
+    for (let game = 0; game < 30; game++) {
+      const { shots, cells } = playGame(level);
+
+      expect(shots).toBeLessThanOrEqual(100);
+      expect(cells.size).toBe(shots);
+    }
+  });
+
+  it('plays on the hardest level by default', () => {
+    expect(averageShots('hard', 200)).toBeLessThan(58);
+  });
+
+  it('gets stronger with every level', () => {
+    const games = 300;
+
+    const easy = averageShots('easy', games);
+    const medium = averageShots('medium', games);
+    const hard = averageShots('hard', games);
+
+    // Roughly 60 / 52 / 45 shots; the margins leave plenty of room for luck.
+    expect(easy).toBeGreaterThan(medium + 3);
+    expect(medium).toBeGreaterThan(hard + 3);
+  });
+
+  it('medium hunts on a single colour of the checkerboard', () => {
+    for (const seed of SEEDS) {
+      vi.spyOn(Math, 'random').mockImplementation(mulberry32(seed));
+
+      const script = Array<null>(40).fill(null);
+      const { board, fired } = scriptedBoard(script);
+      const ai = new AI(board.size, 'medium');
+
+      for (let shot = 0; shot < script.length; shot++) {
+        ai.shoot(board);
+      }
+
+      const colours = new Set(fired.map((cell) => (cell.row + cell.column) % 2));
+
+      expect(colours.size, `seed ${seed}`).toBe(1);
+
+      vi.restoreAllMocks();
+    }
+  });
+
+  it('hard opens in the open water, away from the corners', () => {
+    for (const seed of SEEDS) {
+      vi.spyOn(Math, 'random').mockImplementation(mulberry32(seed));
+
+      const { board, fired } = scriptedBoard([null]);
+
+      new AI(board.size, 'hard').shoot(board);
+
+      const [first] = fired;
+
+      // The heat map peaks in the centre of the board.
+      expect(first.row, `seed ${seed}`).toBeGreaterThanOrEqual(3);
+      expect(first.row, `seed ${seed}`).toBeLessThanOrEqual(6);
+      expect(first.column, `seed ${seed}`).toBeGreaterThanOrEqual(3);
+      expect(first.column, `seed ${seed}`).toBeLessThanOrEqual(6);
 
       vi.restoreAllMocks();
     }

@@ -115,6 +115,7 @@ describe('abandoned Solo matches do not leave timers running', () => {
     vi.useFakeTimers();
 
     click('#mode-ai');
+    click('#difficulty-hard');
     await placeFleet();
     click('#new-game'); // Start Battle
 

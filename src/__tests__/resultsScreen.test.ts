@@ -173,6 +173,7 @@ describe('results screen through the real UI', () => {
 
       clock = 1_000;
       click('#mode-ai');
+      click('#difficulty-hard');
       await placeFleet();
       click('#new-game'); // Start Battle: the match clock starts here
 
@@ -301,18 +302,26 @@ describe('results screen through the real UI', () => {
       vi.useRealTimers();
     });
 
-    it('Back leads to the mode menu and nothing reappears later', async () => {
+    it('Back leads to the AI level picker and nothing reappears later', async () => {
+      click('#back-to-menu');
+
+      expect(visible('#difficulty-screen')).toBe(true);
+      expect(visible('#game-mode-menu')).toBe(false);
+      expect(visible('#results-screen')).toBe(false);
+      expect(visible('#game-screen')).toBe(false);
+
+      // One more step back reaches the game mode selection.
       click('#back-to-menu');
 
       expect(visible('#game-mode-menu')).toBe(true);
-      expect(visible('#results-screen')).toBe(false);
-      expect(visible('#game-screen')).toBe(false);
+      expect(visible('#difficulty-screen')).toBe(false);
     });
 
     it('does not pop up over the menu if the player leaves during the delay', async () => {
       vi.useFakeTimers();
 
       click('#mode-ai');
+      click('#difficulty-hard');
       await placeFleet();
       click('#new-game');
       await sinkEnemyFleet();
@@ -320,12 +329,12 @@ describe('results screen through the real UI', () => {
       expect(status()).toBe('You win!');
 
       click('#back-to-menu'); // leaves before the delay elapses
-      expect(visible('#game-mode-menu')).toBe(true);
+      expect(visible('#difficulty-screen')).toBe(true);
 
       vi.advanceTimersByTime(RESULTS_DELAY_MS * 2);
 
       expect(visible('#results-screen')).toBe(false);
-      expect(visible('#game-mode-menu')).toBe(true);
+      expect(visible('#difficulty-screen')).toBe(true);
       expect(endSounds()).toEqual([]); // no jingle over the menu
 
       vi.useRealTimers();
@@ -335,6 +344,7 @@ describe('results screen through the real UI', () => {
       vi.useFakeTimers();
 
       click('#mode-ai');
+      click('#difficulty-hard');
       await placeFleet();
       click('#new-game');
       await sinkEnemyFleet();

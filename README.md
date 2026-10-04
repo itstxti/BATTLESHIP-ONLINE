@@ -31,6 +31,7 @@
 ## Features
 
 * **Three game modes** — Solo, Local Multiplayer and Online Multiplayer with room-based matchmaking.
+* **Three AI levels** — in Solo you choose Easy (random search), Medium (checkerboard search) or Hard (probability heat map). All levels finish a ship methodically once they hit it.
 * **Hit streaks** — Landing a hit lets you continue your turn.
 * **Match statistics** — Track shots, hits, accuracy, ships sunk and match duration.
 * **Match results** — Review your performance when the match ends.

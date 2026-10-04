@@ -85,6 +85,7 @@ import type {
 } from './game/Ship';
 
 import type {
+  AIDifficulty,
   GameMode
 } from './game/types';
 
@@ -116,6 +117,11 @@ const gameScreen =
 const passDeviceScreen =
   document.querySelector<HTMLElement>(
     '#pass-device-screen'
+  );
+
+const difficultyScreen =
+  document.querySelector<HTMLElement>(
+    '#difficulty-screen'
   );
 
 const resultsScreen =
@@ -235,6 +241,9 @@ const soundIcon =
 
 
 let gameMode: GameMode = 'ai';
+
+/* Level of the AI in Solo; kept so "New Game" replays at the same level. */
+let aiDifficulty: AIDifficulty = 'hard';
 
 let gameState: GameState =
   createGameState(
@@ -407,14 +416,21 @@ function toggleSoundPanel(): void {
 function handleBackToMenu(): void {
   setSoundPanelOpen(false);
 
-  // From the results screen, go back to game mode selection.
+  // From the results screen, go back one step: the AI level picker in
+  // Solo, game mode selection otherwise.
   if (!resultsScreen!.hidden) {
-    showModeMenu();
+    leaveMatch();
     return;
   }
 
-  // If we are in the game, go back to game mode selection.
+  // Same from inside the game.
   if (!gameScreen!.hidden) {
+    leaveMatch();
+    return;
+  }
+
+  // From the AI level picker, go back to game mode selection.
+  if (!difficultyScreen!.hidden) {
     showModeMenu();
     return;
   }
@@ -432,6 +448,18 @@ function handleBackToMenu(): void {
     showModeMenu();
   }
 
+}
+
+function leaveMatch(): void {
+  const wasSolo =
+    gameMode === 'ai';
+
+  // Shared clean-up: timers, results, music and screens.
+  showModeMenu();
+
+  if (wasSolo) {
+    showDifficultyMenu();
+  }
 }
 
 function handleBackToEntry(): void {
@@ -454,6 +482,9 @@ function handleBackToEntry(): void {
     true;
 
   passDeviceScreen!.hidden =
+    true;
+
+  difficultyScreen!.hidden =
     true;
 
   onlineScreen!.hidden =
@@ -1748,11 +1779,38 @@ function showModeMenu(): void {
   passDeviceScreen!.hidden =
     true;
 
+  difficultyScreen!.hidden =
+    true;
+
   gameScreen!.hidden =
     true;
 
   gameModeMenu!.hidden =
     false;
+}
+
+
+function showDifficultyMenu(): void {
+  gameModeMenu!.hidden =
+    true;
+
+  difficultyScreen!.hidden =
+    false;
+}
+
+
+function startAIGame(
+  difficulty: AIDifficulty
+): void {
+  aiDifficulty =
+    difficulty;
+
+  difficultyScreen!.hidden =
+    true;
+
+  startSelectedMode(
+    'ai'
+  );
 }
 
 
@@ -2284,6 +2342,9 @@ function startSelectedMode(
 ): void {
   hideResultsScreen();
 
+  difficultyScreen!.hidden =
+    true;
+
   if (
     selectedMode ===
     'online'
@@ -2353,6 +2414,9 @@ const gameController =
 
     getPlacementState:
       () => placementState,
+
+    getDifficulty:
+      () => aiDifficulty,
 
     setGameState:
       (newGameState) => {
@@ -2534,10 +2598,24 @@ backToMenuButton?.addEventListener(
 
 modeAIButton?.addEventListener(
   'click',
-  () => {
-    startSelectedMode(
-      'ai'
-    );
+  showDifficultyMenu
+);
+
+
+(['easy', 'medium', 'hard'] as const).forEach(
+  (level) => {
+    document
+      .querySelector<HTMLButtonElement>(
+        `#difficulty-${level}`
+      )
+      ?.addEventListener(
+        'click',
+        () => {
+          startAIGame(
+            level
+          );
+        }
+      );
   }
 );
 
