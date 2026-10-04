@@ -28,13 +28,13 @@
      ───────────────────
 </p>
 
-## Game Modes
+## Features
 
-| Mode                   | Description                                        |
-| ---------------------- | -------------------------------------------------- |
-| **Solo**               | Play against the AI                                |
-| **Local Multiplayer**  | Two players on the same device                     |
-| **Online Multiplayer** | Two players on different devices using a room code |
+* **Three game modes** — Solo, Local Multiplayer and Online Multiplayer with room-based matchmaking.
+* **Hit streaks** — Landing a hit lets you continue your turn.
+* **Match statistics** — Track shots, hits, accuracy, ships sunk and match duration.
+* **Match results** — Review your performance when the match ends.
+* **Audio feedback** — Sound effects and background music during gameplay.
 
 ## Tech Stack
 
