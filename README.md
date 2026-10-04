@@ -82,7 +82,7 @@ Open the game in two browser tabs, create a room in one and join it using the ge
 
 ### AI Levels
 
-All levels use the same targeting system. Once a ship is hit, the AI probes neighbouring cells and follows its orientation; the difference between levels is how they search for targets.
+All levels use the same targeting system. After a hit, the AI targets neighbouring cells; the difference between levels is how they search for targets.
 
 | Level      | Hunt strategy                                               |
 | ---------- | ----------------------------------------------------------- |
