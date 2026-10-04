@@ -77,6 +77,11 @@ import {
 } from './ui/historyScreen';
 
 import {
+  confirmDialog,
+  dismissConfirmDialog
+} from './ui/confirmDialog';
+
+import {
   addMatchRecord,
   clearHistory,
   createMatchRecord,
@@ -495,6 +500,8 @@ function leaveMatch(): void {
 
 function handleBackToEntry(): void {
   setSoundPanelOpen(false);
+
+  dismissConfirmDialog();
 
   hideResultsScreen();
 
@@ -1090,6 +1097,9 @@ function presentResults(
       // Dismissed, or a new match already replaced this one.
       return;
     }
+
+    // The match is over: a pending "forfeit?" question no longer applies.
+    dismissConfirmDialog();
 
     gameScreen!.hidden =
       true;
@@ -1815,6 +1825,8 @@ function startLocalGame(): void {
    ========================================================= */
 
 function showModeMenu(): void {
+  dismissConfirmDialog();
+
   hideResultsScreen();
 
   cancelBattleTimers(
@@ -1857,16 +1869,39 @@ function showModeMenu(): void {
 
 function showHistoryScreen(): void {
   // Opening the history from inside a match abandons it, so ask first.
-  if (
-    !gameScreen!.hidden &&
+  const matchInProgress =
     gameState.phase === 'battle' &&
-    !window.confirm(
-      'Leave the current match? Your progress will be lost.'
-    )
-  ) {
+    !gameState.gameOver &&
+    (
+      !gameScreen!.hidden ||
+      !passDeviceScreen!.hidden
+    );
+
+  if (matchInProgress) {
+    const state = gameState;
+
+    void confirmDialog({
+      title: 'Leave the current match?',
+      message: 'Your progress will be lost.',
+      confirmLabel: 'Leave match',
+      danger: true
+    }).then((confirmed) => {
+      if (
+        confirmed &&
+        state === gameState
+      ) {
+        openHistoryScreen();
+      }
+    });
+
     return;
   }
 
+  openHistoryScreen();
+}
+
+
+function openHistoryScreen(): void {
   // Shared clean-up (timers, results, music, other screens).
   showModeMenu();
 
@@ -2098,15 +2133,25 @@ function handleOnlineButton(): void {
     gameState.phase ===
     'battle'
   ) {
-    if (
-      window.confirm(
-        'Forfeit this game? Your opponent will win.'
-      )
-    ) {
-      gameState
-        .multiplayerGame
-        ?.forfeit();
-    }
+    // Pinned now: the match may end (e.g. a disconnect) while the dialog is open.
+    const state = gameState;
+
+    void confirmDialog({
+      title: 'Forfeit this game?',
+      message: 'Your opponent will win.',
+      confirmLabel: 'Forfeit',
+      danger: true
+    }).then((confirmed) => {
+      if (
+        confirmed &&
+        state === gameState &&
+        state.phase === 'battle'
+      ) {
+        state
+          .multiplayerGame
+          ?.forfeit();
+      }
+    });
 
     return;
   }
@@ -2553,8 +2598,10 @@ document.addEventListener(
     const target =
       event.target;
 
+    // Element, not HTMLElement: clicking the icon of a button targets its
+    // inner <svg>/<path>, which is an SVGElement and would get no sound.
     if (
-      target instanceof HTMLElement &&
+      target instanceof Element &&
       target.closest('button')
     ) {
       audio.playSfx(
@@ -2734,11 +2781,7 @@ modeLocalButton?.addEventListener(
  */
 historyToggleButton?.addEventListener(
   'click',
-  (event) => {
-    event.stopPropagation();
-    audio.playSfx(
-      'click'
-    );
+  () => {
     setSoundPanelOpen(false);
 
     // Second click closes it again.

@@ -544,14 +544,18 @@ describe('results screen through the real UI', () => {
     it('shows DEFEAT when the player forfeits, immediately', async () => {
       click('#back-to-menu');
 
-      vi.spyOn(window, 'confirm').mockReturnValue(true);
-
       await startOnlineBattle(true);
 
       cell('#enemy-board', 0, 0).click(); // one hit (keeps the turn)
       await flush();
 
       click('#new-game'); // "Forfeit" during battle
+      await flush();
+
+      // The in-page confirmation, not window.confirm.
+      expect(visible('#results-screen')).toBe(false);
+
+      click('#confirm-dialog-accept');
       await flush();
 
       // A forfeit has no explosion to wait for: no delay.

@@ -8,6 +8,8 @@ import {
 
 import { formatAccuracy, formatDuration } from '../game/matchStats';
 
+import { confirmDialog } from './confirmDialog';
+
 export const HISTORY_HEADLINE_ID = 'history-headline';
 
 export const HISTORY_CLEAR_ID = 'history-clear';
@@ -110,9 +112,16 @@ export function renderHistoryScreen(
   clear.type = 'button';
 
   clear.addEventListener('click', () => {
-    if (window.confirm('Delete your match history?')) {
-      onClear();
-    }
+    void confirmDialog({
+      title: 'Clear history?',
+      message: 'This deletes all of your saved matches.',
+      confirmLabel: 'Clear history',
+      danger: true
+    }).then((confirmed) => {
+      if (confirmed) {
+        onClear();
+      }
+    });
   });
 
   container.replaceChildren(header, list, clear);
