@@ -441,7 +441,12 @@ input {
 }
 
 .game-mode-header {
-  margin-bottom: 32px;
+    margin-top: 50px;
+    margin-bottom: 20px;
+}
+
+#online-screen {
+  margin-top: 45px;
 }
 
 .game-mode-eyebrow {
