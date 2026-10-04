@@ -844,7 +844,7 @@ function handlePlacementComplete(): void {
  * screen changes. Skipped when nothing visible just happened (forfeit,
  * disconnect).
  */
-const RESULTS_DELAY_MS = 1500;
+const RESULTS_DELAY_MS = 750;
 
 type MatchEnd = {
   outcome: MatchOutcome;
