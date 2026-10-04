@@ -179,7 +179,7 @@ export type StatNames = {
 };
 
 export const DEFAULT_STAT_NAMES: StatNames = {
-  player: 'You',
+  player: 'Player',
   opponent: 'Enemy'
 };
 
