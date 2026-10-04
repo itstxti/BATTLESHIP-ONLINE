@@ -1561,11 +1561,11 @@ input {
 
 /* Same colour code as the stat cards above. */
 .board-section--player .results-board-title {
-  color: #20904b;
+  color: #5b8def;
 }
 
 .board-section--opponent .results-board-title {
-  color: #991b1b;
+  color: #9b8afb;
 }
 
 .results-boards .board {
