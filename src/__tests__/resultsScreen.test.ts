@@ -28,7 +28,8 @@ vi.mock('../online/lobbyScreen', () => ({
   mountLobbyScreen: vi.fn(() => () => {})
 }));
 
-const RESULTS_DELAY_MS = 1500;
+// Mirrors RESULTS_DELAY_MS in src/main.ts (not exported): keep both in sync.
+const RESULTS_DELAY_MS = 750;
 
 const SHIP_SIZES = STANDARD_FLEET.map((ship) => ship.size);
 
@@ -65,7 +66,7 @@ async function placeFleet() {
 /** The rendered stat rows, e.g. ["17 shots", "17 hits", ...]. */
 const resultRows = () =>
   [...document.querySelectorAll('#results-screen .results-stat')].map(
-    (item) => item.textContent
+    (item) => (item.textContent ?? '').trim() // the duration row has no label
   );
 
 const headline = () => $('#results-screen .results-headline').textContent;
@@ -202,15 +203,15 @@ describe('results screen through the real UI', () => {
       expect(resultRows()).toEqual([
         '17 shots',
         '17 hits',
-        '100.0% accuracy',
         '5 ships sunk',
         '17 hits in a row',
+        '100.0% accuracy',
         '0 shots', // the AI never got a turn
         '0 hits',
-        '0.0% accuracy',
         '0 ships sunk',
         '0 hits in a row',
-        '02:43 duration'
+        '0.0% accuracy',
+        '02:43'
       ]);
 
       // Screen readers announce the outcome: focus lands on the headline
@@ -284,15 +285,15 @@ describe('results screen through the real UI', () => {
       expect(resultRows()).toEqual([
         '1 shot',
         '0 hits',
-        '0.0% accuracy',
         '0 ships sunk',
         '0 hits in a row',
+        '0.0% accuracy',
         '17 shots',
         '17 hits',
-        '100.0% accuracy',
         '5 ships sunk',
         '17 hits in a row', // the AI never missed
-        '02:05 duration'
+        '100.0% accuracy',
+        '02:05'
       ]);
 
       aiShot.mockRestore();
@@ -412,19 +413,19 @@ describe('results screen through the real UI', () => {
         [...document.querySelectorAll('#results-screen .results-group-title')].map(
           (title) => title.textContent
         )
-      ).toEqual(['Player 1', 'Player 2', 'Match']);
+      ).toEqual(['Player 1', 'Player 2', 'Match duration']);
       expect(resultRows()).toEqual([
         '18 shots', // 1 miss + 17 hits: only Player 1's own shots
         '17 hits',
-        '94.4% accuracy',
         '5 ships sunk',
         '17 hits in a row', // the early miss does not break the final run
+        '94.4% accuracy',
         '1 shot', // Player 2 fired once, and missed
         '0 hits',
-        '0.0% accuracy',
         '0 ships sunk',
         '0 hits in a row',
-        '01:01 duration'
+        '0.0% accuracy',
+        '01:01'
       ]);
 
       now.mockRestore();
@@ -515,15 +516,15 @@ describe('results screen through the real UI', () => {
       expect(resultRows()).toEqual([
         '17 shots',
         '17 hits',
-        '100.0% accuracy',
         '5 ships sunk',
         '17 hits in a row',
+        '100.0% accuracy',
         '0 shots',
         '0 hits',
-        '0.0% accuracy',
         '0 ships sunk',
         '0 hits in a row',
-        '01:30 duration'
+        '0.0% accuracy',
+        '01:30'
       ]);
 
       now.mockRestore();
@@ -552,8 +553,8 @@ describe('results screen through the real UI', () => {
       expect(resultRows().slice(0, 4)).toEqual([
         '1 shot',
         '1 hit',
-        '100.0% accuracy',
-        '0 ships sunk'
+        '0 ships sunk',
+        '1 hit in a row'
       ]);
     });
 
@@ -576,8 +577,8 @@ describe('results screen through the real UI', () => {
       expect(resultRows().slice(0, 4)).toEqual([
         '1 shot',
         '0 hits',
-        '0.0% accuracy',
-        '0 ships sunk'
+        '0 ships sunk',
+        '0 hits in a row'
       ]);
     });
 

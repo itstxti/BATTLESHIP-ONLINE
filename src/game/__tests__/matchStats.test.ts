@@ -291,8 +291,9 @@ describe('formatAccuracy', () => {
 });
 
 describe('describeStatGroups', () => {
+  // The match-duration row has an empty label, hence the trim.
   const sentence = (row: { value: string; label: string }) =>
-    `${row.value} ${row.label}`;
+    `${row.value} ${row.label}`.trim();
 
   it('groups the rows in display order', () => {
     const groups = describeStatGroups({
@@ -316,28 +317,28 @@ describe('describeStatGroups', () => {
     ]);
 
     expect(groups.map((group) => group.title)).toEqual([
-      'You',
+      'Player',
       'Enemy',
-      'Match'
+      'Match duration'
     ]);
 
     expect(groups[0].rows.map(sentence)).toEqual([
       '17 shots',
       '9 hits',
-      '52.9% accuracy',
       '4 ships sunk',
-      '6 hits in a row'
+      '6 hits in a row',
+      '52.9% accuracy'
     ]);
 
     expect(groups[1].rows.map(sentence)).toEqual([
       '12 shots',
       '3 hits',
-      '25.0% accuracy',
       '2 ships sunk',
-      '3 hits in a row'
+      '3 hits in a row',
+      '25.0% accuracy'
     ]);
 
-    expect(groups[2].rows.map(sentence)).toEqual(['02:43 duration']);
+    expect(groups[2].rows.map(sentence)).toEqual(['02:43']);
   });
 
   it('titles the cards with the given names (Local: Player 1 / Player 2)', () => {
@@ -361,7 +362,7 @@ describe('describeStatGroups', () => {
     expect(groups.map((group) => group.title)).toEqual([
       'Player 1',
       'Player 2',
-      'Match'
+      'Match duration'
     ]);
 
     // Both sides list exactly the same stats.
@@ -446,17 +447,17 @@ describe('describeStatGroups', () => {
     expect(groups[0].rows.map((row) => row.label)).toEqual([
       'shot',
       'hit',
-      'accuracy',
       'ship sunk',
-      'hit in a row'
+      'hit in a row',
+      'accuracy'
     ]);
 
     expect(groups[1].rows.map((row) => row.label)).toEqual([
       'shot',
       'hit',
-      'accuracy',
       'ship sunk',
-      'hit in a row'
+      'hit in a row',
+      'accuracy'
     ]);
   });
 });

@@ -78,7 +78,7 @@ describe('results screen', () => {
           document.getElementById(group.getAttribute('aria-labelledby')!)
             ?.textContent
       )
-    ).toEqual(['You', 'Enemy', 'Match']);
+    ).toEqual(['Player', 'Enemy', 'Match duration']);
 
     const meters = [
       ...container.querySelectorAll<HTMLElement>('.results-stat--meter')
@@ -89,21 +89,24 @@ describe('results screen', () => {
       ['50', '50']
     );
 
-    // The row still reads "<value> <label>" in the DOM.
+    // The row still reads "<value> <label>" in the DOM (trimmed: the
+    // match-duration row has an empty label).
     expect(
-      [...container.querySelectorAll('.results-stat')].map((row) => row.textContent)
+      [...container.querySelectorAll('.results-stat')].map((row) =>
+        row.textContent?.trim()
+      )
     ).toEqual([
       '2 shots',
       '1 hit',
-      '50.0% accuracy',
       '0 ships sunk',
       '1 hit in a row',
+      '50.0% accuracy',
       '2 shots',
       '1 hit',
-      '50.0% accuracy',
       '0 ships sunk',
       '1 hit in a row', // the opponent's one hit, then a miss
-      '00:01 duration'
+      '50.0% accuracy',
+      '00:01' // the duration row has no label: its group title says it
     ]);
   });
 
