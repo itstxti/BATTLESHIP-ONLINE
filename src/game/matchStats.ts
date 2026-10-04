@@ -175,17 +175,17 @@ export function describeStatGroups(
       title: names.player,
       rows: [
         {
+          value: formatAccuracy(stats.accuracy),
+          label: 'accuracy',
+          meter: clampPercent(stats.accuracy)
+        },
+        {
           value: String(stats.shots),
           label: plural(stats.shots, 'shot', 'shots')
         },
         {
           value: String(stats.hits),
           label: plural(stats.hits, 'hit', 'hits')
-        },
-        {
-          value: formatAccuracy(stats.accuracy),
-          label: 'accuracy',
-          meter: clampPercent(stats.accuracy)
         },
         {
           value: String(stats.shipsSunk),
