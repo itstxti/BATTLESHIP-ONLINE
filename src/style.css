@@ -1288,8 +1288,7 @@ input {
 }
 
 .results-group {
-  padding: 10px 22px 8px;
-
+  padding: 15px 20px 5px 20px;
   border: 1px solid rgba(127, 127, 127, 0.22);
   border-radius: 14px;
 }
