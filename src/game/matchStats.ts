@@ -269,6 +269,7 @@ export function describeStatGroups(
       rows: [
         {
           value: formatDuration(stats.durationMs),
+          label: ''
         }
       ]
     }
