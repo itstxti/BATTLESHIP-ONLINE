@@ -34,7 +34,7 @@ input {
   align-items: center;
   justify-content: center;
 
-  background: #0d0f12;
+  background: #f2f4f7;
 
   cursor: pointer;
 
@@ -75,7 +75,7 @@ input {
   font-weight: 600;
   letter-spacing: 0.25em;
 
-  color: #7d858f;
+  color: #535960;
 }
 
 
@@ -91,7 +91,7 @@ input {
   font-weight: 700;
   letter-spacing: 0.08em;
 
-  color: #f2f4f7;
+  color: #0d0f12;
 }
 
 
@@ -103,7 +103,7 @@ input {
   letter-spacing: 0.12em;
   text-transform: uppercase;
 
-  color: #7d858f;
+  color: #575c63;
 
   animation:
     entry-pulse 2s ease-in-out infinite;
@@ -116,7 +116,7 @@ input {
 
   margin-top: 24px;
 
-  background: #7d858f;
+  background: #0d0f12;
 
   transform-origin: center;
 
