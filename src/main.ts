@@ -394,6 +394,10 @@ function handleBackToMenu(): void {
     showModeMenu();
   }
 
+  if (!passDeviceScreen!.hidden) {
+    showModeMenu();
+  }
+
 }
 
 function handleBackToEntry(): void {
