@@ -29,7 +29,7 @@ The WebSocket relay has **zero external dependencies**.
 
 ## Installation
 
-Requires **Node.js 22 or newer**.
+Requires **Node.js 22.12 or newer**.
 
 Clone the repository:
 
