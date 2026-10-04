@@ -420,6 +420,10 @@ function enterGame(): void {
     return;
   }
 
+  audio.playSfx(
+    'click'
+  );
+
   audio.playMusic(
     'menu'
   );
