@@ -10,16 +10,6 @@ type Shot = {
   column: number;
 };
 
-type ShipSize = 2 | 3 | 4 | 5;
-
-const FLEET_SIZES: ShipSize[] = [
-  5,
-  4,
-  3,
-  3,
-  2
-];
-
 export class AI implements Opponent {
   private availableShots: Shot[] = [];
 
@@ -28,10 +18,6 @@ export class AI implements Opponent {
   private hits: Shot[] = [];
 
   private boardSize: number;
-
-  private remainingShipSizes: ShipSize[] = [
-    ...FLEET_SIZES
-  ];
 
   constructor(boardSize: number) {
     this.boardSize = boardSize;
@@ -61,27 +47,37 @@ export class AI implements Opponent {
   }
 
   shoot(board: Board): ShotResult {
-    const shot = this.getNextShot();
+    const shot =
+      this.getNextShot();
 
-    const result = board.shoot(
-      shot.row,
-      shot.column
-    );
-
-    if (result === 'already-shot') {
-      return this.shoot(board);
-    }
-
-    if (result === 'hit') {
-      const ship = board.getShipAt(
+    const result =
+      board.shoot(
         shot.row,
         shot.column
       );
 
-      this.hits.push(shot);
+    if (
+      result === 'already-shot'
+    ) {
+      return this.shoot(board);
+    }
 
-      if (ship?.isSunk()) {
-        this.removeSunkShip(ship);
+    if (
+      result === 'hit'
+    ) {
+      const ship =
+        board.getShipAt(
+          shot.row,
+          shot.column
+        );
+
+      this.hits.push(
+        shot
+      );
+
+      if (
+        ship?.isSunk()
+      ) {
         this.resetTargeting();
       } else {
         this.updateTargets();
@@ -96,249 +92,53 @@ export class AI implements Opponent {
   }
 
   private getNextShot(): Shot {
-    if (this.targetShots.length > 0) {
+    if (
+      this.targetShots.length > 0
+    ) {
       const shot =
         this.targetShots.shift()!;
 
-      this.removeAvailableShot(shot);
+      this.removeAvailableShot(
+        shot
+      );
 
       return shot;
     }
 
-    return this.getBestProbabilityShot();
-  }
-
-  /**
-   * Expert hunt mode.
-   *
-   * Every possible placement of every remaining ship is evaluated.
-   * A cell receives one point every time it belongs to a possible
-   * ship placement.
-   *
-   * The AI then fires at the cell with the highest probability.
-   */
-  private getBestProbabilityShot(): Shot {
-    const scores = new Map<string, number>();
-
-    for (const shipSize of this.remainingShipSizes) {
-      this.scoreHorizontalPlacements(
-        shipSize,
-        scores
+    const preferredShots =
+      this.availableShots.filter(
+        (shot) =>
+          (shot.row +
+            shot.column) %
+            2 ===
+          0
       );
-
-      this.scoreVerticalPlacements(
-        shipSize,
-        scores
-      );
-    }
-
-    const candidates = this.availableShots.filter(
-      (shot) =>
-        (scores.get(this.shotKey(shot)) ?? 0) > 0
-    );
 
     const pool =
-      candidates.length > 0
-        ? candidates
+      preferredShots.length > 0
+        ? preferredShots
         : this.availableShots;
 
-    let bestScore = -1;
-    let bestShots: Shot[] = [];
-
-    for (const shot of pool) {
-      const score =
-        scores.get(this.shotKey(shot)) ?? 0;
-
-      if (score > bestScore) {
-        bestScore = score;
-        bestShots = [shot];
-      } else if (score === bestScore) {
-        bestShots.push(shot);
-      }
-    }
+    const index =
+      Math.floor(
+        Math.random() *
+          pool.length
+      );
 
     const shot =
-      bestShots[
-        Math.floor(
-          Math.random() *
-            bestShots.length
-        )
-      ];
+      pool[index];
 
-    this.removeAvailableShot(shot);
+    this.removeAvailableShot(
+      shot
+    );
 
     return shot;
   }
 
-  private scoreHorizontalPlacements(
-    shipSize: number,
-    scores: Map<string, number>
-  ): void {
-    for (
-      let row = 0;
-      row < this.boardSize;
-      row++
-    ) {
-      for (
-        let column = 0;
-        column <=
-        this.boardSize - shipSize;
-        column++
-      ) {
-        const placement: Shot[] = [];
-
-        let valid = true;
-
-        for (
-          let offset = 0;
-          offset < shipSize;
-          offset++
-        ) {
-          const shot = {
-            row,
-            column:
-              column + offset
-          };
-
-          if (
-            !this.isAvailableOrHit(
-              shot
-            )
-          ) {
-            valid = false;
-            break;
-          }
-
-          placement.push(shot);
-        }
-
-        if (valid) {
-          this.scorePlacement(
-            placement,
-            scores
-          );
-        }
-      }
-    }
-  }
-
-  private scoreVerticalPlacements(
-    shipSize: number,
-    scores: Map<string, number>
-  ): void {
-    for (
-      let row = 0;
-      row <=
-      this.boardSize - shipSize;
-      row++
-    ) {
-      for (
-        let column = 0;
-        column < this.boardSize;
-        column++
-      ) {
-        const placement: Shot[] = [];
-
-        let valid = true;
-
-        for (
-          let offset = 0;
-          offset < shipSize;
-          offset++
-        ) {
-          const shot = {
-            row:
-              row + offset,
-            column
-          };
-
-          if (
-            !this.isAvailableOrHit(
-              shot
-            )
-          ) {
-            valid = false;
-            break;
-          }
-
-          placement.push(shot);
-        }
-
-        if (valid) {
-          this.scorePlacement(
-            placement,
-            scores
-          );
-        }
-      }
-    }
-  }
-
-  private scorePlacement(
-    placement: Shot[],
-    scores: Map<string, number>
-  ): void {
-    /**
-     * If we already have a hit that belongs
-     * to the current target, strongly prefer
-     * placements that contain it.
-     */
-    const containsKnownHit =
-      placement.some((shot) =>
-        this.isHit(shot)
-      );
-
-    const multiplier =
-      this.hits.length > 0
-        ? containsKnownHit
-          ? 8
-          : 1
-        : 1;
-
-    for (const shot of placement) {
-      const key =
-        this.shotKey(shot);
-
-      scores.set(
-        key,
-        (scores.get(key) ?? 0) +
-          multiplier
-      );
-    }
-  }
-
-  private isAvailableOrHit(
-    shot: Shot
-  ): boolean {
-    if (!this.isInsideBoard(shot)) {
-      return false;
-    }
-
-    if (this.isHit(shot)) {
-      return true;
-    }
-
-    return this.availableShots.some(
-      (availableShot) =>
-        availableShot.row ===
-          shot.row &&
-        availableShot.column ===
-          shot.column
-    );
-  }
-
-  private isHit(
-    shot: Shot
-  ): boolean {
-    return this.hits.some(
-      (hit) =>
-        hit.row === shot.row &&
-        hit.column === shot.column
-    );
-  }
-
   private updateTargets(): void {
-    if (this.hits.length === 1) {
+    if (
+      this.hits.length === 1
+    ) {
       this.addAdjacentTargets(
         this.hits[0]
       );
@@ -472,7 +272,9 @@ export class AI implements Opponent {
     for (
       const target of directions
     ) {
-      this.addTarget(target);
+      this.addTarget(
+        target
+      );
     }
   }
 
@@ -480,7 +282,9 @@ export class AI implements Opponent {
     target: Shot
   ): void {
     if (
-      !this.isInsideBoard(target)
+      !this.isInsideBoard(
+        target
+      )
     ) {
       return;
     }
@@ -507,7 +311,9 @@ export class AI implements Opponent {
             target.column
       );
 
-    if (alreadyTargeted) {
+    if (
+      alreadyTargeted
+    ) {
       return;
     }
 
@@ -536,48 +342,6 @@ export class AI implements Opponent {
     }
   }
 
-  private removeSunkShip(
-    ship: unknown
-  ): void {
-    /**
-     * Ship implementations commonly expose
-     * their size as `size` or `length`.
-     *
-     * If neither exists, the fleet remains
-     * unchanged and targeting still works.
-     */
-    const candidate =
-      ship as {
-        size?: number;
-        length?: number;
-      };
-
-    const size =
-      candidate.size ??
-      candidate.length;
-
-    if (
-      size !== 2 &&
-      size !== 3 &&
-      size !== 4 &&
-      size !== 5
-    ) {
-      return;
-    }
-
-    const index =
-      this.remainingShipSizes.indexOf(
-        size
-      );
-
-    if (index !== -1) {
-      this.remainingShipSizes.splice(
-        index,
-        1
-      );
-    }
-  }
-
   private resetTargeting(): void {
     this.targetShots = [];
 
@@ -596,10 +360,5 @@ export class AI implements Opponent {
         this.boardSize
     );
   }
-
-  private shotKey(
-    shot: Shot
-  ): string {
-    return `${shot.row}:${shot.column}`;
-  }
 }
+
