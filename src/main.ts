@@ -389,6 +389,11 @@ function handleBackToMenu(): void {
   if (!gameModeMenu!.hidden) {
     handleBackToEntry();
   }
+
+  if (!onlineScreen!.hidden) {
+    showModeMenu();
+  }
+
 }
 
 function handleBackToEntry(): void {
@@ -656,7 +661,8 @@ function renderPlayerFleet(): void {
     },
     pendingAnimation?.target === 'player'
       ? pendingAnimation.sunkShip
-      : undefined
+      : undefined,
+    true
   );
 }
 

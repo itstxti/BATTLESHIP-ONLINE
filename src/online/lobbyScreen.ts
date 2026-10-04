@@ -191,11 +191,6 @@ export function mountLobbyScreen(
 
     body.append(create, joinBox);
 
-    addBack(body, '← Back to menu', () => {
-      leave();
-      callbacks.onBack();
-    });
-
     input.focus();
   }
 

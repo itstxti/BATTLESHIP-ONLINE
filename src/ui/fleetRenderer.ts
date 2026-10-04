@@ -15,7 +15,8 @@ export function renderFleet(
   onSelectShip: (
     ship: FleetDefinition
   ) => void,
-  animatedShipName?: ShipName
+  animatedShipName?: ShipName,
+  nameFirst = false
 ): void {
   element.innerHTML = '';
 
@@ -114,13 +115,32 @@ export function renderFleet(
     nameElement.textContent =
       ship.name;
 
-    shipElement.appendChild(
-      visualElement
-    );
+    /*
+     * Fleet order.
+     *
+     * Player:
+     * name → visual
+     *
+     * Enemy:
+     * visual → name
+     */
+    if (nameFirst) {
+      shipElement.appendChild(
+        nameElement
+      );
 
-    shipElement.appendChild(
-      nameElement
-    );
+      shipElement.appendChild(
+        visualElement
+      );
+    } else {
+      shipElement.appendChild(
+        visualElement
+      );
+
+      shipElement.appendChild(
+        nameElement
+      );
+    }
 
     element.appendChild(
       shipElement
@@ -145,4 +165,3 @@ export function renderFleet(
     }
   }
 }
-

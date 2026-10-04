@@ -100,18 +100,20 @@ export function selectShip(
   );
 
   renderFleet(
-    playerFleetElement,
-    gameState.playerBoard,
-    gameState.fleet,
-    gameState.phase,
-    state.selectedShip,
-    (selectedShip) => {
-      selectShip(
-        selectedShip,
-        options
-      );
-    }
-  );
+  playerFleetElement,
+  gameState.playerBoard,
+  gameState.fleet,
+  gameState.phase,
+  state.selectedShip,
+  (selectedShip) => {
+    selectShip(
+      selectedShip,
+      options
+    );
+  },
+  undefined,
+  true
+);
 
   renderBoard(
     playerBoardElement,
@@ -231,18 +233,20 @@ export function selectPlacedShip(
   }
 
   renderFleet(
-    playerFleetElement,
-    gameState.playerBoard,
-    gameState.fleet,
-    gameState.phase,
-    state.selectedShip,
-    (selectedShip) => {
-      selectShip(
-        selectedShip,
-        options
-      );
-    }
-  );
+  playerFleetElement,
+  gameState.playerBoard,
+  gameState.fleet,
+  gameState.phase,
+  state.selectedShip,
+  (selectedShip) => {
+    selectShip(
+      selectedShip,
+      options
+    );
+  },
+  undefined,
+  true
+);
 
   renderBoard(
     playerBoardElement,
@@ -410,18 +414,20 @@ export function handlePlacement(
   );
 
   renderFleet(
-    playerFleetElement,
-    gameState.playerBoard,
-    gameState.fleet,
-    gameState.phase,
-    state.selectedShip,
-    (selectedShip) => {
-      selectShip(
-        selectedShip,
-        options
-      );
-    }
-  );
+  playerFleetElement,
+  gameState.playerBoard,
+  gameState.fleet,
+  gameState.phase,
+  state.selectedShip,
+  (selectedShip) => {
+    selectShip(
+      selectedShip,
+      options
+    );
+  },
+  undefined,
+  true
+);
 
   if (
     gameState.playerBoard
@@ -520,18 +526,20 @@ export function restoreMovingShip(
   );
 
   renderFleet(
-    playerFleetElement,
-    gameState.playerBoard,
-    gameState.fleet,
-    gameState.phase,
-    state.selectedShip,
-    (selectedShip) => {
-      selectShip(
-        selectedShip,
-        options
-      );
-    }
-  );
+  playerFleetElement,
+  gameState.playerBoard,
+  gameState.fleet,
+  gameState.phase,
+  state.selectedShip,
+  (selectedShip) => {
+    selectShip(
+      selectedShip,
+      options
+    );
+  },
+  undefined,
+  true
+);
 }
 
 
@@ -684,18 +692,20 @@ export function resetFleet(
   );
 
   renderFleet(
-    playerFleetElement,
-    gameState.playerBoard,
-    gameState.fleet,
-    gameState.phase,
-    state.selectedShip,
-    (selectedShip) => {
-      selectShip(
-        selectedShip,
-        options
-      );
-    }
-  );
+  playerFleetElement,
+  gameState.playerBoard,
+  gameState.fleet,
+  gameState.phase,
+  state.selectedShip,
+  (selectedShip) => {
+    selectShip(
+      selectedShip,
+      options
+    );
+  },
+  undefined,
+  true
+);
 }
 
 
@@ -785,7 +795,9 @@ export function cancelPlacement(
         selectedShip,
         options
       );
-    }
-  );
+      },
+  undefined,
+  true
+);
 }
 
