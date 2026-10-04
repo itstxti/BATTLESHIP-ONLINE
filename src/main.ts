@@ -379,9 +379,37 @@ function toggleSoundPanel(): void {
 function handleBackToMenu(): void {
   setSoundPanelOpen(false);
 
-  showModeMenu();
+  // If we are in the game, go back to game mode selection.
+  if (!gameScreen!.hidden) {
+    showModeMenu();
+    return;
+  }
+
+  // If we are in the game mode menu, return to entry screen.
+  if (!gameModeMenu!.hidden) {
+    handleBackToEntry();
+  }
 }
 
+function handleBackToEntry(): void {
+  setSoundPanelOpen(false);
+
+  entryScreen?.classList.remove(
+    'hidden'
+  );
+
+  gameModeMenu!.hidden =
+    true;
+
+  gameScreen!.hidden =
+    true;
+
+  passDeviceScreen!.hidden =
+    true;
+
+  onlineScreen!.hidden =
+    true;
+}
 
 /* =========================================================
    ENTRY SCREEN
@@ -392,10 +420,6 @@ function enterGame(): void {
     return;
   }
 
-  /*
-   * This pointer interaction is a user gesture.
-   * The browser therefore allows audio playback.
-   */
   audio.playMusic(
     'menu'
   );
@@ -404,6 +428,11 @@ function enterGame(): void {
     'hidden'
   );
 }
+
+entryScreen?.addEventListener(
+  'pointerdown',
+  enterGame
+);
 
 
 entryScreen?.addEventListener(
