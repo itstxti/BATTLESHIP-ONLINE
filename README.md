@@ -83,9 +83,15 @@ Create a room in one tab and join it using the generated room code in the other.
 ## Screenshots
 
 <p align="center">
-  <img width="49%" alt="Solo game" src="https://github.com/user-attachments/assets/9780d272-bdf4-4aa9-99f0-4f30a8e75571" />
-  <img width="49%" alt="Local multiplayer" src="https://github.com/user-attachments/assets/c10c32ff-4590-4af5-a035-53bb4f16a058" />
-  <img width="50%" alt="Online multiplayer" src="https://github.com/user-attachments/assets/e27a7d7c-ddae-4987-97f6-be35adf0fc91" />
+  <img width="49%" alt="image" src="https://github.com/user-attachments/assets/fc5d4a16-50b0-453e-abf8-68f85b80240b" />
+  <img width="49%" alt="image" src="https://github.com/user-attachments/assets/79ec80cd-b265-44c7-88e0-6d365e9b5271" />
+
+</p>
+
+<p align="center">
+  <img width="49%" alt="image" src="https://github.com/user-attachments/assets/061bbed3-b10c-48ee-9f0b-6228869c5d4b" />
+  <img width="49%" alt="image" src="https://github.com/user-attachments/assets/87f96606-0fea-4def-8ac6-1ac8ca9cf054" />
+
 </p>
 
 ## Development
