@@ -1,39 +1,56 @@
 # Battleship Online
 
-A browser-based version of the classic Battleship game featuring AI, local multiplayer, and online multiplayer.
+A browser-based implementation of the classic **Battleship** game, built with TypeScript and Vite.
+
+Play against the AI, challenge another player on the same device, or play online using a room code.
 
 ## Game Modes
 
-| Mode               | Description                                                     |
-| ------------------ | --------------------------------------------------------------- |
-| Solo               | Play against the AI                                             |
-| Local Multiplayer  | Two players on the same device                                  |
-| Online Multiplayer | Two players on different devices, connected through a room code |
+| Mode                   | Description                                        |
+| ---------------------- | -------------------------------------------------- |
+| **Solo**               | Play against the AI                                |
+| **Local Multiplayer**  | Two players on the same device                     |
+| **Online Multiplayer** | Two players on different devices using a room code |
 
 ## Tech Stack
 
 * TypeScript
 * Vite
-* Vitest and jsdom
-* Node.js WebSocket relay (zero dependencies)
-* Vercel for the frontend
-* Render for the WebSocket relay
+* Vitest
+* jsdom
+* Node.js WebSocket relay
+* Vercel
+* Render
+
+The WebSocket relay has **zero external dependencies**.
 
 > [!WARNING]
 > Online multiplayer uses Render's free plan. The relay may sleep after periods of inactivity, so the first connection can take up to a minute while the server wakes up.
 
 ## Installation
 
-Requires Node.js 22 or newer.
+Requires **Node.js 22 or newer**.
+
+Clone the repository:
 
 ```bash
 git clone https://github.com/itstxti/battleship-online.git
 cd battleship-online
+```
+
+Install the dependencies:
+
+```bash
 npm install
+```
+
+Start the development server:
+
+```bash
 npm run dev
 ```
 
-### Online Multiplayer
+## Online Multiplayer
 
 To use online multiplayer locally, start the WebSocket relay in a second terminal:
 
@@ -41,14 +58,17 @@ To use online multiplayer locally, start the WebSocket relay in a second termina
 npm run server
 ```
 
-Then open the game in two browser tabs. Create a room in one tab and join it using the room code in the other.
+Then open the game in two browser tabs.
+
+Create a room in one tab and join it using the generated room code in the other.
 
 ## How to Play
 
-1. Place your five ships on your board.
-2. Press the **Ready** button to lock your fleet.
-3. Take turns firing at the enemy board. A successful hit gives you another shot.
-4. Sink all enemy ships to win.
+1. Place your five ships on the board.
+2. Press **Ready** to lock your fleet.
+3. Take turns firing at the enemy board.
+4. A successful hit gives you another shot.
+5. Sink all enemy ships to win.
 
 ### Controls
 
@@ -68,16 +88,32 @@ Then open the game in two browser tabs. Create a room in one tab and join it usi
   <img width="50%" alt="Online multiplayer" src="https://github.com/user-attachments/assets/e27a7d7c-ddae-4987-97f6-be35adf0fc91" />
 </p>
 
+## Development
+
+The project includes automated tests using **Vitest** and **jsdom**.
+
+Run the test suite with:
+
+```bash
+npm test
+```
+
+For a production build:
+
+```bash
+npm run build
+```
+
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
 
 ### Audio Attribution
 
-The following audio asset is used under the Creative Commons Attribution 4.0 International License (CC BY 4.0):
+The following audio asset is used under the **Creative Commons Attribution 4.0 International License (CC BY 4.0)**:
 
 **"Melancholic Synth Ambient Loop - Solitude"** by **SiriusS19YT**
+
 https://freesound.org/s/870146/
 
 License: **CC BY 4.0**
-
