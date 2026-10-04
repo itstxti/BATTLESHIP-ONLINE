@@ -1,8 +1,11 @@
 import { formatAccuracy } from '../game/matchStats';
 
 import {
+<<<<<<< HEAD
   deriveStats,
   emptyBaseStats,
+=======
+>>>>>>> e4a62464389bb8d59e78ab65548a65d76bb00ee9
   getScopeStats,
   type DerivedStats,
   type PlayerStats,
@@ -19,9 +22,12 @@ export const STATS_RESET_ID = 'stats-reset';
 /** How long the numbers take to count up or down. */
 const COUNT_MS = 450;
 
+<<<<<<< HEAD
 /** Delay between one card and the next when the screen opens. */
 const STAGGER_MS = 55;
 
+=======
+>>>>>>> e4a62464389bb8d59e78ab65548a65d76bb00ee9
 type Section = StatsScope['section'];
 
 type AIView = AIDifficulty | 'all';
@@ -139,12 +145,16 @@ function createCard(card: StatCard): LiveCard {
   return { item, value, shown: card.amount, frame: 0 };
 }
 
+<<<<<<< HEAD
 function updateCard(
   live: LiveCard,
   card: StatCard,
   /** Waits before counting, so cards can start one after another. */
   delayMs = 0
 ): void {
+=======
+function updateCard(live: LiveCard, card: StatCard): void {
+>>>>>>> e4a62464389bb8d59e78ab65548a65d76bb00ee9
   const format = (amount: number): string =>
     card.percent
       ? formatAccuracy(amount)
@@ -173,10 +183,14 @@ function updateCard(
   const start = performance.now();
 
   const step = (time: number): void => {
+<<<<<<< HEAD
     const progress = Math.max(
       0,
       Math.min(1, (time - start - delayMs) / COUNT_MS)
     );
+=======
+    const progress = Math.min(1, (time - start) / COUNT_MS);
+>>>>>>> e4a62464389bb8d59e78ab65548a65d76bb00ee9
 
     const eased = 1 - (1 - progress) ** 3;
 
@@ -371,6 +385,7 @@ export function renderStatsScreen(
 
   const grid = element('dl', 'stats-grid');
 
+<<<<<<< HEAD
   // When the screen opens the cards fade in one after another while their
   // numbers count up from zero; without animation they just show the values.
   const opening = canAnimate();
@@ -389,12 +404,23 @@ export function renderStatsScreen(
 
   /** Writes the current scope's numbers into the existing cards. */
   const update = (staggered = false): void => {
+=======
+  const cards = describeStatCards(
+    getScopeStats(loadStats(), currentScope())
+  ).map(createCard);
+
+  grid.append(...cards.map((card) => card.item));
+
+  /** Writes the current scope's numbers into the existing cards. */
+  const update = (): void => {
+>>>>>>> e4a62464389bb8d59e78ab65548a65d76bb00ee9
     levels.element.hidden = section !== 'ai';
 
     note.textContent = SECTION_NOTES[section];
 
     describeStatCards(
       getScopeStats(loadStats(), currentScope())
+<<<<<<< HEAD
     ).forEach((card, index) =>
       updateCard(
         cards[index],
@@ -402,6 +428,9 @@ export function renderStatsScreen(
         staggered ? index * STAGGER_MS : 0
       )
     );
+=======
+    ).forEach((card, index) => updateCard(cards[index], card));
+>>>>>>> e4a62464389bb8d59e78ab65548a65d76bb00ee9
   };
 
   const sections = createSegments<Section>(
@@ -461,7 +490,11 @@ export function renderStatsScreen(
 
   container.replaceChildren(header, filters, note, grid, reset);
 
+<<<<<<< HEAD
   update(opening);
+=======
+  update();
+>>>>>>> e4a62464389bb8d59e78ab65548a65d76bb00ee9
 
   // The first measurement can happen before the container is in the page.
   window.requestAnimationFrame?.(() => {
