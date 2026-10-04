@@ -1,70 +1,147 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <!-- iOS App Background Gradient -->
-    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#0A84FF" />
-      <stop offset="100%" stop-color="#004FB0" />
+    <!-- Background -->
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0A84FF"/>
     </linearGradient>
 
-    <!-- Subtle Material Gradient for the Ship -->
-    <linearGradient id="shipMaterial" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#FFFFFF" />
-      <stop offset="100%" stop-color="#E5E7EB" />
+    <!-- Ship -->
+    <linearGradient id="ship" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#FFFFFF"/>
     </linearGradient>
 
-    <!-- iOS Drop Shadow for the main glyph -->
-    <filter id="appleShadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#001D4A" flood-opacity="0.4" />
+    <!-- Soft shadow -->
+    <filter id="shadow"
+            x="-30%"
+            y="-20%"
+            width="160%"
+            height="160%">
+      <feDropShadow
+        dx="0"
+        dy="12"
+        stdDeviation="14"
+        flood-color="#001D4A"
+        flood-opacity="0.45"/>
     </filter>
 
-    <!-- Grid Pattern -->
-    <pattern id="bgGrid" width="64" height="64" patternUnits="userSpaceOnUse">
-      <line x1="64" y1="0" x2="64" y2="64" stroke="#FFFFFF" stroke-opacity="0.1" stroke-width="2" />
-      <line x1="0" y1="64" x2="64" y2="64" stroke="#FFFFFF" stroke-opacity="0.1" stroke-width="2" />
+    <!-- Subtle grid -->
+    <pattern id="grid"
+             width="64"
+             height="64"
+             patternUnits="userSpaceOnUse">
+      <path
+        d="M64 0H0V64"
+        fill="none"
+        stroke="#FFFFFF"
+        stroke-width="2"
+        stroke-opacity="0.10"/>
     </pattern>
   </defs>
 
-  <!-- iOS App Icon Squircle Background -->
-  <rect width="512" height="512" rx="115" fill="url(#bgGradient)" />
-  
-  <!-- Grid overlay -->
-  <rect width="512" height="512" rx="115" fill="url(#bgGrid)" />
+  <!-- App icon background -->
+  <rect
+    width="512"
+    height="512"
+    rx="112"
+    fill="url(#bg)"/>
 
-  <!-- Ship Silhouette (Top-Down view) -->
-  <g filter="url(#appleShadow)">
-    <!-- Main Hull -->
-    <path d="M 256,70 
-             C 280,70 295,120 295,160 
-             L 295,380 
-             C 295,430 280,442 256,442 
-             C 232,442 217,430 217,380 
-             L 217,160 
-             C 217,120 232,70 256,70 Z" 
-          fill="url(#shipMaterial)" />
+  <!-- Battleship grid -->
+  <rect
+    width="512"
+    height="512"
+    rx="112"
+    fill="url(#grid)"/>
 
-    <!-- Minimalist Deck Lines (Negative Space) -->
-    <rect x="248" y="140" width="16" height="40" rx="8" fill="#001D4A" opacity="0.15" />
-    <rect x="254" y="110" width="4" height="35" rx="2" fill="#001D4A" opacity="0.15" /> <!-- Front Barrel -->
+  <!-- Ship -->
+  <g filter="url(#shadow)">
 
-    <rect x="236" y="210" width="40" height="92" rx="12" fill="#001D4A" opacity="0.15" />
-    <rect x="246" y="230" width="20" height="52" rx="10" fill="#001D4A" opacity="0.25" />
+    <!-- Main hull -->
+    <path
+      d="
+        M256 64
+        C282 64 298 112 298 160
+        L298 364
+        C298 417 283 444 256 444
+        C229 444 214 417 214 364
+        L214 160
+        C214 112 230 64 256 64
+        Z"
+      fill="url(#ship)"/>
 
-    <rect x="248" y="332" width="16" height="40" rx="8" fill="#001D4A" opacity="0.15" />
-    <rect x="254" y="367" width="4" height="35" rx="2" fill="#001D4A" opacity="0.15" /> <!-- Rear Barrel -->
+    <!-- Bridge -->
+    <rect
+      x="226"
+      y="176"
+      width="60"
+      height="72"
+      rx="14"
+      fill="#C7CED7"/>
+
+    <!-- Bridge window -->
+    <rect
+      x="238"
+      y="190"
+      width="36"
+      height="30"
+      rx="8"
+      fill="#64748B"/>
+
+    <!-- Deck detail -->
+    <rect
+      x="240"
+      y="270"
+      width="32"
+      height="82"
+      rx="12"
+      fill="#B8C1CB"/>
+
+    <!-- Front gun -->
+    <rect
+      x="248"
+      y="104"
+      width="16"
+      height="62"
+      rx="8"
+      fill="#B8C1CB"/>
+
+    <!-- Rear gun -->
+    <rect
+      x="248"
+      y="350"
+      width="16"
+      height="48"
+      rx="8"
+      fill="#B8C1CB"/>
   </g>
 
-  <!-- Target / Crosshair -->
-  <g stroke="#FF3B30" stroke-linecap="round">
-    <!-- Outer Ring -->
-    <circle cx="256" cy="256" r="64" fill="none" stroke-width="6" opacity="0.9" />
-    
-    <!-- Crosshair Ticks -->
-    <line x1="256" y1="172" x2="256" y2="204" stroke-width="8" />
-    <line x1="256" y1="308" x2="256" y2="340" stroke-width="8" />
-    <line x1="172" y1="256" x2="204" y2="256" stroke-width="8" />
-    <line x1="308" y1="256" x2="340" y2="256" stroke-width="8" />
+  <!-- Target -->
+  <g
+    fill="none"
+    stroke="#FF3B30"
+    stroke-width="9"
+    stroke-linecap="round">
+
+    <!-- Target ring -->
+    <circle
+      cx="256"
+      cy="256"
+      r="69"/>
+
+    <!-- Crosshair -->
+    <path d="M256 166V202"/>
+    <path d="M256 310V346"/>
+    <path d="M166 256H202"/>
+    <path d="M310 256H346"/>
   </g>
 
-  <!-- Center Dot (The 'Hit') -->
-  <circle cx="256" cy="256" r="12" fill="#FF3B30" stroke="#FFFFFF" stroke-width="3" />
+  <!-- Hit -->
+  <circle
+    cx="256"
+    cy="256"
+    r="15"
+    fill="#FF3B30"
+    stroke="#FFFFFF"
+    stroke-width="4"/>
 </svg>
+
