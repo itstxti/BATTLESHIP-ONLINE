@@ -36,23 +36,6 @@ export type MatchStats = {
   durationMs: number;
 };
 
-/**
- * Derives the local player's offensive stats from the enemy board.
- *
- * The enemy board is the single source of truth in every mode:
- *  - Solo: it is the real enemy fleet, shot directly.
- *  - Local / Online: it is the fog-of-war tracking board, filled only
- *    from the defender's replies (`recordShot` / `markSunk`).
- *
- * The opponent's side is derived the same way from the player's own board,
- * which receives the opponent's shots in every mode.
- *
- * Boards are created per match, so the numbers can never leak from a
- * previous game, and there is no parallel counter that could drift out of
- * sync with what the player sees on screen. The one thing the grid cannot
- * tell is the ORDER of shots, so boards keep an ordered shot log
- * (`getShotHistory`) from which the hit streak is read.
- */
 export function computeMatchStats(
   enemyBoard: Board,
   durationMs: number,
@@ -80,11 +63,6 @@ export function computeMatchStats(
   };
 }
 
-/**
- * Looks at the same match from the other side: the opponent's numbers become
- * the "player" ones and vice versa. Used by Local mode, where the stats are
- * computed from the winner's seat but must always be shown as Player 1 / Player 2.
- */
 export function swapPerspective(stats: MatchStats): MatchStats {
   return {
     shots: stats.enemyShots,
@@ -139,12 +117,10 @@ export function longestHitStreak(history: readonly ShotRecord[]): number {
   return longest;
 }
 
-/** "52.9%". One decimal place, always. */
 export function formatAccuracy(accuracy: number): string {
   return `${accuracy.toFixed(1)}%`;
 }
 
-/** "02:43", or "1:02:43" for matches that last an hour or more. */
 export function formatDuration(durationMs: number): string {
   const totalSeconds = Math.floor(Math.max(0, durationMs) / 1000);
 
@@ -161,20 +137,13 @@ export function formatDuration(durationMs: number): string {
 
 export type StatRow = {
   value: string;
-
-  /** Reads naturally after the value: "17 shots", "1 hit in a row". */
   label: string;
-
-  /** 0-100. When present the row is drawn with a progress bar. */
   meter?: number;
 };
 
 /** Who each column of the results belongs to. */
 export type StatNames = {
-  /** The local player: "You" in Solo/Online, "Player 1" in Local. */
   player: string;
-
-  /** The other side: "Enemy" in Solo/Online, "Player 2" in Local. */
   opponent: string;
 };
 
@@ -278,10 +247,6 @@ export function describeStatGroups(
 
 /* ------------------------------ match clock ------------------------------ */
 
-/**
- * The only new state this feature needs: when the battle phase began and
- * ended. Kept on GameState (not module-level) so each match owns its clock.
- */
 export type MatchClock = {
   battleStartedAt: number | null;
   battleEndedAt: number | null;
