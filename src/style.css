@@ -1395,9 +1395,6 @@ input {
   }
 
   .board-label {
-    width: 18px;
-    height: 18px;
-
     font-size: 9px;
   }
 
@@ -1462,9 +1459,6 @@ input {
   }
 
   .board-label {
-    width: 18px;
-    height: 18px;
-
     font-size: 9px;
   }
 
@@ -1606,9 +1600,6 @@ input {
   }
 
   .board-label {
-    width: 17px;
-    height: 17px;
-
     font-size: 8px;
   }
 
