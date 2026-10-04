@@ -302,7 +302,8 @@ export function handleAITurn(
     () => { },
     ship?.isSunk()
       ? ship.name
-      : undefined
+      : undefined,
+    true
   );
 
   if (
