@@ -89,9 +89,8 @@ Create a room in one tab and join it using the generated room code in the other.
 </p>
 
 <p align="center">
-  <img width="49%" alt="image" src="https://github.com/user-attachments/assets/061bbed3-b10c-48ee-9f0b-6228869c5d4b" />
   <img width="49%" alt="image" src="https://github.com/user-attachments/assets/87f96606-0fea-4def-8ac6-1ac8ca9cf054" />
-
+  <img width="49%" alt="image" src="https://github.com/user-attachments/assets/061bbed3-b10c-48ee-9f0b-6228869c5d4b" />
 </p>
 
 ## Development
