@@ -427,20 +427,13 @@ function enterGame(): void {
   entryScreen.classList.add(
     'hidden'
   );
+
+  showModeMenu();
 }
 
 entryScreen?.addEventListener(
   'pointerdown',
   enterGame
-);
-
-
-entryScreen?.addEventListener(
-  'pointerdown',
-  enterGame,
-  {
-    once: true
-  }
 );
 
 
