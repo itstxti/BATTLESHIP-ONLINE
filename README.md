@@ -91,7 +91,7 @@ returns to the lobby to find a new opponent.
 ## Screenshots
 
 <p align="center">
-  <img width="49%" alt="image" src="https://github.com/user-attachments/assets/da06aae3-1482-4022-88c6-289d6f0a1f20" />
+  <img width="49%" alt="image" src="https://github.com/user-attachments/assets/fc5d4a16-50b0-453e-abf8-68f85b80240b" />
   <img width="49%" alt="image" src="https://github.com/user-attachments/assets/79ec80cd-b265-44c7-88e0-6d365e9b5271" />
 
 </p>

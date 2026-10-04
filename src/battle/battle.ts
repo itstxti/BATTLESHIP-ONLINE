@@ -178,8 +178,6 @@ export function handleEnemyShot(
       gameState.phase =
         'game-over';
 
-      audio.playSfx('win');
-
       setTurnStatus(
         'You win!',
         'game-over'
@@ -314,8 +312,6 @@ export function handleAITurn(
     gameState.gameOver = true;
     gameState.phase =
       'game-over';
-
-    audio.playSfx('lose');
 
     setTurnStatus(
       'You lose!',

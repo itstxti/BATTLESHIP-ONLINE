@@ -1,8 +1,17 @@
 // @vitest-environment jsdom
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi
+} from 'vitest';
 
 import indexHtml from '../../index.html?raw';
 
+import { audio } from '../audio/audio';
 import { AI } from '../game/AI';
 import { Board } from '../game/Board';
 import { STANDARD_FLEET } from '../game/fleet';
@@ -94,6 +103,19 @@ function fixedBoard(): Board {
   return board;
 }
 
+let musicSpy: ReturnType<typeof vi.spyOn>;
+
+let sfxSpy: ReturnType<typeof vi.spyOn>;
+
+/** The win/lose jingles requested so far in the current test. */
+const endSounds = () =>
+  (sfxSpy.mock.calls as unknown[][])
+    .map((call) => call[0])
+    .filter((name) => name === 'win' || name === 'lose');
+
+/** The track most recently requested, e.g. "battle" or "menu". */
+const currentMusic = () => musicSpy.mock.calls.at(-1)?.[0];
+
 describe('results screen through the real UI', () => {
   const restores: (() => void)[] = [];
 
@@ -126,7 +148,14 @@ describe('results screen through the real UI', () => {
 
     restores.push(() => placement.mockRestore());
 
+    musicSpy = vi.spyOn(audio, 'playMusic');
+    sfxSpy = vi.spyOn(audio, 'playSfx');
+
     await import('../main');
+  });
+
+  beforeEach(() => {
+    sfxSpy.mockClear();
   });
 
   afterAll(() => {
@@ -153,15 +182,21 @@ describe('results screen through the real UI', () => {
       expect(status()).toBe('You win!');
       expect(visible('#results-screen')).toBe(false);
       expect(visible('#game-screen')).toBe(true);
+      expect(currentMusic()).toBe('battle');
+      expect(endSounds()).toEqual([]); // the jingle waits for the results screen
 
       clock += 60_000; // time spent staring at the delay must not count
       vi.advanceTimersByTime(RESULTS_DELAY_MS - 1);
       expect(visible('#results-screen')).toBe(false);
+      expect(currentMusic()).toBe('battle');
+      expect(endSounds()).toEqual([]);
 
       vi.advanceTimersByTime(1);
 
       expect(visible('#results-screen')).toBe(true);
       expect(visible('#game-screen')).toBe(false);
+      expect(currentMusic()).toBe('menu'); // battle theme replaced
+      expect(endSounds()).toEqual(['win']); // exactly once
       expect(headline()).toBe('VICTORY');
       expect(detail()).toBe('Enemy fleet destroyed.');
       expect(resultRows()).toEqual([
@@ -182,6 +217,8 @@ describe('results screen through the real UI', () => {
     it('New Game on the results screen starts a clean solo match', async () => {
       click('#results-new-game');
       await flush();
+
+      expect(currentMusic()).toBe('menu'); // placement still uses the menu theme
 
       expect(visible('#results-screen')).toBe(false);
       expect(visible('#game-screen')).toBe(true);
@@ -226,9 +263,14 @@ describe('results screen through the real UI', () => {
       expect(status()).toBe('You lose!');
       expect(visible('#results-screen')).toBe(false);
 
+      expect(currentMusic()).toBe('battle');
+      expect(endSounds()).toEqual([]);
+
       vi.advanceTimersByTime(RESULTS_DELAY_MS);
 
       expect(visible('#results-screen')).toBe(true);
+      expect(currentMusic()).toBe('menu');
+      expect(endSounds()).toEqual(['lose']);
       expect(headline()).toBe('DEFEAT');
       expect(detail()).toBe('Your fleet was sunk.');
       expect(resultRows()).toEqual([
@@ -269,6 +311,7 @@ describe('results screen through the real UI', () => {
 
       expect(visible('#results-screen')).toBe(false);
       expect(visible('#game-mode-menu')).toBe(true);
+      expect(endSounds()).toEqual([]); // no jingle over the menu
 
       vi.useRealTimers();
     });
@@ -291,6 +334,7 @@ describe('results screen through the real UI', () => {
       expect(visible('#results-screen')).toBe(false);
       expect(visible('#game-screen')).toBe(true);
       expect(status()).toBe('Place your fleet');
+      expect(endSounds()).toEqual([]); // no jingle over the new match
 
       vi.useRealTimers();
 
@@ -338,10 +382,14 @@ describe('results screen through the real UI', () => {
 
       expect(status()).toBe('Player 1 wins!');
       expect(visible('#results-screen')).toBe(false);
+      expect(currentMusic()).toBe('battle');
+      expect(endSounds()).toEqual([]);
 
       vi.advanceTimersByTime(RESULTS_DELAY_MS);
 
       expect(visible('#results-screen')).toBe(true);
+      expect(currentMusic()).toBe('menu');
+      expect(endSounds()).toEqual(['win']);
       expect(visible('#game-screen')).toBe(false);
       expect(visible('#pass-device-screen')).toBe(false);
       expect(headline()).toBe('VICTORY');
@@ -430,10 +478,12 @@ describe('results screen through the real UI', () => {
 
       expect(status()).toBe('You win! Enemy fleet destroyed.');
       expect(visible('#results-screen')).toBe(false);
+      expect(endSounds()).toEqual([]);
 
       vi.advanceTimersByTime(RESULTS_DELAY_MS);
 
       expect(visible('#results-screen')).toBe(true);
+      expect(endSounds()).toEqual(['win']);
       expect(visible('#game-screen')).toBe(false);
       expect(headline()).toBe('VICTORY');
       expect(detail()).toBe('Enemy fleet destroyed.');
@@ -464,6 +514,8 @@ describe('results screen through the real UI', () => {
 
       // A forfeit has no explosion to wait for: no delay.
       expect(visible('#results-screen')).toBe(true);
+      expect(currentMusic()).toBe('menu');
+      expect(endSounds()).toEqual(['lose']);
       expect(headline()).toBe('DEFEAT');
       expect(detail()).toBe('You forfeited the match.');
       expect(resultRows().slice(0, 4)).toEqual([
@@ -486,6 +538,8 @@ describe('results screen through the real UI', () => {
       await flush();
 
       expect(visible('#results-screen')).toBe(true);
+      expect(currentMusic()).toBe('menu');
+      expect(endSounds()).toEqual(['win']);
       expect(headline()).toBe('VICTORY');
       expect(detail()).toBe('Your opponent disconnected.');
       expect(resultRows().slice(0, 4)).toEqual([
@@ -519,6 +573,7 @@ describe('results screen through the real UI', () => {
       expect(visible('#results-screen')).toBe(false);
       expect(visible('#game-screen')).toBe(true);
       expect(status()).toBe('Opponent left before the battle started.');
+      expect(endSounds()).toEqual(['win']); // unchanged: the one case with no results screen
     });
   });
 });

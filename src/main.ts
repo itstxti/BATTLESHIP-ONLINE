@@ -959,6 +959,17 @@ function presentResults(
     resultsScreen.hidden =
       false;
 
+    // The battle is over: swap its music for the menu theme (cross-fade).
+    audio.playMusic(
+      'menu'
+    );
+
+    audio.playSfx(
+      view.outcome === 'victory'
+        ? 'win'
+        : 'lose'
+    );
+
     newGame.focus();
   };
 
@@ -1520,10 +1531,6 @@ function handleLocalEvent(
       ) {
         return;
       }
-
-      audio.playSfx(
-        'win'
-      );
 
       localFlowId++;
 
@@ -2128,9 +2135,14 @@ function handleOnlineEvent(
         event.winner ===
         'me'
       ) {
-        audio.playSfx(
-          'win'
-        );
+        if (
+          duringPlacement
+        ) {
+          // No battle took place, so no results screen will play the jingle.
+          audio.playSfx(
+            'win'
+          );
+        }
 
         message =
           event.reason ===
@@ -2145,10 +2157,6 @@ function handleOnlineEvent(
               ? 'Opponent forfeited — you win!'
               : 'You win! Enemy fleet destroyed.';
       } else {
-        audio.playSfx(
-          'lose'
-        );
-
         message =
           event.reason ===
           'forfeit'
