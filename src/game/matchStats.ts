@@ -175,11 +175,6 @@ export function describeStatGroups(
       title: names.player,
       rows: [
         {
-          value: formatAccuracy(stats.accuracy),
-          label: 'accuracy',
-          meter: clampPercent(stats.accuracy)
-        },
-        {
           value: String(stats.shots),
           label: plural(stats.shots, 'shot', 'shots')
         },
@@ -198,6 +193,11 @@ export function describeStatGroups(
             'hit in a row',
             'hits in a row'
           )
+        },
+        {
+          value: formatAccuracy(stats.accuracy),
+          label: 'accuracy',
+          meter: clampPercent(stats.accuracy)
         }
       ]
     },
@@ -205,18 +205,13 @@ export function describeStatGroups(
       id: 'defense',
       title: names.opponent,
       rows: [
-        {
+                {
           value: String(stats.enemyShots),
           label: plural(stats.enemyShots, 'shot', 'shots')
         },
         {
           value: String(stats.enemyHits),
           label: plural(stats.enemyHits, 'hit', 'hits')
-        },
-        {
-          value: formatAccuracy(stats.enemyAccuracy),
-          label: 'accuracy',
-          meter: clampPercent(stats.enemyAccuracy)
         },
         {
           value: String(stats.enemyShipsSunk),
@@ -229,6 +224,11 @@ export function describeStatGroups(
             'hit in a row',
             'hits in a row'
           )
+        },
+        {
+          value: formatAccuracy(stats.enemyAccuracy),
+          label: 'accuracy',
+          meter: clampPercent(stats.enemyAccuracy)
         }
       ]
     },
