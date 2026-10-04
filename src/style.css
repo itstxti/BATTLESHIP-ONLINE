@@ -1216,9 +1216,7 @@ input {
   transform: translateY(0);
 }
 
-.placement-button.secondary {
-  color: #718096;
-}
+
 
 .placement-button:disabled {
   opacity: 0.45;
@@ -1231,30 +1229,34 @@ input {
    ========================================================= */
 
 .new-game-button {
-  display: block;
+  padding: 9px 16px;
 
-  margin: 40px auto 0;
+  border: 1px solid #dfe5ee;
+  border-radius: 7px;
 
-  padding: 12px 24px;
+  background: white;
+  color: #172033;
 
-  border: 0;
-  border-radius: 8px;
-
-  background: #172033;
-  color: white;
-
+  font-size: 13px;
   font-weight: 600;
 
   cursor: pointer;
 
   transition:
     background-color 0.15s ease,
-    transform 0.15s ease;
+    border-color 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .new-game-button:hover {
-  background: #27344d;
+  background: #f8fafc;
+  border-color: #b8c4d4;
+
   transform: translateY(-1px);
+
+  box-shadow:
+    0 3px 8px rgba(23, 32, 51, 0.06);
 }
 
 .new-game-button:active {
@@ -1264,7 +1266,7 @@ input {
 .new-game-button:disabled {
   opacity: 0.45;
   cursor: default;
-  transform: none;
+  pointer-events: none;
 }
 
 /* =========================================================
