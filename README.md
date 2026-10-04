@@ -121,8 +121,7 @@ In Local multiplayer the winner's stats are shown. In Online mode, **New Game** 
 
 <p align="center">
   <img width="49%" alt="Online lobby" src="https://github.com/user-attachments/assets/87f96606-0fea-4def-8ac6-1ac8ca9cf054" />
-  <img width="49%" alt="Match results" src="https://github.com/user-attachments/assets/4b1ee43e-85a8-4534-ab28-b07033ab9195" />
-
+  <img width="49%" alt="Match results" src="https://github.com/user-attachments/assets/3cd593cb-ccfd-4b0a-a8a4-fd82a2f08c01" />
 </p>
 
 <p align="center">
