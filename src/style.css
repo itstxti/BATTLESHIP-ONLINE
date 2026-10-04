@@ -1322,14 +1322,14 @@ input {
   /*--side-color: #20904b;
   --meter-color: #20904b;*/
   --side-color: #5B8DEF;
-  --meter-color: #5B8DEF;
+  --meter-color: transparent;
 }
 
 .results-group--defense {
   /*--side-color: #991b1b;
   --meter-color: #991b1b;*/
   --side-color: #9B8AFB;
-  --meter-color: #9B8AFB;
+  --meter-color: transparent;
 }
 
 .results-player--one {
