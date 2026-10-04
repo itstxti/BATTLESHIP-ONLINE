@@ -73,6 +73,17 @@ import {
 } from './ui/resultsScreen';
 
 import {
+  renderHistoryScreen
+} from './ui/historyScreen';
+
+import {
+  addMatchRecord,
+  clearHistory,
+  createMatchRecord,
+  loadHistory
+} from './game/matchHistory';
+
+import {
   mountLobbyScreen
 } from './online/lobbyScreen';
 
@@ -137,6 +148,16 @@ const modeAIButton =
 const modeLocalButton =
   document.querySelector<HTMLButtonElement>(
     '#mode-local'
+  );
+
+const historyScreen =
+  document.querySelector<HTMLElement>(
+    '#history-screen'
+  );
+
+const historyToggleButton =
+  document.querySelector<HTMLButtonElement>(
+    '#history-toggle'
   );
 
 const modeOnlineButton =
@@ -310,6 +331,10 @@ let onlineOpponentReady = false;
  */
 let resultsFlowId = 0;
 
+/* A match is saved to the history once, however many times its end is signalled. */
+const recordedMatches =
+  new WeakSet<GameState>();
+
 
 /* =========================================================
    SOUND CONTROLS
@@ -429,6 +454,12 @@ function handleBackToMenu(): void {
     return;
   }
 
+  // From the history screen, back to game mode selection.
+  if (!historyScreen!.hidden) {
+    showModeMenu();
+    return;
+  }
+
   // From the AI level picker, go back to game mode selection.
   if (!difficultyScreen!.hidden) {
     showModeMenu();
@@ -485,6 +516,9 @@ function handleBackToEntry(): void {
     true;
 
   difficultyScreen!.hidden =
+    true;
+
+  historyScreen!.hidden =
     true;
 
   onlineScreen!.hidden =
@@ -1016,6 +1050,34 @@ function presentResults(
 
     boards
   };
+
+  if (!recordedMatches.has(state)) {
+    recordedMatches.add(state);
+
+    addMatchRecord(
+      createMatchRecord({
+        mode:
+          gameMode,
+
+        difficulty:
+          gameMode === 'ai'
+            ? aiDifficulty
+            : undefined,
+
+        // Local: "victory" = Player 1 won (stats are already oriented that way).
+        outcome:
+          isLocalMatch
+            ? (
+              end.localWinnerSeat === 0
+                ? 'victory'
+                : 'defeat'
+            )
+            : end.outcome,
+
+        stats
+      })
+    );
+  }
 
   const flowId =
     ++resultsFlowId;
@@ -1782,10 +1844,46 @@ function showModeMenu(): void {
   difficultyScreen!.hidden =
     true;
 
+  historyScreen!.hidden =
+    true;
+
   gameScreen!.hidden =
     true;
 
   gameModeMenu!.hidden =
+    false;
+}
+
+
+function showHistoryScreen(): void {
+  // Opening the history from inside a match abandons it, so ask first.
+  if (
+    !gameScreen!.hidden &&
+    gameState.phase === 'battle' &&
+    !window.confirm(
+      'Leave the current match? Your progress will be lost.'
+    )
+  ) {
+    return;
+  }
+
+  // Shared clean-up (timers, results, music, other screens).
+  showModeMenu();
+
+  gameModeMenu!.hidden =
+    true;
+
+  renderHistoryScreen(
+    historyScreen!,
+    loadHistory(),
+    () => {
+      clearHistory();
+
+      showHistoryScreen();
+    }
+  );
+
+  historyScreen!.hidden =
     false;
 }
 
@@ -2626,6 +2724,30 @@ modeLocalButton?.addEventListener(
     startSelectedMode(
       'local'
     );
+  }
+);
+
+
+/*
+ * No stopPropagation here: the click sound comes from the global button
+ * listener on `document`, which a stopped event would never reach.
+ */
+historyToggleButton?.addEventListener(
+  'click',
+  (event) => {
+    event.stopPropagation();
+    audio.playSfx(
+      'click'
+    );
+    setSoundPanelOpen(false);
+
+    // Second click closes it again.
+    if (!historyScreen!.hidden) {
+      showModeMenu();
+      return;
+    }
+
+    showHistoryScreen();
   }
 );
 
