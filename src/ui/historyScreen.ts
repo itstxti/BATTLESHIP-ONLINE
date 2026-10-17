@@ -30,6 +30,7 @@ function element<K extends keyof HTMLElementTagNameMap>(
   return node;
 }
 
+<<<<<<< HEAD
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
 function svg(
@@ -161,6 +162,8 @@ function renderEmptyBoard(): SVGElement {
   return board;
 }
 
+=======
+>>>>>>> 69564e5cd4b53338c46c06c5dd0b554835e946bf
 function renderRow(record: MatchRecord, index: number): HTMLElement {
   const item = element('li', `history-row history-row--${record.outcome}`);
 
