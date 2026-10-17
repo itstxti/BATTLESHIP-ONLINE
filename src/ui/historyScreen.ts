@@ -93,7 +93,17 @@ export function renderHistoryScreen(
   );
 
   if (records.length === 0) {
-    container.replaceChildren(header);
+    // Decorative only: the header note already says there are no matches.
+    const empty = element('div', 'history-empty');
+
+    empty.setAttribute('aria-hidden', 'true');
+
+    empty.append(
+      element('span', 'history-empty-ship'),
+      element('span', 'history-empty-ring')
+    );
+
+    container.replaceChildren(header, empty);
 
     return headline;
   }

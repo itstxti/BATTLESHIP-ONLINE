@@ -14,7 +14,6 @@
   /* Sea */
   --sea-frame-top: #17495a;
   --sea-frame-bottom: #0f3140;
-  --waves: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 34' preserveAspectRatio='none'%3E%3Cpath d='M0 11q8.5-5 17 0t17 0M0 25q8.5-5 17 0t17 0' fill='none' stroke='white' stroke-opacity='.17' stroke-width='1.2'/%3E%3C/svg%3E");
 
   font-family: var(--font-sans);
   color: var(--ink);
@@ -769,11 +768,11 @@ input {
 
   padding: 0;
   border: 0;
-  border-radius: 5px;
+  border-radius: 4px;
 
   background:
-    var(--waves) 0 0 / 100% 100% no-repeat,
-    linear-gradient(165deg, #3b8da2, #266a7e);
+    linear-gradient(165deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 55%),
+    #2b7186;
 
   cursor: pointer;
 
@@ -821,10 +820,9 @@ input {
    ========================================================= */
 
 .cell.hit {
-  color: #ffffff;
-  font-size: 20px;
-  font-weight: 700;
-  text-shadow: 0 1px 2px rgba(60, 10, 6, 0.65);
+  color: transparent;
+  font-size: 0;
+  text-shadow: none;
 }
 
 /* =========================================================
@@ -832,9 +830,8 @@ input {
    ========================================================= */
 
 .cell.miss {
-  color: rgba(255, 255, 255, 0.82);
-  font-size: 18px;
-  font-weight: 700;
+  color: transparent;
+  font-size: 0;
 }
 
 /* =========================================================
@@ -842,7 +839,7 @@ input {
    ========================================================= */
 
 .cell.sunk {
-  color: #ffffff;
+  color: transparent;
 }
 
 /* =========================================================
@@ -991,7 +988,11 @@ input {
 
   border-radius: 1px;
 
-  background: linear-gradient(180deg, #9fb1b8, #5d727b);
+  background: #9fb1b8;
+
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .fleet-ship-name {
@@ -1051,18 +1052,15 @@ input {
 
 .fleet-ship.selected {
   transform: translateX(-3px);
-
-  border-color: #12202b;
-
-  background: #f7faf9;
-
+  border-color: var(--accent);
+  background: #f1f8f8;
   box-shadow:
-    0 0 0 2px rgba(18, 32, 43, 0.1),
+    0 0 0 3px rgba(38, 115, 122, 0.14),
     0 5px 14px rgba(18, 32, 43, 0.08);
 }
 
 .fleet-ship.selected .ship-segment {
-  background: linear-gradient(180deg, #3d98a5, #1d5e69);
+  background: rgba(38, 115, 122, 0.2);
 }
 
 /* =========================================================
@@ -2616,8 +2614,9 @@ body::before {
 
 /* =========================================================
    SHIPS & SHOTS
-   Hulls are drawn on ::before (below the × / • text), shot
-   markers on ::after. The renderer tags ship cells with
+   Flat, single-colour silhouettes on calm water. Hulls are drawn
+   on ::before (below any text), shots on ::after. The renderer
+   tags ship cells with
    .hull .hull-h|v .hull-bow|mid|stern .hull-<name> [.hull-bridge].
    ========================================================= */
 
@@ -2631,39 +2630,30 @@ body::before {
 }
 
 .cell.hull {
-  --hull-a: 180deg;
-  --hull-top: #a7b8be;
-  --hull-bot: #5d727b;
-  --deck: #cdd8dc;
-  --deck-size: 100% 50%;
-  --run-dir: 90deg;
-  --run-color: transparent;
-  --run-size: 100% 2px;
-  --bridge: #3f525b;
+  --hull: #dde6e9;
+  --deck: #c3d0d5;
+  --deck-size: 100% 42%;
+  --bridge: #8ea2aa;
   --bridge-size: 0 0;
 }
 
 .cell.hull::before {
-  /* Horizontal ship: runs left to right and overlaps the grid gap so the
-     hull reads as one piece. */
-  inset: 14% calc(var(--gap) * -1 - 1px) 14% 0;
+  /* Horizontal ship. It overlaps the grid gap (plus 1px against subpixel
+     seams) so the hull reads as one piece. */
+  inset: 15% calc(var(--gap) * -1 - 1px) 15% 0;
 
   background:
     linear-gradient(var(--bridge), var(--bridge)) center / var(--bridge-size) no-repeat,
-    repeating-linear-gradient(var(--run-dir), var(--run-color) 0 6px, transparent 6px 12px) center / var(--run-size) no-repeat,
     linear-gradient(var(--deck), var(--deck)) center / var(--deck-size) no-repeat,
-    linear-gradient(var(--hull-a), var(--hull-top), var(--hull-bot));
+    var(--hull);
 }
 
 .cell.hull-v {
-  --hull-a: 90deg;
-  --deck-size: 50% 100%;
-  --run-dir: 0deg;
-  --run-size: 2px 100%;
+  --deck-size: 42% 100%;
 }
 
 .cell.hull-v::before {
-  inset: 0 14% calc(var(--gap) * -1 - 1px) 14%;
+  inset: 0 15% calc(var(--gap) * -1 - 1px) 15%;
 }
 
 .cell.hull-h.hull-stern::before {
@@ -2675,74 +2665,69 @@ body::before {
 }
 
 .cell.hull-h.hull-bow::before {
-  clip-path: polygon(0 50%, 40% 0, 100% 0, 100% 100%, 40% 100%);
+  clip-path: polygon(0 50%, 42% 0, 100% 0, 100% 100%, 42% 100%);
 }
 
 .cell.hull-h.hull-stern::before {
-  clip-path: polygon(0 0, 78% 0, 100% 18%, 100% 82%, 78% 100%, 0 100%);
+  clip-path: polygon(0 0, 82% 0, 100% 16%, 100% 84%, 82% 100%, 0 100%);
 }
 
 .cell.hull-v.hull-bow::before {
-  clip-path: polygon(50% 0, 100% 40%, 100% 100%, 0 100%, 0 40%);
+  clip-path: polygon(50% 0, 100% 42%, 100% 100%, 0 100%, 0 42%);
 }
 
 .cell.hull-v.hull-stern::before {
-  clip-path: polygon(0 0, 100% 0, 100% 78%, 82% 100%, 18% 100%, 0 78%);
+  clip-path: polygon(0 0, 100% 0, 100% 82%, 84% 100%, 16% 100%, 0 82%);
 }
 
-.cell.hull-bridge {
-  --bridge-size: 46% 46%;
+.cell.hull-h.hull-bridge {
+  --bridge-size: 30% 62%;
 }
 
-/* Each class of ship gets its own silhouette. */
+.cell.hull-v.hull-bridge {
+  --bridge-size: 62% 30%;
+}
+
+/* Each class of ship differs by proportion and tone, not by decoration. */
 .cell.hull-carrier {
-  --deck: #b7c4c9;
-  --deck-size: 100% 78%;
-  --run-color: rgba(255, 255, 255, 0.85);
+  --deck: #cdd9dd;
+  --deck-size: 100% 72%;
 }
 
-.cell.hull-battleship {
-  --hull-top: #98a9b0;
-  --hull-bot: #4f646d;
+.cell.hull-h.hull-carrier {
+  --deck-size: 100% 72%;
+}
+
+.cell.hull-v.hull-carrier {
+  --deck-size: 72% 100%;
 }
 
 .cell.hull-submarine {
-  --hull-top: #46606b;
-  --hull-bot: #1f3640;
-  --deck: #2e4854;
-  --deck-size: 100% 36%;
-  --bridge: #8ea4ad;
-  --bridge-size: 34% 34%;
+  --hull: #9db0b8;
+  --deck: #9db0b8;
+  --bridge: #647a83;
 }
 
-.cell.hull-submarine.hull-bridge {
-  --bridge-size: 34% 34%;
-}
-
-.cell.hull-destroyer {
-  --hull-top: #b2c1c6;
-  --hull-bot: #667c85;
-}
-
-/* Wrecks: charred hull. */
+/* Wrecks. */
 .cell.sunk.hull {
-  --hull-top: #6a3a38;
-  --hull-bot: #3a1c1c;
-  --deck: #7b4c49;
-  --run-color: transparent;
-  --bridge: #2a1212;
+  --hull: #94615c;
+  --deck: #7a4a45;
+  --bridge: #52302d;
 }
 
-/* Shots */
+/* Shots: a solid disc is a hit, a hollow ring is a miss. */
 .cell.hit::after {
-  inset: 18%;
+  inset: 29%;
   border-radius: 50%;
-  background: radial-gradient(circle, #ffe0a0 0 20%, #f2793f 21% 50%, rgba(200, 56, 47, 0.75) 51% 68%, rgba(200, 56, 47, 0) 70%);
+  background: #d9433a;
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.92),
+    0 2px 5px rgba(8, 24, 32, 0.35);
 }
 
 .cell.miss::after {
-  inset: 26%;
-  border: 2px solid rgba(255, 255, 255, 0.5);
+  inset: 31%;
+  border: 2px solid rgba(255, 255, 255, 0.72);
   border-radius: 50%;
 }
 
@@ -2750,4 +2735,198 @@ body::before {
   .board {
     --gap: 2px;
   }
+}
+
+
+/* =========================================================
+   FLEET PLACEMENT PROGRESS
+   Hollow segments = still to place, filled = placed.
+   ========================================================= */
+
+.fleet-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+
+  margin-bottom: 3px;
+
+  color: #667a7e;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.fleet-progress.complete {
+  color: var(--accent);
+}
+
+.fleet-progress-pips {
+  display: flex;
+  gap: 3px;
+}
+
+.fleet-progress-pip {
+  width: calc(var(--size, 3) * 5px);
+  height: 6px;
+
+  border-radius: 3px;
+
+  box-shadow: inset 0 0 0 1.5px #b4c3c5;
+
+  transition:
+    background-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.fleet-progress-pip.current {
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+}
+
+.fleet-progress-pip.filled {
+  background: var(--accent);
+  box-shadow: none;
+}
+
+/* Still to place: outlined hull. */
+.fleet-ship.selectable .ship-segment {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px #8ea2aa;
+}
+
+.fleet-ship.selected .ship-segment {
+  background: rgba(38, 115, 122, 0.2);
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+}
+
+/* Placed: solid hull and a check badge. */
+.fleet-ship.placed {
+  border-color: rgba(38, 115, 122, 0.35);
+}
+
+.fleet-ship.placed .ship-segment {
+  background: #5d727b;
+}
+
+.fleet-ship.placed::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  right: -6px;
+
+  width: 16px;
+  height: 16px;
+
+  border: 2px solid #f2f5f5;
+  border-radius: 50%;
+
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.8 6.3l2.3 2.3 4.1-4.6' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      center / 10px no-repeat,
+    var(--accent);
+}
+
+/* =========================================================
+   EMPTY STATE: HISTORY
+   ========================================================= */
+
+.history-empty {
+  position: relative;
+
+  width: min(100%, 360px);
+  height: 112px;
+  margin-top: 8px;
+
+  overflow: hidden;
+
+  border-radius: 12px;
+
+  background:
+    linear-gradient(165deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 55%),
+    linear-gradient(160deg, var(--sea-frame-top), var(--sea-frame-bottom));
+}
+
+.history-empty-ship {
+  position: absolute;
+  left: 22%;
+  top: 50%;
+
+  width: 92px;
+  height: 22px;
+
+  background:
+    linear-gradient(#8ea2aa, #8ea2aa) 62% 50% / 16% 56% no-repeat,
+    linear-gradient(#c3d0d5, #c3d0d5) center / 100% 42% no-repeat,
+    #dde6e9;
+
+  clip-path: polygon(0 50%, 16% 0, 100% 0, 100% 100%, 16% 100%);
+
+  transform: translateY(-50%);
+}
+
+.history-empty-ring {
+  position: absolute;
+  right: 20%;
+  top: 36%;
+
+  width: 16px;
+  height: 16px;
+
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  border-radius: 50%;
+}
+
+/* =========================================================
+   MOTION BETWEEN SCREENS
+   Screens switch with the hidden attribute, so each one animates
+   in when it is shown. :where() keeps this at the lowest priority:
+   the results screen keeps its own entrance.
+   ========================================================= */
+
+@keyframes screen-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+  :where(.game-mode-menu, .game-container):not([hidden]) {
+    animation: screen-enter 0.28s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+
+}
+
+/* =========================================================
+   TOUCH & PRESSED STATES
+   ========================================================= */
+
+.fleet-ship.selectable:active {
+  transform: translateX(-1px) scale(0.985);
+}
+
+.cell.available:active {
+  transform: scale(0.94);
+}
+
+/* Touch screens have no real hover: don't leave scaled / lifted
+   elements behind after a tap. */
+@media (hover: none) {
+
+  .cell:hover,
+  .cell.available:hover,
+  .fleet-ship.selectable:hover,
+  .placement-button:hover,
+  .new-game-button:hover,
+  .game-mode-button:hover {
+    transform: none;
+    filter: none;
+    box-shadow: none;
+  }
+
 }
