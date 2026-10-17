@@ -2869,49 +2869,58 @@ body::before {
    ========================================================= */
 
 .history-empty {
-  position: relative;
-
-  width: min(100%, 360px);
-  height: 112px;
+  width: min(100%, 400px);
   margin-top: 8px;
+  padding: 18px;
 
-  overflow: hidden;
-
-  border-radius: 12px;
+  border-radius: 16px;
 
   background:
-    linear-gradient(165deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 55%),
+    radial-gradient(120% 90% at 20% 0%, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0) 60%),
     linear-gradient(160deg, var(--sea-frame-top), var(--sea-frame-bottom));
+
+  box-shadow: 0 10px 28px rgba(15, 49, 64, 0.18);
 }
 
-.history-empty-ship {
-  position: absolute;
-  left: 22%;
-  top: 50%;
-
-  width: 92px;
-  height: 22px;
-
-  background:
-    linear-gradient(#8ea2aa, #8ea2aa) 62% 50% / 16% 56% no-repeat,
-    linear-gradient(#c3d0d5, #c3d0d5) center / 100% 42% no-repeat,
-    #dde6e9;
-
-  clip-path: polygon(0 50%, 16% 0, 100% 0, 100% 100%, 16% 100%);
-
-  transform: translateY(-50%);
+.history-empty-board {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
-.history-empty-ring {
-  position: absolute;
-  right: 20%;
-  top: 36%;
+.history-empty-cell {
+  fill: #2b7186;
+}
 
-  width: 16px;
-  height: 16px;
+.history-empty-hull {
+  fill: #dde6e9;
+}
 
-  border: 2px solid rgba(255, 255, 255, 0.55);
-  border-radius: 50%;
+.history-empty-deck {
+  fill: #c3d0d5;
+}
+
+.history-empty-bridge {
+  fill: #8ea2aa;
+}
+
+.history-empty-miss {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.6);
+  stroke-width: 2;
+}
+
+.history-empty-target {
+  fill: rgba(255, 255, 255, 0.06);
+  stroke: rgba(255, 255, 255, 0.7);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .history-empty-target {
+    animation: entry-pulse 2s ease-in-out infinite;
+  }
 }
 
 /* =========================================================
