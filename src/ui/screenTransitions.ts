@@ -8,7 +8,8 @@
  * and tests still see `hidden` change synchronously.
  */
 
-const EXIT_MS = 110;
+/** Keep in step with --dur-exit in style.css. */
+const EXIT_MS = 120;
 
 const hiddenDescriptor = Object.getOwnPropertyDescriptor(
   HTMLElement.prototype,
@@ -65,6 +66,29 @@ function playExit(screen: HTMLElement, ghost: HTMLElement): void {
   parent.appendChild(ghost);
 }
 
+/**
+ * Slides a still copy of `screen` out sideways while the caller swaps its
+ * content, so two views of one screen cross over instead of snapping.
+ * Call it before the content changes. `offsetX` is where the old view goes
+ * (0 = plain fade).
+ */
+export function playSwapExit(screen: HTMLElement, offsetX: number): void {
+  if (!canAnimate()) {
+    return;
+  }
+
+  const ghost = snapshot(screen);
+
+  if (!ghost) {
+    return;
+  }
+
+  ghost.style.setProperty('--exit-x', `${offsetX}px`);
+  ghost.style.setProperty('--exit-y', '0px');
+
+  playExit(screen, ghost);
+}
+
 export function installScreenExit(ids: readonly string[]): void {
   const read = hiddenDescriptor?.get;
   const write = hiddenDescriptor?.set;
@@ -80,6 +104,10 @@ export function installScreenExit(ids: readonly string[]): void {
       continue;
     }
 
+    // A screen that was shown during this same turn never reached the
+    // display, so hiding it again must not flash a copy of it.
+    let shownThisTurn = false;
+
     Object.defineProperty(screen, 'hidden', {
       configurable: true,
 
@@ -91,7 +119,17 @@ export function installScreenExit(ids: readonly string[]): void {
         const wasVisible = !(read.call(screen) as boolean);
 
         const ghost =
-          value && wasVisible && canAnimate() ? snapshot(screen) : null;
+          value && wasVisible && !shownThisTurn && canAnimate()
+            ? snapshot(screen)
+            : null;
+
+        if (!value && !wasVisible) {
+          shownThisTurn = true;
+
+          queueMicrotask(() => {
+            shownThisTurn = false;
+          });
+        }
 
         write.call(screen, value);
 

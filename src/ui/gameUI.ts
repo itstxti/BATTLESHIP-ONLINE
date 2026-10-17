@@ -17,6 +17,12 @@ export function updateGameUI(
     resetFleetButton
   } = options;
 
+  // Lets the stylesheet lay the screen out for the current phase (on phones
+  // only the board you act on is shown while placing, and so on).
+  newGameButton
+    .closest<HTMLElement>('.game-container')
+    ?.setAttribute('data-phase', phase);
+
   if (phase === 'placement') {
     rotateShipButton.disabled = false;
     resetFleetButton.disabled = false;

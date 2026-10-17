@@ -120,7 +120,8 @@ import {
 } from './audio/audio';
 
 import {
-  installScreenExit
+  installScreenExit,
+  playSwapExit
 } from './ui/screenTransitions';
 
 
@@ -590,8 +591,11 @@ function enterGame(): void {
   showModeMenu();
 }
 
+// "click", not "pointerdown": on touch screens the click that follows a
+// pointerdown lands on whatever is under the entry screen once it hides
+// (it started a game mode by itself). Audio is unlocked on pointerdown anyway.
 entryScreen?.addEventListener(
-  'pointerdown',
+  'click',
   enterGame
 );
 
@@ -1976,9 +1980,33 @@ function showRecordsScreen(
 }
 
 
+/** How far the views travel when switching between statistics and history. */
+const RECORDS_SLIDE_PX = 28;
+
 function openRecordsScreen(
   view: RecordsView
 ): void {
+  // Already on this screen: the content is swapped (or refreshed) in place.
+  // Statistics sits left of history in the top bar, so going to history moves
+  // forward (old view leaves to the left) and back goes the other way.
+  const swapping =
+    !historyScreen!.hidden;
+
+  const direction =
+    recordsView === view
+      ? 0
+      : view === 'history'
+        ? 1
+        : -1;
+
+  // The still copy of the old view has to be taken before anything changes.
+  if (swapping) {
+    playSwapExit(
+      historyScreen!,
+      -direction * RECORDS_SLIDE_PX
+    );
+  }
+
   // Shared clean-up (timers, results, music, other screens).
   showModeMenu();
 
@@ -2009,18 +2037,55 @@ function openRecordsScreen(
   historyScreen!.hidden =
     false;
 
-  // Fade the screen in again, also when switching between its two views
-  // (removing the class and forcing a reflow restarts the animation).
+  // Opening from another screen uses the normal screen entrance. Only a swap
+  // inside this screen slides in (removing the class and forcing a reflow
+  // restarts the animation).
   historyScreen!.classList.remove(
     'records-enter'
   );
 
-  void historyScreen!.offsetWidth;
+  if (swapping) {
+    historyScreen!.style.setProperty(
+      '--enter-x',
+      `${direction * RECORDS_SLIDE_PX}px`
+    );
 
-  historyScreen!.classList.add(
-    'records-enter'
+    void historyScreen!.offsetWidth;
+
+    historyScreen!.classList.add(
+      'records-enter'
+    );
+  }
+
+  syncRecordsToggles();
+}
+
+
+/* The top-bar buttons stay lit while their view is on screen. */
+function syncRecordsToggles(): void {
+  const open =
+    !historyScreen!.hidden;
+
+  statsToggleButton?.setAttribute(
+    'aria-pressed',
+    String(open && recordsView === 'stats')
+  );
+
+  historyToggleButton?.setAttribute(
+    'aria-pressed',
+    String(open && recordsView === 'history')
   );
 }
+
+new MutationObserver(
+  syncRecordsToggles
+).observe(
+  historyScreen!,
+  {
+    attributes: true,
+    attributeFilter: ['hidden']
+  }
+);
 
 
 function showDifficultyMenu(): void {

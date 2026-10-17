@@ -11,6 +11,41 @@ const STORAGE_KEY =
 
 
 /*
+ * Short vibration pulses on phones that support them, so shots can be felt
+ * even with the sound off. Skipped for people who asked for less motion.
+ */
+const HAPTICS: Partial<Record<SfxName, number | number[]>> = {
+  place: 8,
+  fire: 10,
+  miss: 6,
+  hit: 28,
+  sunk: [40, 40, 90],
+  win: [60, 50, 60, 50, 150],
+  lose: 220
+};
+
+function vibrateFor(sound: SfxName): void {
+  const pattern = HAPTICS[sound];
+
+  if (
+    pattern === undefined ||
+    typeof navigator === 'undefined' ||
+    typeof navigator.vibrate !== 'function' ||
+    (typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  ) {
+    return;
+  }
+
+  try {
+    navigator.vibrate(pattern);
+  } catch {
+    // Vibration is a nicety; ignore refusals.
+  }
+}
+
+
+/*
  * HTMLMediaElement.play() returns a Promise in modern browsers, but older
  * browsers and some test environments return undefined (or throw
  * synchronously). Normalise every case into a Promise: undefined counts as
@@ -321,6 +356,8 @@ class AudioManager {
   playSfx(
     sound: SfxName
   ): void {
+    vibrateFor(sound);
+
     if (
       this.settings.muted ||
       this.settings.sfxVolume <= 0
