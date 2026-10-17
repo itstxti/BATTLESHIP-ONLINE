@@ -12,6 +12,18 @@
   --z-entry: 400;
   --z-exit: 150;
 
+  /* Motion: one vocabulary for the whole app.
+     fast = hover / press / colour, base = state changes and entrances,
+     slow = emphasis (meters, sunk ships, entry fade), exit = leaving. */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --dur-fast: 150ms;
+  --dur-base: 240ms;
+  --dur-slow: 420ms;
+  --dur-exit: 120ms;
+  --enter-delay: 60ms;
+  --rise: 8px;
+
   /* Sea */
   --sea-frame-top: #17495a;
   --sea-frame-bottom: #0f3140;
@@ -59,8 +71,8 @@ input {
   visibility: visible;
 
   transition:
-    opacity 500ms ease,
-    visibility 500ms ease;
+    opacity var(--dur-slow) var(--ease-out),
+    visibility var(--dur-slow) var(--ease-out);
 }
 
 .entry-screen.hidden {
@@ -267,10 +279,10 @@ input {
     0 2px 8px rgba(18, 32, 43, 0.05);
 
   transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease,
-    transform 0.15s ease,
-    box-shadow 0.15s ease;
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
 }
 
 .game-icon-button:hover {
@@ -434,8 +446,8 @@ input {
   cursor: pointer;
 
   transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease;
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
 }
 
 .sound-mute-button:hover {
@@ -529,9 +541,9 @@ input {
   cursor: pointer;
 
   transition:
-    border-color 180ms ease,
-    background 180ms ease,
-    transform 180ms ease;
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
 }
 
 .game-mode-button:hover {
@@ -595,8 +607,8 @@ input {
   opacity: 0.3;
 
   transition:
-    opacity 180ms ease,
-    transform 180ms ease;
+    opacity var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
 }
 
 .game-mode-button:hover .game-mode-arrow {
@@ -649,6 +661,22 @@ input {
   color: #12202b;
   font-size: 17px;
   font-weight: 700;
+
+  transition: color var(--dur-base) var(--ease-out);
+}
+
+/* The message re-runs this each time it changes (ui/status.ts). */
+@media (prefers-reduced-motion: no-preference) {
+  #turn-status.status-swap {
+    animation: status-swap var(--dur-base) var(--ease-out);
+  }
+}
+
+@keyframes status-swap {
+  from {
+    opacity: 0;
+    transform: translateY(calc(var(--rise) / 2));
+  }
 }
 
 /* =========================================================
@@ -778,9 +806,10 @@ input {
   cursor: pointer;
 
   transition:
-    transform 0.12s ease,
-    filter 0.15s ease,
-    box-shadow 0.15s ease;
+    background-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out),
+    filter var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
 }
 
 .cell:hover {
@@ -805,9 +834,9 @@ input {
   cursor: pointer;
 
   transition:
-    background-color 0.15s ease,
-    transform 0.15s ease,
-    box-shadow 0.15s ease;
+    background-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
 }
 
 .cell.ship.movable:hover {
@@ -869,7 +898,7 @@ input {
 }
 
 .cell.shot-animation {
-  animation: shot-impact 0.3s ease-out;
+  animation: shot-impact var(--dur-base) var(--ease-out);
 }
 
 .cell.hit.shot-animation {
@@ -884,7 +913,7 @@ input {
 }
 
 .cell.sunk.shot-animation {
-  animation: sunk-impact 0.4s ease-out;
+  animation: sunk-impact var(--dur-slow) var(--ease-out);
 
   box-shadow:
     0 0 0 2px rgba(127, 29, 29, 0.2),
@@ -969,11 +998,11 @@ input {
   border: 1px solid #dbe3e4;
 
   transition:
-    opacity 0.2s ease,
-    transform 0.2s ease,
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    background-color 0.2s ease;
+    opacity var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out),
+    background-color var(--dur-base) var(--ease-out);
 }
 
 .fleet-ship-visual {
@@ -992,8 +1021,8 @@ input {
   background: #9fb1b8;
 
   transition:
-    background-color 0.2s ease,
-    box-shadow 0.2s ease;
+    background-color var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
 }
 
 .fleet-ship-name {
@@ -1035,11 +1064,11 @@ input {
   cursor: pointer;
 
   transition:
-    opacity 0.2s ease,
-    transform 0.2s ease,
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    background-color 0.2s ease;
+    opacity var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out),
+    background-color var(--dur-base) var(--ease-out);
 }
 
 .fleet-ship.selectable:hover {
@@ -1110,11 +1139,11 @@ input {
 }
 
 .fleet-ship.sunk-animation {
-  animation: fleet-sunk 0.5s ease-out;
+  animation: fleet-sunk var(--dur-slow) var(--ease-out);
 }
 
 .fleet-ship.sunk-animation .ship-segment {
-  animation: segment-sunk 0.35s ease-out;
+  animation: segment-sunk var(--dur-base) var(--ease-out);
 }
 
 @keyframes segment-sunk {
@@ -1185,10 +1214,10 @@ input {
   cursor: pointer;
 
   transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease,
-    transform 0.15s ease,
-    box-shadow 0.15s ease;
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
 }
 
 .placement-button:hover {
@@ -1232,10 +1261,10 @@ input {
   cursor: pointer;
 
   transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease,
-    transform 0.15s ease,
-    box-shadow 0.15s ease;
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
 }
 
 .new-game-button:hover {
@@ -1495,8 +1524,8 @@ input {
   cursor: pointer;
 
   transition:
-    background-color 180ms ease,
-    transform 180ms ease;
+    background-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
 }
 
 .results-new-game:hover {
@@ -1518,8 +1547,8 @@ input {
   cursor: pointer;
 
   transition:
-    background-color 180ms ease,
-    transform 180ms ease;
+    background-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
 }
 
 .results-view-boards:hover {
@@ -1627,21 +1656,9 @@ input {
   font-size: clamp(5px, 1.2vw, 8px);
 }
 
-@keyframes results-enter {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @media (prefers-reduced-motion: no-preference) {
   .results-screen:not([hidden]) {
-    animation: results-enter 320ms ease-out;
+    animation: screen-enter var(--dur-base) var(--ease-out) var(--enter-delay) backwards;
   }
 }
 
@@ -1720,8 +1737,8 @@ input {
   cursor: pointer;
 
   transition:
-    background-color 0.15s ease,
-    opacity 0.15s ease;
+    background-color var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out);
 }
 
 .lobby-join-button:hover:not(:disabled) {
@@ -2246,8 +2263,8 @@ input {
   cursor: pointer;
 
   transition:
-    background-color 180ms ease,
-    transform 180ms ease;
+    background-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
 }
 
 .confirm-button:hover {
@@ -2339,8 +2356,8 @@ input {
 
 
   transition:
-    transform 280ms cubic-bezier(0.4, 0, 0.2, 1),
-    width 280ms cubic-bezier(0.4, 0, 0.2, 1);
+    transform var(--dur-base) var(--ease-out),
+    width var(--dur-base) var(--ease-out);
 }
 
 .stats-segment {
@@ -2364,9 +2381,9 @@ input {
   opacity: 0.75;
 
   transition:
-    color 200ms ease,
-    opacity 200ms ease,
-    background-color 200ms ease;
+    color var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
 }
 
 .stats-segment:hover {
@@ -2403,7 +2420,7 @@ input {
 }
 
 .stats-segments--reveal {
-  animation: stats-reveal 260ms ease-out;
+  animation: stats-reveal var(--dur-base) var(--ease-out);
 }
 
 /* Section filter with the AI level filter to its right (wraps below on phones). */
@@ -2481,26 +2498,47 @@ input {
 
   background: #26737a;
 
-  transition: width 450ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: width var(--dur-slow) var(--ease-out);
 }
 
 /* Opening the screen: cards rise in one after another (--i is their index),
    and the bars fill from empty to their value. */
 @media (prefers-reduced-motion: no-preference) {
   .stats-card {
-    animation: results-enter 380ms ease-out backwards;
+    animation: screen-enter var(--dur-base) var(--ease-out) backwards;
     animation-delay: calc(var(--i, 0) * 55ms);
   }
 
   .stats-card--meter::after {
-    animation: stats-meter-in 700ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    animation: stats-meter-in calc(var(--dur-slow) * 1.5) var(--ease-out) backwards;
     animation-delay: calc(var(--i, 0) * 55ms + 120ms);
   }
 
-  /* Switching between statistics and history fades the screen in again;
-     the class is re-applied each time from main.ts. */
+  /* Switching between statistics and history slides the new view in from
+     the side of the button that was pressed (--enter-x, set in main.ts) once
+     a copy of the old view has slid out the other way (screenTransitions.ts).
+     The children skip their own entrance so nothing animates twice. */
   .records-enter {
-    animation: results-enter 260ms ease-out;
+    animation: records-in var(--dur-base) var(--ease-out) var(--dur-exit) backwards;
+  }
+
+  .records-enter .stats-card,
+  .records-enter .history-row {
+    animation: none;
+  }
+
+  /* Opening from the menu: history rows rise in one after another, like the
+     statistics cards. */
+  .history-row {
+    animation: screen-enter var(--dur-base) var(--ease-out) backwards;
+    animation-delay: calc(min(var(--i, 0), 9) * 40ms);
+  }
+}
+
+@keyframes records-in {
+  from {
+    opacity: 0;
+    transform: translateX(var(--enter-x, 0px));
   }
 }
 
@@ -2775,8 +2813,8 @@ body::before {
   box-shadow: inset 0 0 0 1.5px #b4c3c5;
 
   transition:
-    background-color 0.25s ease,
-    box-shadow 0.25s ease;
+    background-color var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
 }
 
 .fleet-progress-pip.current {
@@ -2831,49 +2869,58 @@ body::before {
    ========================================================= */
 
 .history-empty {
-  position: relative;
-
-  width: min(100%, 360px);
-  height: 112px;
+  width: min(100%, 400px);
   margin-top: 8px;
+  padding: 18px;
 
-  overflow: hidden;
-
-  border-radius: 12px;
+  border-radius: 16px;
 
   background:
-    linear-gradient(165deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 55%),
+    radial-gradient(120% 90% at 20% 0%, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0) 60%),
     linear-gradient(160deg, var(--sea-frame-top), var(--sea-frame-bottom));
+
+  box-shadow: 0 10px 28px rgba(15, 49, 64, 0.18);
 }
 
-.history-empty-ship {
-  position: absolute;
-  left: 22%;
-  top: 50%;
-
-  width: 92px;
-  height: 22px;
-
-  background:
-    linear-gradient(#8ea2aa, #8ea2aa) 62% 50% / 16% 56% no-repeat,
-    linear-gradient(#c3d0d5, #c3d0d5) center / 100% 42% no-repeat,
-    #dde6e9;
-
-  clip-path: polygon(0 50%, 16% 0, 100% 0, 100% 100%, 16% 100%);
-
-  transform: translateY(-50%);
+.history-empty-board {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
-.history-empty-ring {
-  position: absolute;
-  right: 20%;
-  top: 36%;
+.history-empty-cell {
+  fill: #2b7186;
+}
 
-  width: 16px;
-  height: 16px;
+.history-empty-hull {
+  fill: #dde6e9;
+}
 
-  border: 2px solid rgba(255, 255, 255, 0.55);
-  border-radius: 50%;
+.history-empty-deck {
+  fill: #c3d0d5;
+}
+
+.history-empty-bridge {
+  fill: #8ea2aa;
+}
+
+.history-empty-miss {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.6);
+  stroke-width: 2;
+}
+
+.history-empty-target {
+  fill: rgba(255, 255, 255, 0.06);
+  stroke: rgba(255, 255, 255, 0.7);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .history-empty-target {
+    animation: entry-pulse 2s ease-in-out infinite;
+  }
 }
 
 /* =========================================================
@@ -2886,7 +2933,7 @@ body::before {
 @keyframes screen-enter {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(var(--rise));
   }
 
   to {
@@ -2898,7 +2945,7 @@ body::before {
 @media (prefers-reduced-motion: no-preference) {
 
   :where(.game-mode-menu, .game-container):not([hidden]) {
-    animation: screen-enter 0.28s cubic-bezier(0.22, 1, 0.36, 1) 0.06s backwards;
+    animation: screen-enter var(--dur-base) var(--ease-out) var(--enter-delay) backwards;
   }
 
 }
@@ -2943,7 +2990,7 @@ body::before {
 @keyframes screen-exit {
   to {
     opacity: 0;
-    transform: translateY(-6px);
+    transform: translate(var(--exit-x, 0px), var(--exit-y, -6px));
   }
 }
 
@@ -2953,7 +3000,16 @@ body::before {
   box-sizing: border-box;
   z-index: var(--z-exit);
   pointer-events: none;
-  animation: screen-exit 0.11s ease-in forwards;
+  animation: screen-exit var(--dur-exit) var(--ease-in) forwards;
+}
+
+/* The copy is a still picture: anything inside it that animates on insert
+   (stat cards, meters, history rows) must stay put while it fades. */
+.screen-exit-clone.screen-exit-clone *,
+.screen-exit-clone.screen-exit-clone *::before,
+.screen-exit-clone.screen-exit-clone *::after {
+  animation: none;
+  transition: none;
 }
 
 /* =========================================================
@@ -3048,15 +3104,151 @@ body::before {
 
   .sound-panel:not([hidden]) {
     transform-origin: top right;
-    animation: popover-in 0.16s ease-out;
+    animation: popover-in var(--dur-base) var(--ease-out);
   }
 
   .confirm-overlay {
-    animation: overlay-in 0.18s ease-out;
+    animation: overlay-in var(--dur-base) var(--ease-out);
   }
 
   .confirm-dialog {
-    animation: dialog-in 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+    animation: dialog-in var(--dur-base) var(--ease-out);
   }
 
+}
+
+
+/* =========================================================
+   TOPBAR TOGGLES: OPEN STATE
+   Statistics / history stay lit while their screen is open.
+   ========================================================= */
+
+.game-icon-button[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: #eaf4f4;
+  color: var(--accent);
+}
+
+/* =========================================================
+   MOTION: ERRORS, DIALOG EXIT, PRESSED
+   ========================================================= */
+
+@media (prefers-reduced-motion: no-preference) {
+
+  .lobby-error:not([hidden]) {
+    animation: screen-enter var(--dur-base) var(--ease-out);
+  }
+
+  /* The dialog is removed once this has played (ui/confirmDialog.ts). */
+  .confirm-overlay--closing {
+    pointer-events: none;
+    animation: overlay-out var(--dur-exit) var(--ease-in) forwards;
+  }
+
+  .confirm-overlay--closing .confirm-dialog {
+    animation: dialog-out var(--dur-exit) var(--ease-in) forwards;
+  }
+
+}
+
+@keyframes overlay-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes dialog-out {
+  to {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+}
+
+/* One pressed feedback for every text button. */
+.history-clear:active,
+.lobby-join-button:active:not(:disabled),
+.sound-mute-button:active,
+.stats-segment:active {
+  transform: scale(0.98);
+}
+
+.history-clear,
+.lobby-join-button,
+.sound-mute-button {
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+/* Anyone who asked for less motion gets none, including anything added later. */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+
+}
+
+
+/* =========================================================
+   MOTION: SHIP PLACEMENT, RESULTS ENTRANCE
+   ========================================================= */
+
+@media (prefers-reduced-motion: no-preference) {
+
+  /* A ship just placed or moved: its hull grows out from the bow, one cell
+     after another (--n is the cell's position among the new ones). */
+  .cell.hull-enter::before {
+    animation: hull-in var(--dur-base) var(--ease-out) backwards;
+    animation-delay: calc(var(--n, 0) * 45ms);
+  }
+
+  .cell.hull-h.hull-enter::before {
+    transform-origin: left center;
+  }
+
+  .cell.hull-v.hull-enter::before {
+    transform-origin: center top;
+    animation-name: hull-in-v;
+  }
+
+  /* Results: the groups, their meters and the buttons follow the headline in
+     order instead of arriving together. */
+  .results-group {
+    animation: screen-enter var(--dur-base) var(--ease-out) backwards;
+    animation-delay: calc(var(--enter-delay) + var(--i, 0) * 70ms);
+  }
+
+  .results-stat--meter::after {
+    animation: stats-meter-in calc(var(--dur-slow) * 1.5) var(--ease-out) backwards;
+    animation-delay: calc(var(--enter-delay) + var(--i, 0) * 70ms + 160ms);
+  }
+
+  .results-actions {
+    animation: screen-enter var(--dur-base) var(--ease-out) backwards;
+    animation-delay: calc(var(--enter-delay) + 3 * 70ms + 120ms);
+  }
+
+}
+
+@keyframes hull-in {
+  from {
+    opacity: 0;
+    transform: scale(0.35, 0.6);
+  }
+}
+
+@keyframes hull-in-v {
+  from {
+    opacity: 0;
+    transform: scale(0.6, 0.35);
+  }
 }

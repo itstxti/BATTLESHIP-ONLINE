@@ -278,6 +278,12 @@ function addHullClasses(
    BOARD
    ========================================================= */
 
+/*
+ * Hull cells each board showed at its last render, so the next render can
+ * tell which ones are new (a ship just placed or moved) and animate only those.
+ */
+const shownHulls = new WeakMap<HTMLElement, Set<string>>();
+
 export function renderBoard(
   element: HTMLDivElement,
   board: Board,
@@ -298,6 +304,21 @@ export function renderBoard(
   } = options;
 
   element.innerHTML = '';
+
+  const previousHulls =
+    shownHulls.get(element);
+
+  const hulls =
+    new Set<string>();
+
+  // Hull cells new in this render, grouped by ship, with their position along it.
+  const arrivals =
+    new Map<object, { cell: HTMLElement; axis: number }[]>();
+
+  const animateHulls =
+    gamePhase === 'placement' &&
+    !readOnly &&
+    !isEnemyBoard;
 
   /*
    * Top-left empty corner.
@@ -446,6 +467,30 @@ export function renderBoard(
             row,
             column
           );
+
+          const key =
+            `${row},${column}`;
+
+          hulls.add(key);
+
+          if (
+            animateHulls &&
+            previousHulls &&
+            !previousHulls.has(key)
+          ) {
+            const list =
+              arrivals.get(hullShip) ?? [];
+
+            list.push({
+              cell,
+              axis:
+                cell.classList.contains('hull-v')
+                  ? row
+                  : column
+            });
+
+            arrivals.set(hullShip, list);
+          }
         }
       }
 
@@ -670,5 +715,18 @@ export function renderBoard(
       );
     }
   }
+
+  // New hull cells grow in from the bow, one after another.
+  for (const list of arrivals.values()) {
+    list
+      .sort((a, b) => a.axis - b.axis)
+      .forEach(({ cell }, index) => {
+        cell.style.setProperty('--n', String(index));
+
+        cell.classList.add('hull-enter');
+      });
+  }
+
+  shownHulls.set(element, hulls);
 }
 
