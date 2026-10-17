@@ -213,15 +213,19 @@ export function renderResultsScreen(
   const groups =
     element('div', 'results-groups');
 
-  for (
-    const group of describeStatGroups(
-      view.stats,
-      names
-    )
-  ) {
+  describeStatGroups(
+    view.stats,
+    names
+  ).forEach((group, groupIndex) => {
     const section = element(
       'div',
       `results-group results-group--${group.id}`
+    );
+
+    // Groups rise in one after another (see .results-group in style.css).
+    section.style.setProperty(
+      '--i',
+      String(groupIndex)
     );
 
     const title = element(
@@ -295,7 +299,7 @@ export function renderResultsScreen(
     );
 
     groups.append(section);
-  }
+  });
 
   const newGameButton =
     element(
