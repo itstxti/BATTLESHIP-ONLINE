@@ -30,8 +30,10 @@ function element<K extends keyof HTMLElementTagNameMap>(
   return node;
 }
 
-function renderRow(record: MatchRecord): HTMLElement {
+function renderRow(record: MatchRecord, index: number): HTMLElement {
   const item = element('li', `history-row history-row--${record.outcome}`);
+
+  item.style.setProperty('--i', String(index));
 
   if (record.mode === 'local') {
     item.classList.add('history-row--local');
@@ -112,9 +114,9 @@ export function renderHistoryScreen(
 
   list.setAttribute('aria-label', 'Match history, newest first');
 
-  for (const record of records) {
-    list.append(renderRow(record));
-  }
+  records.forEach((record, index) => {
+    list.append(renderRow(record, index));
+  });
 
   const clear = element('button', 'history-clear', 'Clear history');
 

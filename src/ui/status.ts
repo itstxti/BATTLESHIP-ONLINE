@@ -16,8 +16,25 @@ export function setTurnStatus(
     return;
   }
 
+  const changed =
+    turnStatusElement.textContent !== message;
+
   turnStatusElement.textContent =
     message;
+
+  // Re-run the short entrance so a new message is noticed
+  // (removing the class and forcing a reflow restarts it).
+  if (changed) {
+    turnStatusElement.classList.remove(
+      'status-swap'
+    );
+
+    void turnStatusElement.offsetWidth;
+
+    turnStatusElement.classList.add(
+      'status-swap'
+    );
+  }
 
   turnStatusElement.classList.remove(
     'player-turn',
