@@ -20,6 +20,30 @@ export const CONFIRM_CANCEL_ID = 'confirm-dialog-cancel';
 
 let dismissOpen: (() => void) | null = null;
 
+/** Keep in step with --dur-exit in style.css. */
+const EXIT_MS = 120;
+
+/** Fades the dialog out before removing it (at once without animation). */
+function removeOverlay(overlay: HTMLElement): void {
+  const animate =
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: no-preference)').matches;
+
+  if (!animate) {
+    overlay.remove();
+
+    return;
+  }
+
+  const remove = (): void => overlay.remove();
+
+  overlay.classList.add('confirm-overlay--closing');
+  overlay.addEventListener('animationend', remove, { once: true });
+
+  // Safety net if the animation never fires.
+  window.setTimeout(remove, EXIT_MS + 200);
+}
+
 /** Closes the open dialog, if any, as if the player had cancelled it. */
 export function dismissConfirmDialog(): void {
   dismissOpen?.();
@@ -103,7 +127,7 @@ export function confirmDialog(options: ConfirmOptions): Promise<boolean> {
         dismissOpen = null;
       }
 
-      overlay.remove();
+      removeOverlay(overlay);
 
       // Only give focus back if nothing else has taken it in the meantime.
       if (
