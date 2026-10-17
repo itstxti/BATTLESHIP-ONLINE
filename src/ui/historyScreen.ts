@@ -166,6 +166,8 @@ function renderRow(record: MatchRecord, index: number): HTMLElement {
 
   item.style.setProperty('--i', String(index));
 
+  item.style.setProperty('--i', String(index));
+
   if (record.mode === 'local') {
     item.classList.add('history-row--local');
   }
@@ -242,6 +244,9 @@ export function renderHistoryScreen(
 
   list.setAttribute('aria-label', 'Match history, newest first');
 
+  records.forEach((record, index) => {
+    list.append(renderRow(record, index));
+  });
   records.forEach((record, index) => {
     list.append(renderRow(record, index));
   });
