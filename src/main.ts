@@ -119,6 +119,25 @@ import {
   audio
 } from './audio/audio';
 
+import {
+  installScreenExit
+} from './ui/screenTransitions';
+
+
+/*
+ * Screens fade out (instead of vanishing) when they are hidden.
+ */
+installScreenExit([
+  'game-mode-menu',
+  'difficulty-screen',
+  'pass-device-screen',
+  'online-screen',
+  'history-screen',
+  'results-screen',
+  'game-screen',
+  'sound-panel'
+]);
+
 
 /* =========================================================
    ENTRY SCREEN

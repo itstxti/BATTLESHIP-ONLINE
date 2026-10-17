@@ -10,6 +10,7 @@
   --z-popover: 200;
   --z-dialog: 300;
   --z-entry: 400;
+  --z-exit: 150;
 
   /* Sea */
   --sea-frame-top: #17495a;
@@ -402,7 +403,7 @@ input {
 
   cursor: pointer;
 
-  accent-color: #12202b;
+  accent-color: var(--accent);
 }
 
 /* =========================================================
@@ -2334,7 +2335,7 @@ input {
 
   border-radius: 999px;
 
-  background: #2a7d4f;
+  background: var(--accent);
 
 
   transition:
@@ -2897,7 +2898,7 @@ body::before {
 @media (prefers-reduced-motion: no-preference) {
 
   :where(.game-mode-menu, .game-container):not([hidden]) {
-    animation: screen-enter 0.28s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    animation: screen-enter 0.28s cubic-bezier(0.22, 1, 0.36, 1) 0.06s backwards;
   }
 
 }
@@ -2927,6 +2928,135 @@ body::before {
     transform: none;
     filter: none;
     box-shadow: none;
+  }
+
+}
+
+
+/* =========================================================
+   SCREEN EXIT
+   A frozen copy of the leaving screen (see ui/screenTransitions.ts)
+   fades out over the new one. The doubled class beats the entrance
+   animations that the copy also matches.
+   ========================================================= */
+
+@keyframes screen-exit {
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.screen-exit-clone.screen-exit-clone:not([hidden]) {
+  position: fixed;
+  margin: 0;
+  box-sizing: border-box;
+  z-index: var(--z-exit);
+  pointer-events: none;
+  animation: screen-exit 0.11s ease-in forwards;
+}
+
+/* =========================================================
+   EMPTY STATE: STATISTICS
+   ========================================================= */
+
+.stats-empty {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  margin-bottom: 12px;
+
+  padding: 14px 16px;
+
+  border: 1px dashed #b4c3c5;
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.55);
+  color: #55666b;
+  font-size: 13px;
+}
+
+.stats-empty[hidden] {
+  display: none;
+}
+
+.stats-empty::before {
+  content: "";
+  flex-shrink: 0;
+
+  width: 18px;
+  height: 18px;
+
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+}
+
+.stats-empty-title {
+  display: block;
+
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.stats-empty-text {
+  display: block;
+}
+
+/* Colour, not opacity: the cards already animate their own opacity in. */
+.stats-grid--empty .stats-card-value {
+  color: #8fa0a3;
+}
+
+
+/* =========================================================
+   POPOVER & DIALOG ENTRANCE
+   (exit of the sound panel is handled by ui/screenTransitions.ts)
+   ========================================================= */
+
+@keyframes popover-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+  .sound-panel:not([hidden]) {
+    transform-origin: top right;
+    animation: popover-in 0.16s ease-out;
+  }
+
+  .confirm-overlay {
+    animation: overlay-in 0.18s ease-out;
+  }
+
+  .confirm-dialog {
+    animation: dialog-in 0.22s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
 }

@@ -39,6 +39,12 @@ const AI_VIEWS: readonly { id: AIView; label: string }[] = [
   { id: 'hard', label: 'Hard' }
 ];
 
+const EMPTY_NOTES: Record<Section, string> = {
+  global: 'Finish a game and your numbers will show up here.',
+  ai: 'Play against the computer to fill this in.',
+  online: 'Play an online match to fill this in.'
+};
+
 const SECTION_NOTES: Record<Section, string> = {
   global: 'Solo and online matches combined.',
   ai: 'Matches against the computer.',
@@ -371,6 +377,18 @@ export function renderStatsScreen(
 
   const grid = element('dl', 'stats-grid');
 
+  // Shown instead of a wall of zeros when the chosen scope has no matches.
+  // The cards stay in place (dimmed) so switching filters keeps animating.
+  const empty = element('div', 'stats-empty');
+
+  empty.hidden = true;
+
+  const emptyTitle = element('strong', 'stats-empty-title', 'No matches here yet');
+
+  const emptyText = element('span', 'stats-empty-text');
+
+  empty.append(emptyTitle, emptyText);
+
   // When the screen opens the cards fade in one after another while their
   // numbers count up from zero; without animation they just show the values.
   const opening = canAnimate();
@@ -393,9 +411,20 @@ export function renderStatsScreen(
 
     note.textContent = SECTION_NOTES[section];
 
-    describeStatCards(
-      getScopeStats(loadStats(), currentScope())
-    ).forEach((card, index) =>
+    const scopeStats = getScopeStats(loadStats(), currentScope());
+
+    const isEmpty = scopeStats.matches === 0;
+
+    empty.hidden = !isEmpty;
+
+    emptyText.textContent =
+      section === 'ai' && aiView !== 'all'
+        ? 'No matches at this level yet.'
+        : EMPTY_NOTES[section];
+
+    grid.classList.toggle('stats-grid--empty', isEmpty);
+
+    describeStatCards(scopeStats).forEach((card, index) =>
       updateCard(
         cards[index],
         card,
@@ -459,7 +488,7 @@ export function renderStatsScreen(
     });
   });
 
-  container.replaceChildren(header, filters, note, grid, reset);
+  container.replaceChildren(header, filters, note, empty, grid, reset);
 
   update(opening);
 
