@@ -11,6 +11,11 @@
   --z-dialog: 300;
   --z-entry: 400;
 
+  /* Sea */
+  --sea-frame-top: #17495a;
+  --sea-frame-bottom: #0f3140;
+  --waves: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 34' preserveAspectRatio='none'%3E%3Cpath d='M0 11q8.5-5 17 0t17 0M0 25q8.5-5 17 0t17 0' fill='none' stroke='white' stroke-opacity='.17' stroke-width='1.2'/%3E%3C/svg%3E");
+
   font-family: var(--font-sans);
   color: var(--ink);
   background: #f2f5f5;
@@ -716,8 +721,13 @@ input {
 
   padding: 8px;
 
-  background: #d3dfe0;
-  border-radius: 10px;
+  --gap: 3px;
+
+  background: linear-gradient(160deg, var(--sea-frame-top), var(--sea-frame-bottom));
+  border-radius: 12px;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.07),
+    0 18px 32px -20px rgba(18, 32, 43, 0.55);
 }
 
 /* =========================================================
@@ -738,7 +748,7 @@ input {
   width: 100%;
   height: 100%;
 
-  color: #667a7e;
+  color: rgba(214, 234, 238, 0.72);
 
   font-size: 10px;
   font-weight: 700;
@@ -751,26 +761,30 @@ input {
    ========================================================= */
 
 .cell {
+  position: relative;
+  isolation: isolate;
+
   width: 34px;
   height: 34px;
 
   padding: 0;
-
   border: 0;
   border-radius: 5px;
 
-  background: #ffffff;
+  background:
+    var(--waves) 0 0 / 100% 100% no-repeat,
+    linear-gradient(165deg, #3b8da2, #266a7e);
 
   cursor: pointer;
 
   transition:
     transform 0.12s ease,
-    background-color 0.15s ease,
+    filter 0.15s ease,
     box-shadow 0.15s ease;
 }
 
 .cell:hover {
-  background: #e7eeef;
+  filter: brightness(1.18);
   transform: scale(1.04);
 }
 
@@ -779,7 +793,8 @@ input {
    ========================================================= */
 
 .cell.ship {
-  background-color: #12202b;
+  /* The hull itself is drawn by .cell.hull::before. */
+  position: relative;
 }
 
 /* =========================================================
@@ -796,12 +811,9 @@ input {
 }
 
 .cell.ship.movable:hover {
-  background: #1f3340;
-
-  transform: scale(1.06);
-
-  box-shadow:
-    0 0 0 2px rgba(18, 32, 43, 0.12);
+  transform: none;
+  box-shadow: none;
+  filter: brightness(1.14);
 }
 
 /* =========================================================
@@ -809,10 +821,10 @@ input {
    ========================================================= */
 
 .cell.hit {
-  background-color: #c8382f;
-  color: white;
+  color: #ffffff;
   font-size: 20px;
   font-weight: 700;
+  text-shadow: 0 1px 2px rgba(60, 10, 6, 0.65);
 }
 
 /* =========================================================
@@ -820,8 +832,7 @@ input {
    ========================================================= */
 
 .cell.miss {
-  background-color: #dde6e7;
-  color: #667a7e;
+  color: rgba(255, 255, 255, 0.82);
   font-size: 18px;
   font-weight: 700;
 }
@@ -831,8 +842,7 @@ input {
    ========================================================= */
 
 .cell.sunk {
-  background-color: #7f1d1d;
-  color: white;
+  color: #ffffff;
 }
 
 /* =========================================================
@@ -970,7 +980,7 @@ input {
 
 .fleet-ship-visual {
   display: flex;
-  gap: 2px;
+  gap: 1px;
 
   flex-shrink: 0;
 }
@@ -979,9 +989,9 @@ input {
   width: 13px;
   height: 9px;
 
-  border-radius: 2px;
+  border-radius: 1px;
 
-  background: #12202b;
+  background: linear-gradient(180deg, #9fb1b8, #5d727b);
 }
 
 .fleet-ship-name {
@@ -1052,7 +1062,7 @@ input {
 }
 
 .fleet-ship.selected .ship-segment {
-  background: #12202b;
+  background: linear-gradient(180deg, #3d98a5, #1d5e69);
 }
 
 /* =========================================================
@@ -1060,22 +1070,18 @@ input {
    ========================================================= */
 
 .cell.placement-preview {
-  background: #c3d2d4;
-
+  background: #9fcbd6;
   box-shadow:
-    inset 0 0 0 2px #12202b,
-    0 0 8px rgba(18, 32, 43, 0.08);
-
+    inset 0 0 0 2px #ffffff,
+    0 0 10px rgba(255, 255, 255, 0.28);
   transform: scale(1.04);
 }
 
 .cell.placement-invalid {
-  background: #fee2e2;
-
+  background: #c8382f;
   box-shadow:
-    inset 0 0 0 2px #c8382f,
-    0 0 8px rgba(200, 56, 47, 0.08);
-
+    inset 0 0 0 2px #ffd3cf,
+    0 0 10px rgba(200, 56, 47, 0.35);
   transform: scale(1.04);
 }
 
@@ -1138,11 +1144,9 @@ input {
 }
 
 .cell.available:hover {
-  background: #e4eeee;
   transform: scale(1.06);
-
-  box-shadow:
-    0 0 0 2px rgba(18, 32, 43, 0.08);
+  filter: brightness(1.22);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
 }
 
 .cell.disabled {
@@ -1151,9 +1155,9 @@ input {
 }
 
 .cell.disabled:hover {
-  background: #ffffff;
   transform: none;
   box-shadow: none;
+  filter: none;
 }
 
 /* =========================================================
@@ -1586,7 +1590,8 @@ input {
   grid-template-columns: minmax(0, 1.4fr) repeat(10, minmax(0, 3fr));
   grid-template-rows: auto;
 
-  gap: clamp(1px, 0.5vw, 3px);
+  --gap: clamp(1px, 0.5vw, 3px);
+  gap: var(--gap);
 
   width: 100%;
   padding: clamp(3px, 1.2vw, 8px);
@@ -1610,6 +1615,8 @@ input {
 
   /* The × / • marks shrink with the cell instead of stretching its row. */
   overflow: hidden;
+  overflow: clip;
+  overflow-clip-margin: 3px;
   font-size: clamp(6px, 1.6vw, 10px);
   line-height: 1;
 
@@ -2604,4 +2611,143 @@ body::before {
     animation: none;
   }
 
+}
+
+
+/* =========================================================
+   SHIPS & SHOTS
+   Hulls are drawn on ::before (below the × / • text), shot
+   markers on ::after. The renderer tags ship cells with
+   .hull .hull-h|v .hull-bow|mid|stern .hull-<name> [.hull-bridge].
+   ========================================================= */
+
+.cell.hull::before,
+.cell.hit::after,
+.cell.miss::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.cell.hull {
+  --hull-a: 180deg;
+  --hull-top: #a7b8be;
+  --hull-bot: #5d727b;
+  --deck: #cdd8dc;
+  --deck-size: 100% 50%;
+  --run-dir: 90deg;
+  --run-color: transparent;
+  --run-size: 100% 2px;
+  --bridge: #3f525b;
+  --bridge-size: 0 0;
+}
+
+.cell.hull::before {
+  /* Horizontal ship: runs left to right and overlaps the grid gap so the
+     hull reads as one piece. */
+  inset: 14% calc(var(--gap) * -1 - 1px) 14% 0;
+
+  background:
+    linear-gradient(var(--bridge), var(--bridge)) center / var(--bridge-size) no-repeat,
+    repeating-linear-gradient(var(--run-dir), var(--run-color) 0 6px, transparent 6px 12px) center / var(--run-size) no-repeat,
+    linear-gradient(var(--deck), var(--deck)) center / var(--deck-size) no-repeat,
+    linear-gradient(var(--hull-a), var(--hull-top), var(--hull-bot));
+}
+
+.cell.hull-v {
+  --hull-a: 90deg;
+  --deck-size: 50% 100%;
+  --run-dir: 0deg;
+  --run-size: 2px 100%;
+}
+
+.cell.hull-v::before {
+  inset: 0 14% calc(var(--gap) * -1 - 1px) 14%;
+}
+
+.cell.hull-h.hull-stern::before {
+  right: 0;
+}
+
+.cell.hull-v.hull-stern::before {
+  bottom: 0;
+}
+
+.cell.hull-h.hull-bow::before {
+  clip-path: polygon(0 50%, 40% 0, 100% 0, 100% 100%, 40% 100%);
+}
+
+.cell.hull-h.hull-stern::before {
+  clip-path: polygon(0 0, 78% 0, 100% 18%, 100% 82%, 78% 100%, 0 100%);
+}
+
+.cell.hull-v.hull-bow::before {
+  clip-path: polygon(50% 0, 100% 40%, 100% 100%, 0 100%, 0 40%);
+}
+
+.cell.hull-v.hull-stern::before {
+  clip-path: polygon(0 0, 100% 0, 100% 78%, 82% 100%, 18% 100%, 0 78%);
+}
+
+.cell.hull-bridge {
+  --bridge-size: 46% 46%;
+}
+
+/* Each class of ship gets its own silhouette. */
+.cell.hull-carrier {
+  --deck: #b7c4c9;
+  --deck-size: 100% 78%;
+  --run-color: rgba(255, 255, 255, 0.85);
+}
+
+.cell.hull-battleship {
+  --hull-top: #98a9b0;
+  --hull-bot: #4f646d;
+}
+
+.cell.hull-submarine {
+  --hull-top: #46606b;
+  --hull-bot: #1f3640;
+  --deck: #2e4854;
+  --deck-size: 100% 36%;
+  --bridge: #8ea4ad;
+  --bridge-size: 34% 34%;
+}
+
+.cell.hull-submarine.hull-bridge {
+  --bridge-size: 34% 34%;
+}
+
+.cell.hull-destroyer {
+  --hull-top: #b2c1c6;
+  --hull-bot: #667c85;
+}
+
+/* Wrecks: charred hull. */
+.cell.sunk.hull {
+  --hull-top: #6a3a38;
+  --hull-bot: #3a1c1c;
+  --deck: #7b4c49;
+  --run-color: transparent;
+  --bridge: #2a1212;
+}
+
+/* Shots */
+.cell.hit::after {
+  inset: 18%;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffe0a0 0 20%, #f2793f 21% 50%, rgba(200, 56, 47, 0.75) 51% 68%, rgba(200, 56, 47, 0) 70%);
+}
+
+.cell.miss::after {
+  inset: 26%;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+}
+
+@media (max-width: 420px) {
+  .board {
+    --gap: 2px;
+  }
 }

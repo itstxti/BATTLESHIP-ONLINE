@@ -1,5 +1,7 @@
 import type { Board } from '../game/Board';
 
+import type { Ship } from '../game/Ship';
+
 import type {
   FleetDefinition,
   GamePhase
@@ -219,6 +221,60 @@ function describeCell(
 }
 
 /* =========================================================
+   HULL CLASSES
+   ========================================================= */
+
+/*
+ * Tags a cell with the part of the ship it shows (bow / middle / stern),
+ * its direction and its class, so the stylesheet can draw one continuous
+ * hull instead of separate squares.
+ */
+function addHullClasses(
+  cell: HTMLElement,
+  ship: Ship,
+  row: number,
+  column: number
+): void {
+  const vertical =
+    ship.positions.length > 1 &&
+    ship.positions[0].column ===
+      ship.positions[1].column;
+
+  const coordinates =
+    ship.positions.map(
+      (position) =>
+        vertical
+          ? position.row
+          : position.column
+    );
+
+  const first = Math.min(...coordinates);
+  const last = Math.max(...coordinates);
+  const here = vertical ? row : column;
+
+  cell.classList.add(
+    'hull',
+    vertical ? 'hull-v' : 'hull-h',
+    `hull-${ship.name.toLowerCase()}`
+  );
+
+  if (here === first) {
+    cell.classList.add('hull-bow');
+  } else if (here === last) {
+    cell.classList.add('hull-stern');
+  } else {
+    cell.classList.add('hull-mid');
+  }
+
+  if (
+    ship.size >= 3 &&
+    here === first + Math.floor(ship.size / 2)
+  ) {
+    cell.classList.add('hull-bridge');
+  }
+}
+
+/* =========================================================
    BOARD
    ========================================================= */
 
@@ -363,6 +419,34 @@ export function renderBoard(
         cell.classList.add(
           'ship'
         );
+      }
+
+      /*
+       * Draw the hull on ships we may see: your own, and enemy
+       * ships once they are sunk.
+       */
+      if (
+        (state === 'ship' && !isEnemyBoard) ||
+        state === 'hit'
+      ) {
+        const hullShip =
+          board.getShipAt(
+            row,
+            column
+          );
+
+        if (
+          hullShip &&
+          (!isEnemyBoard ||
+            hullShip.isSunk())
+        ) {
+          addHullClasses(
+            cell,
+            hullShip,
+            row,
+            column
+          );
+        }
       }
 
       /*
