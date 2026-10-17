@@ -576,6 +576,19 @@ entryScreen?.addEventListener(
   enterGame
 );
 
+entryScreen?.addEventListener(
+  'keydown',
+  (event: KeyboardEvent) => {
+    if (
+      event.key === 'Enter' ||
+      event.key === ' '
+    ) {
+      event.preventDefault();
+      enterGame();
+    }
+  }
+);
+
 
 /* =========================================================
    GAME STATE

@@ -1,10 +1,22 @@
 :root {
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+  --font-sans: "Geist", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
-  color: #172033;
-  background: #f4f7fb;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --ink: #12202b;
+  --accent: #26737a;
+
+  --z-topbar: 100;
+  --z-popover: 200;
+  --z-dialog: 300;
+  --z-entry: 400;
+
+  font-family: var(--font-sans);
+  color: var(--ink);
+  background: #f2f5f5;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+  font-variant-numeric: tabular-nums;
 }
 
 * {
@@ -28,13 +40,13 @@ input {
 .entry-screen {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: var(--z-entry);
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  background: #f2f4f7;
+  background: #f2f5f5;
 
   cursor: pointer;
 
@@ -75,7 +87,7 @@ input {
   font-weight: 600;
   letter-spacing: 0.25em;
 
-  color: #535960;
+  color: #55666b;
 }
 
 
@@ -89,7 +101,7 @@ input {
   font-weight: 700;
   letter-spacing: 0.08em;
 
-  color: #0d0f12;
+  color: #0e1a22;
 }
 
 
@@ -101,7 +113,7 @@ input {
   letter-spacing: 0.12em;
   text-transform: uppercase;
 
-  color: #211e1e;
+  color: #1a2a33;
 
   animation:
     entry-pulse 2s ease-in-out infinite;
@@ -114,7 +126,7 @@ input {
 
   margin-top: 8px;
 
-  background: #0d0f12;
+  background: #0e1a22;
 
   transform-origin: center;
 
@@ -178,6 +190,7 @@ input {
 
 #app {
   min-height: 100vh;
+  min-height: 100dvh;
   padding: 20px 20px;
 }
 
@@ -205,7 +218,7 @@ input {
 
 .game-topbar {
   position: relative;
-  z-index: 100;
+  z-index: var(--z-topbar);
 
   display: flex;
   align-items: center;
@@ -234,11 +247,11 @@ input {
 
   box-sizing: border-box;
 
-  border: 1px solid #dfe5ee;
+  border: 1px solid #dbe3e4;
   border-radius: 10px;
 
   background: rgba(255, 255, 255, 0.92);
-  color: #172033;
+  color: #12202b;
 
   cursor: pointer;
 
@@ -246,7 +259,7 @@ input {
   -webkit-appearance: none;
 
   box-shadow:
-    0 2px 8px rgba(23, 32, 51, 0.05);
+    0 2px 8px rgba(18, 32, 43, 0.05);
 
   transition:
     background-color 0.15s ease,
@@ -257,12 +270,12 @@ input {
 
 .game-icon-button:hover {
   background: #ffffff;
-  border-color: #b8c4d4;
+  border-color: #b4c3c5;
 
   transform: translateY(-1px);
 
   box-shadow:
-    0 4px 12px rgba(23, 32, 51, 0.08);
+    0 4px 12px rgba(18, 32, 43, 0.08);
 }
 
 .game-icon-button:active {
@@ -270,7 +283,7 @@ input {
 }
 
 .game-icon-button:focus-visible {
-  outline: 2px solid #172033;
+  outline: 2px solid #12202b;
   outline-offset: 2px;
 }
 
@@ -319,7 +332,7 @@ input {
   top: calc(100% + 10px);
   right: 0;
 
-  z-index: 200;
+  z-index: var(--z-popover);
 
   width: 250px;
 
@@ -327,13 +340,13 @@ input {
 
   box-sizing: border-box;
 
-  border: 1px solid #dfe5ee;
+  border: 1px solid #dbe3e4;
   border-radius: 14px;
 
   background: rgba(255, 255, 255, 0.98);
 
   box-shadow:
-    0 12px 32px rgba(23, 32, 51, 0.12);
+    0 12px 32px rgba(18, 32, 43, 0.12);
 }
 
 .sound-panel[hidden] {
@@ -347,7 +360,7 @@ input {
 
   margin-bottom: 18px;
 
-  color: #172033;
+  color: #12202b;
 
   font-size: 11px;
   font-weight: 700;
@@ -368,7 +381,7 @@ input {
   align-items: center;
   justify-content: space-between;
 
-  color: #718096;
+  color: #667a7e;
 
   font-size: 12px;
   font-weight: 600;
@@ -385,7 +398,7 @@ input {
 
   cursor: pointer;
 
-  accent-color: #172033;
+  accent-color: #12202b;
 }
 
 /* =========================================================
@@ -403,11 +416,11 @@ input {
   margin-top: 18px;
   padding: 8px 12px;
 
-  border: 1px solid #dfe5ee;
+  border: 1px solid #dbe3e4;
   border-radius: 8px;
 
-  background: #f7f9fc;
-  color: #172033;
+  background: #f6f9f8;
+  color: #12202b;
 
   font-family: inherit;
   font-size: 12px;
@@ -422,11 +435,11 @@ input {
 
 .sound-mute-button:hover {
   background: #ffffff;
-  border-color: #b8c4d4;
+  border-color: #b4c3c5;
 }
 
 .sound-mute-button:focus-visible {
-  outline: 2px solid #172033;
+  outline: 2px solid #12202b;
   outline-offset: 2px;
 }
 
@@ -628,10 +641,9 @@ input {
 
 #turn-status {
   padding: 10px 18px;
-  color: #172033;
+  color: #12202b;
   font-size: 17px;
-  font-weight: 600;
-  font-weight: bold;
+  font-weight: 700;
 }
 
 /* =========================================================
@@ -639,7 +651,7 @@ input {
    ========================================================= */
 
 #turn-status.player-turn {
-  color: #20904b;
+  color: #2a7d4f;
 }
 
 /* =========================================================
@@ -655,7 +667,7 @@ input {
    ========================================================= */
 
 #turn-status.game-over {
-  color: black;
+  color: var(--ink);
 }
 
 /* =========================================================
@@ -704,7 +716,7 @@ input {
 
   padding: 8px;
 
-  background: #d9e2ec;
+  background: #d3dfe0;
   border-radius: 10px;
 }
 
@@ -726,7 +738,7 @@ input {
   width: 100%;
   height: 100%;
 
-  color: #718096;
+  color: #667a7e;
 
   font-size: 10px;
   font-weight: 700;
@@ -758,7 +770,7 @@ input {
 }
 
 .cell:hover {
-  background: #edf2f7;
+  background: #e7eeef;
   transform: scale(1.04);
 }
 
@@ -767,7 +779,7 @@ input {
    ========================================================= */
 
 .cell.ship {
-  background-color: #172033;
+  background-color: #12202b;
 }
 
 /* =========================================================
@@ -784,12 +796,12 @@ input {
 }
 
 .cell.ship.movable:hover {
-  background: #27344d;
+  background: #1f3340;
 
   transform: scale(1.06);
 
   box-shadow:
-    0 0 0 2px rgba(23, 32, 51, 0.12);
+    0 0 0 2px rgba(18, 32, 43, 0.12);
 }
 
 /* =========================================================
@@ -797,7 +809,7 @@ input {
    ========================================================= */
 
 .cell.hit {
-  background-color: #dc2626;
+  background-color: #c8382f;
   color: white;
   font-size: 20px;
   font-weight: 700;
@@ -808,8 +820,8 @@ input {
    ========================================================= */
 
 .cell.miss {
-  background-color: #e2e8f0;
-  color: #718096;
+  background-color: #dde6e7;
+  color: #667a7e;
   font-size: 18px;
   font-weight: 700;
 }
@@ -854,8 +866,8 @@ input {
 
 .cell.hit.shot-animation {
   box-shadow:
-    0 0 0 2px rgba(220, 38, 38, 0.18),
-    0 0 14px rgba(220, 38, 38, 0.35);
+    0 0 0 2px rgba(200, 56, 47, 0.18),
+    0 0 14px rgba(200, 56, 47, 0.35);
 }
 
 .cell.miss.shot-animation {
@@ -916,7 +928,7 @@ input {
   text-transform: uppercase;
   letter-spacing: 1.5px;
 
-  color: #718096;
+  color: #667a7e;
 }
 
 .fleet-list {
@@ -946,7 +958,7 @@ input {
   border-radius: 8px;
 
   background: white;
-  border: 1px solid #dfe5ee;
+  border: 1px solid #dbe3e4;
 
   transition:
     opacity 0.2s ease,
@@ -969,13 +981,13 @@ input {
 
   border-radius: 2px;
 
-  background: #172033;
+  background: #12202b;
 }
 
 .fleet-ship-name {
   font-size: 11px;
   font-weight: 600;
-  color: #172033;
+  color: #12202b;
 }
 
 .fleet-ship.sunk {
@@ -1021,26 +1033,26 @@ input {
 .fleet-ship.selectable:hover {
   transform: translateX(-2px);
 
-  border-color: #b8c4d4;
+  border-color: #b4c3c5;
 
   box-shadow:
-    0 4px 12px rgba(23, 32, 51, 0.08);
+    0 4px 12px rgba(18, 32, 43, 0.08);
 }
 
 .fleet-ship.selected {
   transform: translateX(-3px);
 
-  border-color: #172033;
+  border-color: #12202b;
 
-  background: #f8fafc;
+  background: #f7faf9;
 
   box-shadow:
-    0 0 0 2px rgba(23, 32, 51, 0.1),
-    0 5px 14px rgba(23, 32, 51, 0.08);
+    0 0 0 2px rgba(18, 32, 43, 0.1),
+    0 5px 14px rgba(18, 32, 43, 0.08);
 }
 
 .fleet-ship.selected .ship-segment {
-  background: #172033;
+  background: #12202b;
 }
 
 /* =========================================================
@@ -1048,11 +1060,11 @@ input {
    ========================================================= */
 
 .cell.placement-preview {
-  background: #cbd5e1;
+  background: #c3d2d4;
 
   box-shadow:
-    inset 0 0 0 2px #172033,
-    0 0 8px rgba(23, 32, 51, 0.08);
+    inset 0 0 0 2px #12202b,
+    0 0 8px rgba(18, 32, 43, 0.08);
 
   transform: scale(1.04);
 }
@@ -1061,8 +1073,8 @@ input {
   background: #fee2e2;
 
   box-shadow:
-    inset 0 0 0 2px #dc2626,
-    0 0 8px rgba(220, 38, 38, 0.08);
+    inset 0 0 0 2px #c8382f,
+    0 0 8px rgba(200, 56, 47, 0.08);
 
   transform: scale(1.04);
 }
@@ -1126,11 +1138,11 @@ input {
 }
 
 .cell.available:hover {
-  background: #e8f0f8;
+  background: #e4eeee;
   transform: scale(1.06);
 
   box-shadow:
-    0 0 0 2px rgba(23, 32, 51, 0.08);
+    0 0 0 2px rgba(18, 32, 43, 0.08);
 }
 
 .cell.disabled {
@@ -1158,11 +1170,11 @@ input {
 .placement-button {
   padding: 9px 16px;
 
-  border: 1px solid #dfe5ee;
+  border: 1px solid #dbe3e4;
   border-radius: 7px;
 
   background: white;
-  color: #172033;
+  color: #12202b;
 
   font-size: 13px;
   font-weight: 600;
@@ -1177,13 +1189,13 @@ input {
 }
 
 .placement-button:hover {
-  background: #f8fafc;
-  border-color: #b8c4d4;
+  background: #f7faf9;
+  border-color: #b4c3c5;
 
   transform: translateY(-1px);
 
   box-shadow:
-    0 3px 8px rgba(23, 32, 51, 0.06);
+    0 3px 8px rgba(18, 32, 43, 0.06);
 }
 
 .placement-button:active {
@@ -1205,11 +1217,11 @@ input {
 .new-game-button {
   padding: 9px 16px;
 
-  border: 1px solid #dfe5ee;
+  border: 1px solid #dbe3e4;
   border-radius: 7px;
 
   background: white;
-  color: #172033;
+  color: #12202b;
 
   font-size: 13px;
   font-weight: 600;
@@ -1224,13 +1236,13 @@ input {
 }
 
 .new-game-button:hover {
-  background: #f8fafc;
-  border-color: #b8c4d4;
+  background: #f7faf9;
+  border-color: #b4c3c5;
 
   transform: translateY(-1px);
 
   box-shadow:
-    0 3px 8px rgba(23, 32, 51, 0.06);
+    0 3px 8px rgba(18, 32, 43, 0.06);
 }
 
 .new-game-button:active {
@@ -1269,7 +1281,7 @@ input {
 }
 
 .results-headline--victory {
-  color: #20904b;
+  color: #2a7d4f;
 }
 
 .results-headline--defeat {
@@ -1317,26 +1329,26 @@ input {
 }
 
 .results-group--attack {
-  /*--side-color: #20904b;
-  --meter-color: #20904b;*/
-  --side-color: #5B8DEF;
-  --meter-color: #5B8DEF;
+  /*--side-color: #2a7d4f;
+  --meter-color: #2a7d4f;*/
+  --side-color: #26737a;
+  --meter-color: #26737a;
 }
 
 .results-group--defense {
   /*--side-color: #991b1b;
   --meter-color: #991b1b;*/
-  --side-color: #9B8AFB;
-  --meter-color: #9B8AFB;
+  --side-color: #5f7377;
+  --meter-color: #5f7377;
 }
 
 .results-player--one {
-  color: #5B8DEF;
+  color: #26737a;
   font-weight: 600;
 }
 
 .results-player--two {
-  color: #9B8AFB;
+  color: #5f7377;
   font-weight: 600;
 }
 
@@ -1451,7 +1463,7 @@ input {
 .results-stat--meter::after {
   width: calc(var(--meter, 0) * 1%);
 
-  background: var(--meter-color, #20904b);
+  background: var(--meter-color, #2a7d4f);
 }
 
 .results-actions {
@@ -1468,10 +1480,10 @@ input {
   min-height: 56px;
   padding: 16px 22px;
 
-  border: 1px solid #172033;
+  border: 1px solid #12202b;
   border-radius: 14px;
 
-  background: #172033;
+  background: #12202b;
   color: white;
 
   font-size: 16px;
@@ -1485,7 +1497,7 @@ input {
 }
 
 .results-new-game:hover {
-  background: #26324d;
+  background: #1f3340;
 
   transform: translateY(-2px);
 }
@@ -1559,11 +1571,11 @@ input {
 
 /* Same colour code as the stat cards above. */
 .board-section--player .results-board-title {
-  color: #5b8def;
+  color: #26737a;
 }
 
 .board-section--opponent .results-board-title {
-  color: #9b8afb;
+  color: #5f7377;
 }
 
 .results-boards .board {
@@ -1684,7 +1696,7 @@ input {
 }
 
 .lobby-input:focus-visible {
-  outline: 2px solid #172033;
+  outline: 2px solid #12202b;
   outline-offset: 2px;
 }
 
@@ -1694,7 +1706,7 @@ input {
   border: 0;
   border-radius: 14px;
 
-  background: #172033;
+  background: #12202b;
   color: white;
 
   font-weight: 600;
@@ -1707,7 +1719,7 @@ input {
 }
 
 .lobby-join-button:hover:not(:disabled) {
-  background: #27344d;
+  background: #1f3340;
 }
 
 .lobby-join-button:disabled {
@@ -1741,13 +1753,13 @@ input {
 
   border: 0;
   background: none;
-  color: #718096;
+  color: #667a7e;
 
   cursor: pointer;
 }
 
 .lobby-link:hover {
-  color: #172033;
+  color: #12202b;
 }
 
 .lobby-error {
@@ -1767,7 +1779,7 @@ input {
    LARGE TABLETS / SMALL DESKTOP
    ========================================================= */
 
-@media (max-width: 1250px) {
+@media (max-width: 1330px) {
   .game-layout {
     grid-template-columns:
       160px 369px 369px 160px;
@@ -2076,12 +2088,12 @@ input {
 
   padding: 12px 16px;
   border: 1px solid rgba(127, 127, 127, 0.22);
-  border-left: 4px solid var(--row-color, #20904b);
+  border-left: 4px solid var(--row-color, #2a7d4f);
   border-radius: 12px;
 }
 
 .history-row--victory {
-  --row-color: #20904b;
+  --row-color: #2a7d4f;
 }
 
 .history-row--defeat {
@@ -2090,11 +2102,11 @@ input {
 
 /* Local has no "you": neutral colours for either winner. */
 .history-row--local {
-  --row-color: #5b8def;
+  --row-color: #26737a;
 }
 
 .history-row--local.history-row--defeat {
-  --row-color: #9b8afb;
+  --row-color: #5f7377;
 }
 
 .history-row-main {
@@ -2166,7 +2178,7 @@ input {
 .confirm-overlay {
   position: fixed;
   inset: 0;
-  z-index: 10000;
+  z-index: var(--z-dialog);
 
   display: flex;
   align-items: center;
@@ -2174,7 +2186,7 @@ input {
 
   padding: 24px;
 
-  background: rgba(23, 32, 51, 0.45);
+  background: rgba(18, 32, 43, 0.45);
 }
 
 .confirm-dialog {
@@ -2182,13 +2194,13 @@ input {
 
   padding: 24px;
 
-  border: 1px solid #dfe5ee;
+  border: 1px solid #dbe3e4;
   border-radius: 16px;
 
   background: #ffffff;
-  color: #172033;
+  color: #12202b;
 
-  box-shadow: 0 20px 48px rgba(23, 32, 51, 0.28);
+  box-shadow: 0 20px 48px rgba(18, 32, 43, 0.28);
 }
 
 .confirm-title {
@@ -2257,7 +2269,7 @@ input {
 }
 
 .confirm-button--accept {
-  background: #172033;
+  background: #12202b;
   color: #ffffff;
 }
 
@@ -2317,7 +2329,7 @@ input {
 
   border-radius: 999px;
 
-  background: #20904b;
+  background: #2a7d4f;
 
 
   transition:
@@ -2461,7 +2473,7 @@ input {
 .stats-card--meter::after {
   width: calc(var(--meter, 0) * 1%);
 
-  background: #5b8def;
+  background: #26737a;
 
   transition: width 450ms cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -2512,4 +2524,84 @@ input {
   .stats-segment {
     padding: 8px 14px;
   }
+}
+
+
+/* =========================================================
+   DESIGN UPGRADES
+   (additive layer: tokens above, hooks below)
+   ========================================================= */
+
+::selection {
+  background: rgba(38, 115, 122, 0.2);
+}
+
+/* Typography: balanced headings, no orphaned last words, mono coordinates. */
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p,
+.game-mode-description {
+  text-wrap: pretty;
+}
+
+.board-label {
+  font-family: var(--font-mono);
+}
+
+/* One consistent keyboard focus ring. :where() keeps specificity at zero,
+   so the more specific rings defined earlier still win. */
+:where(button, input, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.entry-screen:focus-visible {
+  outline-offset: -8px;
+}
+
+/* Primary action: the JS already toggles .start-battle-button once the
+   fleet is complete, so Start Battle finally reads as the next step. */
+.new-game-button.start-battle-button:not(:disabled) {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #ffffff;
+}
+
+.new-game-button.start-battle-button:not(:disabled):hover {
+  border-color: #1f3340;
+  background: #1f3340;
+  box-shadow: 0 6px 14px rgba(18, 32, 43, 0.22);
+}
+
+/* Surface: a fixed, non-interactive grain layer breaks the flat fill.
+   Never applied to scrolling containers, so it costs no repaints. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E");
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .cell,
+  .game-mode-button,
+  .game-mode-arrow,
+  .fleet-ship,
+  .placement-button,
+  .new-game-button {
+    transition: none;
+  }
+
+  .cell.shot-animation,
+  .cell.sunk.shot-animation {
+    animation: none;
+  }
+
 }
