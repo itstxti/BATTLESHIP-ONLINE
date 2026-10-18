@@ -1,0 +1,537 @@
+/* =========================================================
+   MOBILE REDESIGN
+   Loaded after style.css. Everything is scoped to phones, so the
+   desktop layout is untouched. Palette stays the web one:
+   #f2f5f5 background, #26737a accent, #12202b ink, and the
+   dark sea only inside the boards.
+   ========================================================= */
+
+:root {
+  --m-bg: #f2f5f5;
+  --m-surface: #ffffff;
+  --m-line: #d5dfdf;
+  --m-muted: #5b6e78;
+  --m-accent: #26737a;
+  --m-accent-ink: #1c5a60;
+  --m-accent-tint: #e3eeee;
+  --m-hit: #ff6b4a;
+  --m-radius-card: 18px;
+  --m-radius-btn: 16px;
+  --m-tap: 48px;
+}
+
+@media (max-width: 640px) {
+
+  /* ---------- Shell ---------- */
+
+  #app {
+    padding:
+      max(16px, env(safe-area-inset-top))
+      max(16px, env(safe-area-inset-right))
+      max(16px, env(safe-area-inset-bottom))
+      max(16px, env(safe-area-inset-left));
+  }
+
+  .game-topbar {
+    min-height: var(--m-tap);
+    margin-bottom: 4px;
+  }
+
+  .game-icon-button {
+    width: var(--m-tap);
+    height: var(--m-tap);
+    flex-basis: var(--m-tap);
+    border-radius: 14px;
+  }
+
+  /* ---------- Entry screen ---------- */
+
+  .entry-screen {
+    background: var(--m-bg);
+  }
+
+  .entry-content h1 {
+    font-size: clamp(30px, 9vw, 40px);
+  }
+
+  /* ---------- Mode menu, difficulty, pass-device, lobby ---------- */
+
+  .game-mode-menu {
+    width: 100%;
+    padding: 8px 0 24px;
+  }
+
+  .game-mode-header {
+    margin-top: 28px;
+    margin-bottom: 20px;
+  }
+
+  #online-screen {
+    margin-top: 12px;
+  }
+
+  .game-mode-eyebrow {
+    color: var(--m-accent);
+    letter-spacing: 0.16em;
+  }
+
+  .game-mode-header h2 {
+    font-size: 28px;
+    line-height: 1.15;
+  }
+
+  .game-mode-header p {
+    color: var(--m-muted);
+    font-size: 14px;
+  }
+
+  .game-mode-options {
+    gap: 12px;
+  }
+
+  .game-mode-button {
+    min-height: 76px;
+    padding: 14px 16px;
+
+    border: 0.5px solid var(--m-line);
+    border-radius: var(--m-radius-card);
+
+    background: var(--m-surface);
+  }
+
+  .game-mode-button:hover {
+    border-color: var(--m-line);
+    background: var(--m-surface);
+    transform: none;
+    box-shadow: none;
+  }
+
+  .game-mode-button:active {
+    transform: scale(0.985);
+    background: var(--m-accent-tint);
+  }
+
+  .game-mode-number {
+    display: grid;
+    place-items: center;
+
+    width: 40px;
+    height: 40px;
+    margin-right: 14px;
+
+    border-radius: 50%;
+    background: var(--m-accent-tint);
+    color: var(--m-accent);
+
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .game-mode-title {
+    font-size: 17px;
+  }
+
+  .game-mode-description {
+    color: var(--m-muted);
+    font-size: 12.5px;
+    line-height: 1.35;
+  }
+
+  .game-mode-arrow {
+    color: var(--m-muted);
+  }
+
+  /* First option reads as the primary action. */
+  #game-mode-menu .game-mode-button:first-child {
+    border-color: var(--m-accent);
+    background: var(--m-accent);
+    color: #ffffff;
+  }
+
+  #game-mode-menu .game-mode-button:first-child .game-mode-number {
+    background: var(--m-accent-ink);
+    color: #ffffff;
+  }
+
+  #game-mode-menu .game-mode-button:first-child .game-mode-description,
+  #game-mode-menu .game-mode-button:first-child .game-mode-arrow {
+    color: #dceeef;
+  }
+
+  /* ---------- Lobby ---------- */
+
+  .lobby-code {
+    padding: 24px 12px;
+
+    border: 0.5px solid var(--m-line);
+    border-radius: var(--m-radius-card);
+    background: var(--m-surface);
+
+    font-family: var(--font-mono);
+    font-size: clamp(30px, 11vw, 44px);
+    letter-spacing: 0.18em;
+    text-indent: 0.18em;
+  }
+
+  .lobby-join {
+    flex-direction: column;
+  }
+
+  .lobby-input {
+    min-height: 56px;
+    border: 0.5px solid var(--m-line);
+    border-radius: var(--m-radius-card);
+    background: var(--m-surface);
+    font-family: var(--font-mono);
+    font-size: 22px;
+    text-align: center;
+  }
+
+  .lobby-input:focus-visible {
+    outline: 2px solid var(--m-accent);
+    outline-offset: 0;
+  }
+
+  .lobby-join-button {
+    min-height: 52px;
+    border-radius: var(--m-radius-btn);
+    background: var(--m-accent);
+  }
+
+  .lobby-join-button:hover:not(:disabled) {
+    background: var(--m-accent-ink);
+  }
+
+  .lobby-link {
+    min-height: var(--m-tap);
+    color: var(--m-accent);
+    font-weight: 600;
+  }
+
+  .lobby-error {
+    border-radius: 14px;
+  }
+
+  /* ---------- Turn status as a pill ---------- */
+
+  .game-status {
+    margin: 0 -16px 10px;
+    padding: 6px 16px;
+    background: rgba(242, 245, 245, 0.92);
+  }
+
+  #turn-status {
+    padding: 8px 18px;
+    border-radius: 999px;
+    background: var(--m-accent-tint);
+    font-size: 15px;
+  }
+
+  #turn-status.player-turn {
+    background: var(--m-accent);
+    color: #ffffff;
+  }
+
+  /* ---------- Boards ---------- */
+
+  .board-section {
+    max-width: 440px;
+  }
+
+  .board {
+    grid-template-columns: 16px repeat(10, minmax(0, 1fr));
+    grid-template-rows: 16px;
+    gap: 2px;
+    --gap: 2px;
+
+    padding: 6px;
+    border-radius: 14px;
+  }
+
+  .board-label {
+    color: rgba(214, 234, 238, 0.8);
+    font-size: 11px;
+  }
+
+  .cell {
+    border-radius: 3px;
+  }
+
+  /* Dedicated tap feedback: hover does not exist on touch screens. */
+  @media (hover: none) {
+    .cell:hover {
+      transform: none;
+      filter: none;
+    }
+
+    .cell:active {
+      filter: brightness(1.25);
+    }
+  }
+
+  /* ---------- Fleet lists ---------- */
+
+  .fleet-section h3 {
+    margin-bottom: 10px;
+    color: var(--m-muted);
+  }
+
+  .fleet-list {
+    gap: 8px;
+  }
+
+  /* ---------- Placement ---------- */
+
+  .game-container[data-phase='placement'] .placement-controls {
+    position: sticky;
+    bottom: 0;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+
+    margin: 16px -16px 0;
+    padding:
+      12px 16px
+      max(12px, env(safe-area-inset-bottom));
+
+    border-top: 0.5px solid var(--m-line);
+    background: rgba(242, 245, 245, 0.94);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+
+  /* DOM order is Rotate, Start, Reset: the primary action goes full width. */
+  .game-container[data-phase='placement'] #new-game {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .game-container[data-phase='placement'] #rotate-ship {
+    grid-row: 1;
+  }
+
+  .game-container[data-phase='placement'] #reset-fleet {
+    grid-row: 1;
+  }
+
+  .game-container[data-phase='placement'] .placement-button,
+  .game-container[data-phase='placement'] .new-game-button {
+    min-height: 52px;
+    margin: 0;
+    border-radius: var(--m-radius-btn);
+    font-size: 15px;
+  }
+
+  .game-container[data-phase='placement'] .new-game-button:disabled {
+    border-color: transparent;
+    background: #dce5e5;
+    color: #7c8e96;
+    opacity: 1;
+  }
+
+  .game-container[data-phase='placement'] .new-game-button.start-battle-button:not(:disabled) {
+    border-color: var(--m-accent);
+    background: var(--m-accent);
+    color: #ffffff;
+  }
+
+  .fleet-progress.complete {
+    color: var(--m-accent);
+  }
+
+  .fleet-progress-pip.current {
+    box-shadow: inset 0 0 0 1.5px var(--m-accent);
+  }
+
+  .fleet-progress-pip.filled {
+    background: var(--m-accent);
+  }
+
+  /* ---------- Battle: the board you tap is the hero ---------- */
+
+  .game-container[data-phase='battle'] .board-section:nth-child(3) {
+    max-width: 440px;
+  }
+
+  /* Your own fleet shrinks to a glanceable thumbnail. */
+  .game-container[data-phase='battle'] .board-section:nth-child(2) {
+    max-width: 220px;
+  }
+
+  .game-container[data-phase='battle'] .board-section:nth-child(2) .board {
+    grid-template-columns: 10px repeat(10, minmax(0, 1fr));
+    grid-template-rows: 10px;
+    gap: 1px;
+    --gap: 1px;
+    padding: 4px;
+  }
+
+  .game-container[data-phase='battle'] .board-section:nth-child(2) .board-label {
+    font-size: 8px;
+  }
+
+  .game-container[data-phase='battle'] .board-section h2 {
+    color: var(--m-muted);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .game-container[data-phase='battle'] .new-game-button,
+  .game-container[data-phase='game-over'] .new-game-button {
+    min-height: 52px;
+    border-radius: var(--m-radius-btn);
+  }
+
+  /* ---------- Results ---------- */
+
+  .results-screen {
+    padding-top: 8px;
+  }
+
+  .results-headline {
+    font-size: 34px;
+  }
+
+  .results-headline--victory {
+    color: var(--m-accent);
+  }
+
+  .results-groups {
+    gap: 12px;
+  }
+
+  .results-group {
+    border-radius: var(--m-radius-card);
+  }
+
+  .results-stats {
+    gap: 8px;
+  }
+
+  .results-stat {
+    border-radius: 14px;
+  }
+
+  .results-actions {
+    position: sticky;
+    bottom: 0;
+
+    flex-direction: column;
+    gap: 10px;
+
+    margin: 16px -16px 0;
+    padding:
+      12px 16px
+      max(12px, env(safe-area-inset-bottom));
+
+    border-top: 0.5px solid var(--m-line);
+    background: rgba(242, 245, 245, 0.94);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+
+  .results-new-game,
+  .results-view-boards {
+    width: 100%;
+    min-height: 52px;
+    border-radius: var(--m-radius-btn);
+  }
+
+  .results-new-game {
+    border-color: var(--m-accent);
+    background: var(--m-accent);
+    color: #ffffff;
+  }
+
+  /* ---------- Stats and history ---------- */
+
+  .stats-segments {
+    border-radius: 14px;
+  }
+
+  .stats-segment {
+    min-height: 44px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .stats-card {
+    border-radius: 14px;
+  }
+
+  .stats-card-value {
+    font-size: 24px;
+  }
+
+  .history-list {
+    gap: 0;
+  }
+
+  .history-row {
+    min-height: 64px;
+    border-radius: 0;
+  }
+
+  .history-clear {
+    min-height: var(--m-tap);
+    color: var(--m-accent);
+  }
+
+  /* ---------- Dialogs: bottom sheet ---------- */
+
+  .confirm-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .confirm-dialog {
+    width: 100%;
+    max-width: none;
+    padding:
+      20px 16px
+      max(16px, env(safe-area-inset-bottom));
+
+    border-radius: 24px 24px 0 0;
+  }
+
+  .confirm-actions {
+    flex-direction: column-reverse;
+    gap: 10px;
+  }
+
+  .confirm-button {
+    width: 100%;
+    min-height: 52px;
+    border-radius: var(--m-radius-btn);
+  }
+
+  /* ---------- Sound panel ---------- */
+
+  .sound-panel {
+    right: 0;
+    width: min(280px, calc(100vw - 32px));
+    border-radius: 16px;
+  }
+}
+
+/* Very small phones: keep targets, trim chrome. */
+@media (max-width: 360px) {
+  #app {
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+
+  .game-mode-header h2 {
+    font-size: 24px;
+  }
+
+  .game-mode-number {
+    display: none;
+  }
+}
