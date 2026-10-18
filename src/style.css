@@ -85,8 +85,6 @@ input {
   transition:
     opacity var(--dur-slow) var(--ease-out),
     visibility var(--dur-slow) var(--ease-out);
-    opacity var(--dur-slow) var(--ease-out),
-    visibility var(--dur-slow) var(--ease-out);
 }
 
 .entry-screen.hidden {
@@ -297,10 +295,6 @@ input {
     border-color var(--dur-fast) var(--ease-out),
     transform var(--dur-fast) var(--ease-out),
     box-shadow var(--dur-fast) var(--ease-out);
-    background-color var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-fast) var(--ease-out);
 }
 
 .game-icon-button:hover {
@@ -466,8 +460,6 @@ input {
   transition:
     background-color var(--dur-fast) var(--ease-out),
     border-color var(--dur-fast) var(--ease-out);
-    background-color var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out);
 }
 
 .sound-mute-button:hover {
@@ -564,9 +556,6 @@ input {
     border-color var(--dur-fast) var(--ease-out),
     background var(--dur-fast) var(--ease-out),
     transform var(--dur-fast) var(--ease-out);
-    border-color var(--dur-fast) var(--ease-out),
-    background var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out);
 }
 
 .game-mode-button:hover {
@@ -630,8 +619,6 @@ input {
   opacity: 0.3;
 
   transition:
-    opacity var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out);
     opacity var(--dur-fast) var(--ease-out),
     transform var(--dur-fast) var(--ease-out);
 }
@@ -851,10 +838,6 @@ input {
     transform var(--dur-fast) var(--ease-out),
     filter var(--dur-fast) var(--ease-out),
     box-shadow var(--dur-fast) var(--ease-out);
-    background-color var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out),
-    filter var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-fast) var(--ease-out);
 }
 
 .cell:hover {
@@ -879,9 +862,6 @@ input {
   cursor: pointer;
 
   transition:
-    background-color var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-fast) var(--ease-out);
     background-color var(--dur-fast) var(--ease-out),
     transform var(--dur-fast) var(--ease-out),
     box-shadow var(--dur-fast) var(--ease-out);
@@ -947,7 +927,6 @@ input {
 
 .cell.shot-animation {
   animation: shot-impact var(--dur-base) var(--ease-out);
-  animation: shot-impact var(--dur-base) var(--ease-out);
 }
 
 .cell.hit.shot-animation {
@@ -962,7 +941,6 @@ input {
 }
 
 .cell.sunk.shot-animation {
-  animation: sunk-impact var(--dur-slow) var(--ease-out);
   animation: sunk-impact var(--dur-slow) var(--ease-out);
 
   box-shadow:
@@ -1053,11 +1031,6 @@ input {
     border-color var(--dur-base) var(--ease-out),
     box-shadow var(--dur-base) var(--ease-out),
     background-color var(--dur-base) var(--ease-out);
-    opacity var(--dur-base) var(--ease-out),
-    transform var(--dur-base) var(--ease-out),
-    border-color var(--dur-base) var(--ease-out),
-    box-shadow var(--dur-base) var(--ease-out),
-    background-color var(--dur-base) var(--ease-out);
 }
 
 .fleet-ship-visual {
@@ -1076,8 +1049,6 @@ input {
   background: #9fb1b8;
 
   transition:
-    background-color var(--dur-base) var(--ease-out),
-    box-shadow var(--dur-base) var(--ease-out);
     background-color var(--dur-base) var(--ease-out),
     box-shadow var(--dur-base) var(--ease-out);
 }
@@ -1121,11 +1092,6 @@ input {
   cursor: pointer;
 
   transition:
-    opacity var(--dur-base) var(--ease-out),
-    transform var(--dur-base) var(--ease-out),
-    border-color var(--dur-base) var(--ease-out),
-    box-shadow var(--dur-base) var(--ease-out),
-    background-color var(--dur-base) var(--ease-out);
     opacity var(--dur-base) var(--ease-out),
     transform var(--dur-base) var(--ease-out),
     border-color var(--dur-base) var(--ease-out),
@@ -1202,11 +1168,9 @@ input {
 
 .fleet-ship.sunk-animation {
   animation: fleet-sunk var(--dur-slow) var(--ease-out);
-  animation: fleet-sunk var(--dur-slow) var(--ease-out);
 }
 
 .fleet-ship.sunk-animation .ship-segment {
-  animation: segment-sunk var(--dur-base) var(--ease-out);
   animation: segment-sunk var(--dur-base) var(--ease-out);
 }
 
@@ -1282,10 +1246,6 @@ input {
     border-color var(--dur-fast) var(--ease-out),
     transform var(--dur-fast) var(--ease-out),
     box-shadow var(--dur-fast) var(--ease-out);
-    background-color var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-fast) var(--ease-out);
 }
 
 .placement-button:hover {
@@ -1329,10 +1289,6 @@ input {
   cursor: pointer;
 
   transition:
-    background-color var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-fast) var(--ease-out);
     background-color var(--dur-fast) var(--ease-out),
     border-color var(--dur-fast) var(--ease-out),
     transform var(--dur-fast) var(--ease-out),
@@ -1598,8 +1554,6 @@ input {
   transition:
     background-color var(--dur-fast) var(--ease-out),
     transform var(--dur-fast) var(--ease-out);
-    background-color var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out);
 }
 
 .results-new-game:hover {
@@ -1621,8 +1575,6 @@ input {
   cursor: pointer;
 
   transition:
-    background-color var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out);
     background-color var(--dur-fast) var(--ease-out),
     transform var(--dur-fast) var(--ease-out);
 }
@@ -1735,7 +1687,6 @@ input {
 @media (prefers-reduced-motion: no-preference) {
   .results-screen:not([hidden]) {
     animation: screen-enter var(--dur-base) var(--ease-out) var(--enter-delay) backwards;
-    animation: screen-enter var(--dur-base) var(--ease-out) var(--enter-delay) backwards;
   }
 }
 
@@ -1814,8 +1765,6 @@ input {
   cursor: pointer;
 
   transition:
-    background-color var(--dur-fast) var(--ease-out),
-    opacity var(--dur-fast) var(--ease-out);
     background-color var(--dur-fast) var(--ease-out),
     opacity var(--dur-fast) var(--ease-out);
 }
@@ -2344,8 +2293,6 @@ input {
   transition:
     background-color var(--dur-fast) var(--ease-out),
     transform var(--dur-fast) var(--ease-out);
-    background-color var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out);
 }
 
 .confirm-button:hover {
@@ -2439,8 +2386,6 @@ input {
   transition:
     transform var(--dur-base) var(--ease-out),
     width var(--dur-base) var(--ease-out);
-    transform var(--dur-base) var(--ease-out),
-    width var(--dur-base) var(--ease-out);
 }
 
 .stats-segment {
@@ -2464,9 +2409,6 @@ input {
   opacity: 0.75;
 
   transition:
-    color var(--dur-fast) var(--ease-out),
-    opacity var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out);
     color var(--dur-fast) var(--ease-out),
     opacity var(--dur-fast) var(--ease-out),
     background-color var(--dur-fast) var(--ease-out);
@@ -2506,7 +2448,6 @@ input {
 }
 
 .stats-segments--reveal {
-  animation: stats-reveal var(--dur-base) var(--ease-out);
   animation: stats-reveal var(--dur-base) var(--ease-out);
 }
 
@@ -2586,7 +2527,6 @@ input {
   background: #26737a;
 
   transition: width var(--dur-slow) var(--ease-out);
-  transition: width var(--dur-slow) var(--ease-out);
 }
 
 /* Opening the screen: cards rise in one after another (--i is their index),
@@ -2594,12 +2534,10 @@ input {
 @media (prefers-reduced-motion: no-preference) {
   .stats-card {
     animation: screen-enter var(--dur-base) var(--ease-out) backwards;
-    animation: screen-enter var(--dur-base) var(--ease-out) backwards;
     animation-delay: calc(var(--i, 0) * 55ms);
   }
 
   .stats-card--meter::after {
-    animation: stats-meter-in calc(var(--dur-slow) * 1.5) var(--ease-out) backwards;
     animation: stats-meter-in calc(var(--dur-slow) * 1.5) var(--ease-out) backwards;
     animation-delay: calc(var(--i, 0) * 55ms + 120ms);
   }
@@ -2613,26 +2551,6 @@ input {
      a copy of the old view has slid out the other way (screenTransitions.ts).
      The children skip their own entrance so nothing animates twice. */
   .records-enter {
-    animation: records-in var(--dur-base) var(--ease-out) var(--dur-exit) backwards;
-  }
-
-  .records-enter .stats-card,
-  .records-enter .history-row {
-    animation: none;
-  }
-
-  /* Opening from the menu: history rows rise in one after another, like the
-     statistics cards. */
-  .history-row {
-    animation: screen-enter var(--dur-base) var(--ease-out) backwards;
-    animation-delay: calc(min(var(--i, 0), 9) * 40ms);
-  }
-}
-
-@keyframes records-in {
-  from {
-    opacity: 0;
-    transform: translateX(var(--enter-x, 0px));
     animation: records-in var(--dur-base) var(--ease-out) var(--dur-exit) backwards;
   }
 
@@ -2929,8 +2847,6 @@ body::before {
   transition:
     background-color var(--dur-base) var(--ease-out),
     box-shadow var(--dur-base) var(--ease-out);
-    background-color var(--dur-base) var(--ease-out),
-    box-shadow var(--dur-base) var(--ease-out);
 }
 
 .fleet-progress-pip.current {
@@ -2986,16 +2902,12 @@ body::before {
 
 .history-empty {
   width: min(100%, 400px);
-  width: min(100%, 400px);
   margin-top: 8px;
   padding: 18px;
-  padding: 18px;
 
-  border-radius: 16px;
   border-radius: 16px;
 
   background:
-    radial-gradient(120% 90% at 20% 0%, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0) 60%),
     radial-gradient(120% 90% at 20% 0%, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0) 60%),
     linear-gradient(160deg, var(--sea-frame-top), var(--sea-frame-bottom));
 
@@ -3030,45 +2942,8 @@ body::before {
   fill: none;
   stroke: rgba(255, 255, 255, 0.6);
   stroke-width: 2;
-.history-empty-board {
-  display: block;
-  width: 100%;
-  height: auto;
 }
 
-.history-empty-cell {
-  fill: #2b7186;
-}
-
-.history-empty-hull {
-  fill: #dde6e9;
-}
-
-.history-empty-deck {
-  fill: #c3d0d5;
-}
-
-.history-empty-bridge {
-  fill: #8ea2aa;
-}
-
-.history-empty-miss {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.6);
-  stroke-width: 2;
-}
-
-.history-empty-target {
-  fill: rgba(255, 255, 255, 0.06);
-  stroke: rgba(255, 255, 255, 0.7);
-  stroke-width: 1.5;
-  stroke-dasharray: 5 4;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .history-empty-target {
-    animation: entry-pulse 2s ease-in-out infinite;
-  }
 .history-empty-target {
   fill: rgba(255, 255, 255, 0.06);
   stroke: rgba(255, 255, 255, 0.7);
@@ -3093,7 +2968,6 @@ body::before {
   from {
     opacity: 0;
     transform: translateY(var(--rise));
-    transform: translateY(var(--rise));
   }
 
   to {
@@ -3105,7 +2979,6 @@ body::before {
 @media (prefers-reduced-motion: no-preference) {
 
   :where(.game-mode-menu, .game-container):not([hidden]) {
-    animation: screen-enter var(--dur-base) var(--ease-out) var(--enter-delay) backwards;
     animation: screen-enter var(--dur-base) var(--ease-out) var(--enter-delay) backwards;
   }
 
@@ -3151,7 +3024,6 @@ body::before {
 @keyframes screen-exit {
   to {
     opacity: 0;
-    transform: translate(var(--exit-x, 0px), var(--exit-y, -6px));
     transform: translate(var(--exit-x, 0px), var(--exit-y, -6px));
   }
 }
@@ -3277,11 +3149,9 @@ body::before {
   .sound-panel:not([hidden]) {
     transform-origin: top right;
     animation: popover-in var(--dur-base) var(--ease-out);
-    animation: popover-in var(--dur-base) var(--ease-out);
   }
 
   .confirm-overlay {
-    animation: overlay-in var(--dur-base) var(--ease-out);
     animation: overlay-in var(--dur-base) var(--ease-out);
   }
 
