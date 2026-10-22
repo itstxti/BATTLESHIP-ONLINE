@@ -1,7 +1,7 @@
 /* Phones: one column, the board you act on first, thumb-sized targets. */
 
 @media (max-width: 700px) {
-  :root { --gutter: 16px; }
+  :root { --gutter: 20px; --gutter-top: 12px; --gutter-bottom: 32px; }
 
   .entry-content p { font-size: 18px; margin-top: 24px; }
 
@@ -26,6 +26,27 @@
   }
 
   #turn-status { font-size: 30px; }
+
+  /* Phones keep the natural page flow: the boards stack and the page scrolls. */
+  #app:has(> .game-container:not([hidden])) { height: auto; }
+
+  .game-container,
+  .game-container[data-phase='battle'],
+  .game-container[data-phase='game-over'] {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    grid-template-areas: "status" "layout" "controls";
+    max-width: none;
+  }
+
+  .game-container[data-phase='placement'] { max-width: 480px; }
+
+  .game-container[data-phase='battle'] .placement-controls,
+  .game-container[data-phase='game-over'] .placement-controls { margin: 20px 0 0; }
+
+  .game-layout { grid-template-rows: none; }
+  .game-layout .board-section { container-type: normal; }
+  .game-layout .board-section > * { width: 100%; }
 
   .game-layout {
     grid-template-columns: minmax(0, 1fr);
@@ -74,8 +95,7 @@
   .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .stats-card { min-height: 128px; padding: 18px; }
   .stats-card-value { font-size: 40px; }
-  .stats-card--meter::before, .stats-card--meter::after { left: 18px; bottom: 18px; }
-  .stats-card--meter::before { right: 18px; }
+  .stats-card--meter { --meter-inset: 18px; }
   .stats-card--meter { padding-bottom: 40px; }
   .stats-segments { max-width: 100%; overflow-x: auto; }
 
