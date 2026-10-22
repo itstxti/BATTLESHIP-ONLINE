@@ -10,6 +10,11 @@
   --line: rgba(13, 26, 34, 0.14);
   --ink: #0d1a22;
   --ink-soft: #45555f;
+
+  /* Board water: light blue; a sunk ship's cells turn a lighter blue. */
+  --cell-water: #a8d3f0;
+  --cell-water-hover: #92c4e8;
+  --cell-sunk: #d3ebfa;
   --steel: #6b7b85;
   --steel-edge: #1f2a30;
   --accent: #ff5a36;
@@ -26,16 +31,21 @@
 
   /* Top bar. Icon buttons are 48px boxes around 24px icons; the bar is pulled
      out by the difference so the icons themselves sit on the page edges. */
-  --topbar-h: 48px;
-  --header-gap: clamp(4px, 1vh, 8px);
+  --topbar-h: 64px;
+  --topbar-pad: 24px;
+  --header-gap: clamp(8px, 2vh, 20px);
   --icon-inset: 12px;
 
   /* Height left for a screen below the top bar (desktop: the page does not scroll). */
-  --screen-h: calc(100dvh - var(--gutter-top) - var(--gutter-bottom) - var(--topbar-h) - var(--header-gap));
+  --screen-h: calc(100dvh - env(safe-area-inset-top, 0px) - var(--gutter-bottom) - var(--topbar-h) - var(--header-gap));
 
   --gutter: clamp(24px, 4vw, 64px);
   --gutter-top: clamp(16px, 3vh, 32px);
   --gutter-bottom: clamp(24px, 4vh, 48px);
+  /* The padding #app puts around its content; the top bar cancels it to reach the viewport edges. */
+  --pad-t: max(var(--gutter-top), env(safe-area-inset-top));
+  --pad-r: max(var(--gutter), env(safe-area-inset-right));
+  --pad-l: max(var(--gutter), env(safe-area-inset-left));
   --z-topbar: 100;
   --z-popover: 200;
   --z-dialog: 300;
@@ -172,19 +182,36 @@ input:focus-visible,
 
 /* ---------- Top bar ---------- */
 
+/*
+ * One fixed bar for every screen: full viewport width, always the same height
+ * (plus the notch inset on phones). It cancels #app's padding with negative
+ * margins, so it reaches the viewport edges, and stays on top while scrolling.
+ */
 .game-header {
-  width: 100%;
-  max-width: var(--page-max);
-  margin: 0 auto var(--header-gap);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-topbar);
+  box-sizing: border-box;
+  width: auto;
+  max-width: none;
+  height: calc(var(--topbar-h) + env(safe-area-inset-top, 0px));
+  margin: calc(-1 * var(--pad-t)) calc(-1 * var(--pad-r)) var(--header-gap) calc(-1 * var(--pad-l));
+  padding: env(safe-area-inset-top, 0px) 0 0;
+  background: var(--ground);
+  box-shadow: 0 1px 0 var(--line);
 }
 
 .game-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: var(--topbar-h);
-  /* Optical alignment: the icons, not their hover boxes, line up with the page. */
-  margin-inline: calc(-1 * var(--icon-inset));
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--topbar-h);
+  /* Optical alignment: the icons, not their hover boxes, sit --topbar-pad from the edges. */
+  padding-inline:
+    calc(var(--topbar-pad) - var(--icon-inset) + env(safe-area-inset-left, 0px))
+    calc(var(--topbar-pad) - var(--icon-inset) + env(safe-area-inset-right, 0px));
 }
 
 .game-brand {
@@ -728,12 +755,12 @@ input:focus-visible,
   content: "";
   position: absolute;
   inset: 2px;
-  background: var(--step-1);
+  background: var(--cell-water);
   transition: background-color var(--dur-fast) var(--ease-out);
 }
 
 .cell.available { cursor: pointer; }
-.cell.available:hover::before { background: var(--step-2); }
+.cell.available:hover::before { background: var(--cell-water-hover); }
 .cell.disabled { cursor: default; }
 .cell.ship.movable { cursor: grab; }
 
@@ -752,7 +779,7 @@ input:focus-visible,
 }
 
 .cell {
-  --water: var(--step-1);
+  --water: var(--cell-water);
   --burnt: #a3321c;
   --charred: #2b3135;
 }
@@ -807,11 +834,11 @@ input:focus-visible,
  * Shots. Each state differs in fill, shape and colour so it reads even in
  * greyscale: a miss keeps the water with a small muted dot; a hit fills the
  * cell with a burnt red and a light impact mark; a sunk ship turns the cell
- * charcoal, chars the hull and crosses it out.
+ * a lighter blue, chars the hull and crosses it out.
  */
 
 .cell.hit { --water: var(--burnt); }
-.cell.hit.sunk { --water: var(--charred); }
+.cell.hit.sunk { --water: var(--cell-sunk); }
 .cell.hit:not(.hull)::before { background: var(--water); }
 .cell.hit:not(.hull) { background: none; }
 
@@ -825,7 +852,7 @@ input:focus-visible,
   pointer-events: none;
 }
 
-.cell.miss::after { width: 50%; height: 50%; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='16' fill='%238c9ba4'/%3E%3C/svg%3E"); }
+.cell.miss::after { width: 50%; height: 50%; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='16' fill='%235d87a6'/%3E%3C/svg%3E"); }
 .cell.hit::after { width: 72%; height: 72%; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='31' fill='none' stroke='%23ffe3d9' stroke-width='5' stroke-opacity='.55'/%3E%3Ccircle cx='50' cy='50' r='17' fill='%23ffe3d9' stroke='%235c1609' stroke-width='2'/%3E%3C/svg%3E"); }
 .cell.hit.sunk::after { width: 52%; height: 52%; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M24 24 76 76M76 24 24 76' stroke='%23ff8a6e' stroke-width='10' stroke-linecap='square'/%3E%3C/svg%3E"); }
 
@@ -1620,3 +1647,7 @@ dl, dt, dd { margin: 0; }
 /* Sentence case for the result headline (the text arrives in capitals). */
 .results-headline { text-transform: lowercase; }
 .results-headline::first-letter { text-transform: uppercase; }
+
+/* Statistics icon: soft-filled outlined bars, the tallest one solid. */
+.game-icon-button svg .stats-bar-fill { fill: currentColor; fill-opacity: 0.16; }
+.game-icon-button svg .stats-bar-solid { fill: currentColor; }
