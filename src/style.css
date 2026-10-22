@@ -14,7 +14,7 @@
   /* Board water: light blue; a sunk ship's cells turn a lighter blue. */
   --cell-water: #a8d3f0;
   --cell-water-hover: #92c4e8;
-  --cell-sunk: #d3ebfa;
+  --cell-sunk: #6fa9d0;
   --steel: #6b7b85;
   --steel-edge: #1f2a30;
   --accent: #ff5a36;
