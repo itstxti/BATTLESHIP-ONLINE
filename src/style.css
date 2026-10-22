@@ -15,8 +15,22 @@
   --accent: #ff5a36;
   --float: 0 16px 48px rgba(13, 26, 34, 0.18);
 
-  /* One content width for every page, so headlines and the top bar line up. */
+  /*
+   * The one shared container: every page (menus, lobby, stats, history,
+   * results and the game) and the top bar use --page-max inside the same
+   * --gutter, so their edges are the same two vertical lines.
+   */
   --page-max: 1240px;
+  --page-width: min(var(--page-max), 100%);
+
+  /* Top bar. Icon buttons are 48px boxes around 24px icons; the bar is pulled
+     out by the difference so the icons themselves sit on the page edges. */
+  --topbar-h: 48px;
+  --header-gap: clamp(4px, 1vh, 8px);
+  --icon-inset: 12px;
+
+  /* Height left for a screen below the top bar (desktop: the page does not scroll). */
+  --screen-h: calc(100dvh - var(--gutter-top) - var(--gutter-bottom) - var(--topbar-h) - var(--header-gap));
 
   --gutter: clamp(24px, 4vw, 64px);
   --gutter-top: clamp(16px, 3vh, 32px);
@@ -157,23 +171,26 @@ input:focus-visible,
 
 /* ---------- Top bar ---------- */
 
-.game-header { margin-bottom: clamp(4px, 1vh, 8px); }
+.game-header {
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto var(--header-gap);
+}
 
 .game-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 100%;
-  max-width: var(--page-max);
-  min-height: 48px;
-  margin: 0 auto;
+  min-height: var(--topbar-h);
+  /* Optical alignment: the icons, not their hover boxes, line up with the page. */
+  margin-inline: calc(-1 * var(--icon-inset));
 }
 
 .game-brand {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  margin-left: 12px;
+  margin-left: 4px;
   margin-right: auto;
   font-size: 15px;
   font-weight: 600;
@@ -234,7 +251,8 @@ input:focus-visible,
 .sound-panel {
   position: absolute;
   top: calc(100% + 8px);
-  right: 0;
+  /* Ends on the page edge, under the icon rather than its box. */
+  right: var(--icon-inset);
   z-index: var(--z-popover);
   display: grid;
   gap: 20px;
@@ -501,11 +519,18 @@ input:focus-visible,
 .game-container {
   --board-title: 42px;
   --board-gap: clamp(32px, 4vw, 56px);
-  /* Rough height of everything that is not a board; it only narrows the
-     columns so the fleets line up under boards that shrank to fit. */
-  --battle-chrome: calc(var(--gutter-top) + var(--gutter-bottom) + 280px);
-  /* Widest a board can be in its column (resolved against this container). */
-  --board-col: min(600px, (100cqw - var(--board-gap)) / 2);
+  /* Every height around the boards, from the same values the rules below use. */
+  --turn-size: clamp(28px, min(4vw, 6vh), 52px);
+  --status-mt: clamp(4px, 1.5vh, 16px);
+  --status-mb: clamp(12px, 3vh, 28px);
+  --status-row: calc(max(var(--turn-size) * 1.05, 48px) + var(--status-mt) + var(--status-mb));
+  --layout-gap: clamp(12px, 2vh, 20px);
+  --chip-h: 38px;
+  --fleet-h: calc(2 * var(--chip-h) + 8px);
+  /* The tallest board that fits under the status, with its title and fleet. */
+  --board-fit: calc(var(--screen-h) - var(--status-row) - var(--board-title) - var(--layout-gap) - var(--fleet-h));
+  /* Board size (labels included), resolved against this container's width. */
+  --board-col: max(240px, min(600px, (100cqw - var(--board-gap)) / 2, var(--board-fit)));
 
   container-type: inline-size;
   display: grid;
@@ -516,19 +541,19 @@ input:focus-visible,
     "layout layout"
     "controls controls";
   width: 100%;
-  max-width: clamp(640px, (100dvh - var(--battle-chrome)) * 2 + var(--board-gap), 1260px);
+  max-width: var(--page-max);
   min-height: 0;
   margin: 0 auto;
 }
 
 .game-status {
   grid-area: status;
-  margin: clamp(4px, 1.5vh, 16px) 0 clamp(12px, 3vh, 28px);
+  margin: var(--status-mt) 0 var(--status-mb);
 }
 
 #turn-status {
   display: block;
-  font-size: clamp(28px, min(4vw, 6vh), 52px);
+  font-size: var(--turn-size);
   font-weight: 600;
   line-height: 1.05;
   letter-spacing: -0.035em;
@@ -541,16 +566,21 @@ input:focus-visible,
 .game-layout {
   grid-area: layout;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  /* The board row grows with the free height, but never past what the column
-     width allows, so the fleets stay right under the boards. */
-  grid-template-rows: minmax(240px, calc(var(--board-col) + var(--board-title))) auto;
+  /*
+   * Two columns exactly one board wide, pushed to the page edges: the left
+   * board starts under the back button and the right one ends under the
+   * sound button. When the height limits the boards, the middle gap grows
+   * instead of the boards drifting inward.
+   */
+  grid-template-columns: repeat(2, var(--board-col));
+  grid-template-rows: calc(var(--board-col) + var(--board-title)) auto;
   grid-template-areas:
     "pb eb"
     "pf ef";
+  justify-content: space-between;
   align-content: start;
   column-gap: var(--board-gap);
-  row-gap: clamp(12px, 2vh, 20px);
+  row-gap: var(--layout-gap);
   align-items: start;
 }
 
@@ -767,7 +797,7 @@ input:focus-visible,
 
 /* ---------- Fleet ---------- */
 
-.fleet-section { width: 100%; max-width: 560px; }
+.fleet-section { width: 100%; max-width: 600px; }
 
 .fleet-section h3 {
   position: absolute;
@@ -805,6 +835,7 @@ input:focus-visible,
 .fleet-ship {
   display: inline-flex;
   align-items: center;
+  min-height: var(--chip-h, 38px);
   gap: 12px;
   padding: 10px 14px;
   border: 0;
@@ -935,7 +966,6 @@ input:focus-visible,
 /* Battle and after: the one remaining button sits beside the turn status. */
 .game-container[data-phase='battle'],
 .game-container[data-phase='game-over'] {
-  --battle-chrome: calc(var(--gutter-top) + var(--gutter-bottom) + 220px);
   grid-template-rows: auto minmax(0, 1fr);
   grid-template-areas:
     "status controls"
@@ -946,7 +976,7 @@ input:focus-visible,
 .game-container[data-phase='battle'] .placement-controls,
 .game-container[data-phase='game-over'] .placement-controls {
   align-self: center;
-  margin: clamp(4px, 1.5vh, 16px) 0 clamp(12px, 3vh, 28px);
+  margin: var(--status-mt) 0 var(--status-mb);
 }
 
 /* Battle and after: nothing to rotate or reset. */
@@ -1108,9 +1138,22 @@ input:focus-visible,
 .results-view-boards:hover { background: var(--step-2); }
 
 .results-boards {
+  /* Same idea as the game: board-wide columns on the page edges, sized from
+     the height left under the headline and the buttons. */
+  --rb-gap: 56px;
+  --rb-chrome: calc(
+    clamp(8px, 4vh, 64px)                               /* page top */
+    + 13px + clamp(14px, 2.4vh, 24px)                    /* eyebrow */
+    + clamp(40px, min(5.6vw, 10vh), 88px) * 0.98          /* headline */
+    + clamp(16px, 3vh, 28px) + 19px * 1.5                 /* detail line */
+    + clamp(16px, 3vh, 32px) + 56px                       /* buttons */
+    + clamp(20px, 3vh, 40px) + 42px                       /* board titles */
+  );
+  --rb: max(240px, min(560px, (100% - var(--rb-gap)) / 2, var(--screen-h) - var(--rb-chrome)));
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 56px;
+  grid-template-columns: repeat(2, var(--rb));
+  justify-content: space-between;
+  column-gap: var(--rb-gap);
   row-gap: 32px;
   margin-top: clamp(20px, 3vh, 40px);
 }
@@ -1122,9 +1165,7 @@ input:focus-visible,
  */
 .results-screen:has(.results-boards:not([hidden])) .results-groups { display: none; }
 
-.results-boards .board-section {
-  max-width: clamp(260px, 100dvh - 470px, 560px);
-}
+.results-boards .board-section { max-width: none; }
 
 .board--readonly .cell { cursor: default; }
 
@@ -1485,6 +1526,32 @@ input:focus-visible,
 .game-container[data-phase='placement'] .placement-controls { margin-top: 20px; }
 
 .game-container[data-phase='placement'] #turn-status { font-size: 26px; letter-spacing: -0.025em; }
+
+/*
+ * Placement on a wide screen: the status runs along the top, the board sits
+ * where your board will be in battle (left edge, under the back button) and
+ * the fleet and buttons fill the column to its right, ending on the right
+ * page edge. The board takes all the height under the status.
+ */
+@media (min-width: 1000px) {
+  .game-container[data-phase='placement'] {
+    --placement-status: calc(26px * 1.05 + 24px);
+    --board-col: max(320px, min(600px, var(--screen-h) - var(--placement-status), (100cqw - var(--board-gap)) * 0.55));
+    max-width: var(--page-max);
+    grid-template-columns: var(--board-col) minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas:
+      "status status"
+      "pb pf"
+      "pb controls";
+    column-gap: var(--board-gap);
+  }
+
+  .game-container[data-phase='placement'] .game-layout { display: contents; }
+  .game-container[data-phase='placement'] .board-section { max-width: none; }
+  .game-container[data-phase='placement'] .fleet-section { max-width: none; }
+  .game-container[data-phase='placement'] .placement-controls { align-self: start; margin-top: 24px; }
+}
 #enemy-fleet .fleet-ship { flex-direction: row-reverse; justify-content: flex-end; }
 
 dl, dt, dd { margin: 0; }
