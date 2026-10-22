@@ -524,47 +524,122 @@ input:focus-visible,
 .cell.disabled { cursor: default; }
 .cell.ship.movable { cursor: grab; }
 
-/* Ships: one continuous bar across the cells it covers. */
+/*
+ * Ships: a flat, top-down plan of each ship in steel tones with thin
+ * outlines. Every cell draws its slice (bow, hull, stern, bridge) as an
+ * SVG stretched to the cell, edge to edge so the slices join into one
+ * silhouette. The water square moves to the cell background, ::before
+ * draws the ship and ::after stays free for the shot marks on top.
+ */
 
-.cell.hull::before { background: var(--ink); }
+.cell.hull,
+.cell.placement-preview,
+.cell.placement-invalid {
+  background: linear-gradient(var(--water), var(--water)) center / calc(100% - 4px) calc(100% - 4px) no-repeat;
+}
 
-.cell.hull-h::before { inset: 2px 0; }
-.cell.hull-h.hull-bow::before { left: 2px; }
-.cell.hull-h.hull-stern::before { right: 2px; }
+.cell {
+  --water: var(--step-1);
+  --burnt: #a3321c;
+  --charred: #2b3135;
+}
 
-.cell.hull-v::before { inset: 0 2px; }
-.cell.hull-v.hull-bow::before { top: 2px; }
-.cell.hull-v.hull-stern::before { bottom: 2px; }
+.cell.hull::before {
+  inset: 0;
+  background: transparent center / 100% 100% no-repeat;
+}
 
-/* Shots */
+/* Overlap the neighbouring slice by a pixel so no seam shows at the joins. */
+.cell.hull-h::before { left: -1px; right: -1px; }
+.cell.hull-h.hull-bow::before { left: 0; }
+.cell.hull-h.hull-stern::before { right: 0; }
+.cell.hull-v::before { top: -1px; bottom: -1px; }
+.cell.hull-v.hull-bow::before { top: 0; }
+.cell.hull-v.hull-stern::before { bottom: 0; }
 
-.cell.miss::after {
+.cell.hull.hull-h.hull-bow::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100Z' fill='%236b7b85'/%3E%3Cpath d='M48 50H100' fill='none' stroke='%2346555e' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.hull-carrier.hull-h.hull-bow::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100Z' fill='%236b7b85'/%3E%3Crect x='50' y='33' width='50' height='34' fill='%2358676f'/%3E%3Cpath d='M54 50H100' fill='none' stroke='%23c9d1d5' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.hull-h.hull-mid::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 26H100V74H0Z' fill='%236b7b85'/%3E%3Cpath d='M0 50H44M57 50H100' fill='none' stroke='%2346555e' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M28 50H44' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Crect x='44' y='43' width='13' height='14' fill='%2393a1a9' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.hull-carrier.hull-h.hull-mid::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 26H100V74H0Z' fill='%236b7b85'/%3E%3Crect x='0' y='33' width='100' height='34' fill='%2358676f'/%3E%3Cpath d='M4 50H100' fill='none' stroke='%23c9d1d5' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.hull-h.hull-mid.hull-bridge::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 26H100V74H0Z' fill='%236b7b85'/%3E%3Cpath d='M0 50H28M74 50H100' fill='none' stroke='%2346555e' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Crect x='28' y='36' width='46' height='28' fill='%2393a1a9' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M40 43V57M51 43V57M62 43V57' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.hull-carrier.hull-h.hull-mid.hull-bridge::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 26H100V74H0Z' fill='%236b7b85'/%3E%3Crect x='0' y='33' width='100' height='34' fill='%2358676f'/%3E%3Cpath d='M4 50H100' fill='none' stroke='%23c9d1d5' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Crect x='34' y='27' width='30' height='8' fill='%2393a1a9' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.hull-h.hull-stern::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0Z' fill='%236b7b85'/%3E%3Cpath d='M0 50H40' fill='none' stroke='%2346555e' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M28 50H44' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Crect x='44' y='43' width='13' height='14' fill='%2393a1a9' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M84 31V69' fill='none' stroke='%2346555e' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.hull-carrier.hull-h.hull-stern::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0Z' fill='%236b7b85'/%3E%3Crect x='0' y='33' width='88' height='34' fill='%2358676f'/%3E%3Cpath d='M4 50H88' fill='none' stroke='%23c9d1d5' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.hull-v.hull-bow::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100Z' fill='%236b7b85'/%3E%3Cpath d='M48 50H100' fill='none' stroke='%2346555e' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.hull-carrier.hull-v.hull-bow::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100Z' fill='%236b7b85'/%3E%3Crect x='50' y='33' width='50' height='34' fill='%2358676f'/%3E%3Cpath d='M54 50H100' fill='none' stroke='%23c9d1d5' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.hull-v.hull-mid::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M0 26H100V74H0Z' fill='%236b7b85'/%3E%3Cpath d='M0 50H44M57 50H100' fill='none' stroke='%2346555e' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M28 50H44' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Crect x='44' y='43' width='13' height='14' fill='%2393a1a9' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.hull-carrier.hull-v.hull-mid::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M0 26H100V74H0Z' fill='%236b7b85'/%3E%3Crect x='0' y='33' width='100' height='34' fill='%2358676f'/%3E%3Cpath d='M4 50H100' fill='none' stroke='%23c9d1d5' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.hull-v.hull-mid.hull-bridge::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M0 26H100V74H0Z' fill='%236b7b85'/%3E%3Cpath d='M0 50H28M74 50H100' fill='none' stroke='%2346555e' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Crect x='28' y='36' width='46' height='28' fill='%2393a1a9' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M40 43V57M51 43V57M62 43V57' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.hull-carrier.hull-v.hull-mid.hull-bridge::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M0 26H100V74H0Z' fill='%236b7b85'/%3E%3Crect x='0' y='33' width='100' height='34' fill='%2358676f'/%3E%3Cpath d='M4 50H100' fill='none' stroke='%23c9d1d5' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Crect x='34' y='27' width='30' height='8' fill='%2393a1a9' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.hull-v.hull-stern::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0Z' fill='%236b7b85'/%3E%3Cpath d='M0 50H40' fill='none' stroke='%2346555e' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M28 50H44' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Crect x='44' y='43' width='13' height='14' fill='%2393a1a9' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M84 31V69' fill='none' stroke='%2346555e' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.hull-carrier.hull-v.hull-stern::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0Z' fill='%236b7b85'/%3E%3Crect x='0' y='33' width='88' height='34' fill='%2358676f'/%3E%3Cpath d='M4 50H88' fill='none' stroke='%23c9d1d5' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-h.hull-bow::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100Z' fill='%234b5156'/%3E%3Cpath d='M48 50H100' fill='none' stroke='%23363c40' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-carrier.hull-h.hull-bow::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100Z' fill='%234b5156'/%3E%3Crect x='50' y='33' width='50' height='34' fill='%2340464a'/%3E%3Cpath d='M54 50H100' fill='none' stroke='%236f767a' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-h.hull-mid::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 26H100V74H0Z' fill='%234b5156'/%3E%3Cpath d='M0 50H44M57 50H100' fill='none' stroke='%23363c40' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M28 50H44' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Crect x='44' y='43' width='13' height='14' fill='%235f666b' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-carrier.hull-h.hull-mid::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 26H100V74H0Z' fill='%234b5156'/%3E%3Crect x='0' y='33' width='100' height='34' fill='%2340464a'/%3E%3Cpath d='M4 50H100' fill='none' stroke='%236f767a' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-h.hull-mid.hull-bridge::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 26H100V74H0Z' fill='%234b5156'/%3E%3Cpath d='M0 50H28M74 50H100' fill='none' stroke='%23363c40' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Crect x='28' y='36' width='46' height='28' fill='%235f666b' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M40 43V57M51 43V57M62 43V57' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-carrier.hull-h.hull-mid.hull-bridge::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 26H100V74H0Z' fill='%234b5156'/%3E%3Crect x='0' y='33' width='100' height='34' fill='%2340464a'/%3E%3Cpath d='M4 50H100' fill='none' stroke='%236f767a' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Crect x='34' y='27' width='30' height='8' fill='%235f666b' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-h.hull-stern::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0Z' fill='%234b5156'/%3E%3Cpath d='M0 50H40' fill='none' stroke='%23363c40' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M28 50H44' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Crect x='44' y='43' width='13' height='14' fill='%235f666b' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M84 31V69' fill='none' stroke='%23363c40' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-carrier.hull-h.hull-stern::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0Z' fill='%234b5156'/%3E%3Crect x='0' y='33' width='88' height='34' fill='%2340464a'/%3E%3Cpath d='M4 50H88' fill='none' stroke='%236f767a' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-v.hull-bow::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100Z' fill='%234b5156'/%3E%3Cpath d='M48 50H100' fill='none' stroke='%23363c40' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-carrier.hull-v.hull-bow::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100Z' fill='%234b5156'/%3E%3Crect x='50' y='33' width='50' height='34' fill='%2340464a'/%3E%3Cpath d='M54 50H100' fill='none' stroke='%236f767a' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-v.hull-mid::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M0 26H100V74H0Z' fill='%234b5156'/%3E%3Cpath d='M0 50H44M57 50H100' fill='none' stroke='%23363c40' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M28 50H44' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Crect x='44' y='43' width='13' height='14' fill='%235f666b' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-carrier.hull-v.hull-mid::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M0 26H100V74H0Z' fill='%234b5156'/%3E%3Crect x='0' y='33' width='100' height='34' fill='%2340464a'/%3E%3Cpath d='M4 50H100' fill='none' stroke='%236f767a' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-v.hull-mid.hull-bridge::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M0 26H100V74H0Z' fill='%234b5156'/%3E%3Cpath d='M0 50H28M74 50H100' fill='none' stroke='%23363c40' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Crect x='28' y='36' width='46' height='28' fill='%235f666b' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M40 43V57M51 43V57M62 43V57' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-carrier.hull-v.hull-mid.hull-bridge::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M0 26H100V74H0Z' fill='%234b5156'/%3E%3Crect x='0' y='33' width='100' height='34' fill='%2340464a'/%3E%3Cpath d='M4 50H100' fill='none' stroke='%236f767a' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Crect x='34' y='27' width='30' height='8' fill='%235f666b' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-v.hull-stern::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0Z' fill='%234b5156'/%3E%3Cpath d='M0 50H40' fill='none' stroke='%23363c40' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M28 50H44' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Crect x='44' y='43' width='13' height='14' fill='%235f666b' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M84 31V69' fill='none' stroke='%23363c40' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-carrier.hull-v.hull-stern::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0Z' fill='%234b5156'/%3E%3Crect x='0' y='33' width='88' height='34' fill='%2340464a'/%3E%3Cpath d='M4 50H88' fill='none' stroke='%236f767a' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+
+/*
+ * Shots. Each state differs in fill, shape and colour so it reads even in
+ * greyscale: a miss keeps the water with a small muted dot; a hit fills the
+ * cell with a burnt red and a light impact mark; a sunk ship turns the cell
+ * charcoal, chars the hull and crosses it out.
+ */
+
+.cell.hit { --water: var(--burnt); }
+.cell.hit.sunk { --water: var(--charred); }
+.cell.hit:not(.hull)::before { background: var(--water); }
+.cell.hit:not(.hull) { background: none; }
+
+.cell.miss::after,
+.cell.hit::after {
   content: "";
   position: absolute;
   inset: 0;
-  width: 22%;
-  height: 22%;
   margin: auto;
-  border-radius: 50%;
-  background: var(--ink-soft);
+  background: center / contain no-repeat;
+  pointer-events: none;
 }
 
-.cell.hit::before,
-.cell.sunk::before { background: var(--accent); }
+.cell.miss::after { width: 50%; height: 50%; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='16' fill='%238c9ba4'/%3E%3C/svg%3E"); }
+.cell.hit::after { width: 72%; height: 72%; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='31' fill='none' stroke='%23ffe3d9' stroke-width='5' stroke-opacity='.55'/%3E%3Ccircle cx='50' cy='50' r='17' fill='%23ffe3d9' stroke='%235c1609' stroke-width='2'/%3E%3C/svg%3E"); }
+.cell.hit.sunk::after { width: 52%; height: 52%; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M24 24 76 76M76 24 24 76' stroke='%23ff8a6e' stroke-width='10' stroke-linecap='square'/%3E%3C/svg%3E"); }
 
-.cell.sunk::after {
-  content: "";
-  position: absolute;
+/* Placement preview: the hull outline, translucent; orange when it does not fit. */
+
+.cell.hull-h, .cell.preview-h { --shape: polygon(0 26%, 100% 26%, 100% 74%, 0 74%); }
+.cell.preview-h.preview-bow {
+  --shape: polygon(3% 50%, 12% 38%, 30% 28%, 54% 26%, 100% 26%, 100% 74%, 54% 74%, 30% 72%, 12% 62%);
+}
+.cell.preview-h.preview-stern {
+  --shape: polygon(0 26%, 88% 26%, 93% 28%, 95% 33%, 95% 67%, 93% 72%, 88% 74%, 0 74%);
+}
+.cell.hull-v, .cell.preview-v { --shape: polygon(26% 0, 74% 0, 74% 100%, 26% 100%); }
+.cell.preview-v.preview-bow {
+  --shape: polygon(50% 3%, 62% 12%, 72% 30%, 74% 54%, 74% 100%, 26% 100%, 26% 54%, 28% 30%, 38% 12%);
+}
+.cell.preview-v.preview-stern {
+  --shape: polygon(26% 0, 74% 0, 74% 88%, 72% 93%, 67% 95%, 33% 95%, 28% 93%, 26% 88%);
+}
+
+.cell.placement-preview::before,
+.cell.placement-invalid::before {
   inset: 0;
-  width: 24%;
-  height: 24%;
-  margin: auto;
-  background: var(--ink);
+  clip-path: var(--shape, none);
+  background: #6b7b85;
+  opacity: 0.55;
 }
-
-/* Placement preview */
-
-.cell.placement-preview::before { background: var(--ink); opacity: 0.4; }
 .cell.placement-invalid::before { background: var(--accent); opacity: 0.6; }
 
 /* ---------- Fleet ---------- */
@@ -620,12 +695,25 @@ input:focus-visible,
     color var(--dur-fast) var(--ease-out);
 }
 
-.fleet-ship-visual { display: flex; gap: 2px; }
+/* A small side-on silhouette, one segment per cell: pointed bow, square stern. */
+.fleet-ship-visual { display: flex; }
 
 .ship-segment {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   background: currentColor;
+  clip-path: polygon(0 22%, 100% 22%, 100% 78%, 0 78%);
+}
+.ship-segment:first-child {
+  clip-path: polygon(5% 50%, 15% 36%, 31% 26%, 54% 22%, 100% 22%, 100% 78%, 54% 78%, 31% 74%, 15% 64%);
+}
+.ship-segment:last-child {
+  clip-path: polygon(0 22%, 84% 22%, 92% 27%, 95% 37%, 95% 63%, 92% 73%, 84% 78%, 0 78%);
+}
+/* The bridge sits on the middle segment, as on the board. */
+.ship-segment:nth-child(2):nth-last-child(2),
+.ship-segment:nth-child(3):not(:last-child) {
+  clip-path: polygon(0 22%, 25% 22%, 25% 4%, 75% 4%, 75% 22%, 100% 22%, 100% 78%, 0 78%);
 }
 
 .fleet-ship-name { line-height: 1.2; }
@@ -641,6 +729,7 @@ input:focus-visible,
 }
 
 .fleet-ship.sunk { background: transparent; }
+.fleet-ship:not(.selected) .ship-segment { background: #6b7b85; }
 .fleet-ship.sunk .ship-segment { background: var(--accent); }
 .fleet-ship.sunk .fleet-ship-name { text-decoration: line-through; opacity: 0.6; }
 
@@ -1119,8 +1208,8 @@ input:focus-visible,
 
   #turn-status.status-swap { animation: status-swap var(--dur-base) var(--ease-out); }
 
-  .cell.shot-animation::before { animation: shot-pop 360ms var(--ease-out); }
-  .cell.sunk-animation::before { animation: shot-pop 520ms var(--ease-out); }
+  .cell.shot-animation::after { animation: shot-pop 360ms var(--ease-out); }
+  .cell.sunk-animation::after { animation: shot-pop 520ms var(--ease-out); }
 
   .cell.hull-enter::before {
     animation: hull-in 260ms var(--ease-out) backwards;
