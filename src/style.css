@@ -1,87 +1,97 @@
+/* =========================================================
+   BATTLESHIP: minimal redesign
+   One ground, one ink, one accent. Surfaces are separated by a
+   step in tone, never by a line or a shadow. Square corners.
+   One typeface (Geist). The accent marks the action and the hit.
+   ========================================================= */
+
 :root {
-  --font-sans: "Geist", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
-  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font: "Geist", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
-  --ink: #12202b;
-  --accent: #26737a;
+  --ground: #f1f3f4;
+  --step-1: #e3e7e9;
+  --step-2: #d3d9dc;
+  --ink: #0c1215;
+  --ink-soft: #4a565d;
+  --accent: #ff5a36;
+  --float: 0 16px 48px rgba(12, 18, 21, 0.16);
 
+  --gutter: 24px;
   --z-topbar: 100;
   --z-popover: 200;
   --z-dialog: 300;
   --z-entry: 400;
   --z-exit: 150;
 
-  /* Motion: one vocabulary for the whole app.
-     fast = hover / press / colour, base = state changes and entrances,
-     slow = emphasis (meters, sunk ships, entry fade), exit = leaving. */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
-  --dur-fast: 150ms;
+  --dur-fast: 140ms;
   --dur-base: 240ms;
   --dur-slow: 420ms;
   --dur-exit: 120ms;
-  --enter-delay: 60ms;
-  --rise: 8px;
-
-  /* Motion: one vocabulary for the whole app.
-     fast = hover / press / colour, base = state changes and entrances,
-     slow = emphasis (meters, sunk ships, entry fade), exit = leaving. */
-  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-in: cubic-bezier(0.4, 0, 1, 1);
-  --dur-fast: 150ms;
-  --dur-base: 240ms;
-  --dur-slow: 420ms;
-  --dur-exit: 120ms;
-  --enter-delay: 60ms;
-  --rise: 8px;
-
-  /* Sea */
-  --sea-frame-top: #17495a;
-  --sea-frame-bottom: #0f3140;
-
-  font-family: var(--font-sans);
-  color: var(--ink);
-  background: #f2f5f5;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  font-variant-numeric: tabular-nums;
+  --enter-delay: 40ms;
+  --rise: 10px;
 }
 
-* {
-  box-sizing: border-box;
+/* ---------- Base ---------- */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+[hidden] { display: none !important; }
+
+html {
+  background: var(--ground);
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
-  min-width: 320px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 17px;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
 }
 
-button,
-input {
-  font: inherit;
+h1, h2, h3, p { margin: 0; }
+
+button, input { font: inherit; color: inherit; }
+
+button { cursor: pointer; }
+
+button:focus-visible,
+input:focus-visible,
+.entry-screen:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
 }
 
-/* =========================================================
-   ENTRY SCREEN
-   ========================================================= */
+#app {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding:
+    max(20px, env(safe-area-inset-top))
+    max(var(--gutter), env(safe-area-inset-right))
+    max(40px, env(safe-area-inset-bottom))
+    max(var(--gutter), env(safe-area-inset-left));
+}
+
+/* ---------- Entry ---------- */
 
 .entry-screen {
   position: fixed;
   inset: 0;
   z-index: var(--z-entry);
-
   display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background: #f2f5f5;
-
+  align-items: flex-end;
+  padding: var(--gutter);
+  background: var(--ink);
+  color: var(--ground);
   cursor: pointer;
-
-  opacity: 1;
-  visibility: visible;
-
   transition:
     opacity var(--dur-slow) var(--ease-out),
     visibility var(--dur-slow) var(--ease-out);
@@ -93,2296 +103,714 @@ input {
   pointer-events: none;
 }
 
+.entry-content { width: 100%; }
 
-/* =========================================================
-   ENTRY CONTENT
-   ========================================================= */
-
-.entry-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  text-align: center;
-
-  user-select: none;
-}
-
-
-.entry-eyebrow {
-  margin-bottom: 18px;
-
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: 0.25em;
-
-  color: #55666b;
-}
-
+.entry-eyebrow,
+.entry-line { display: none; }
 
 .entry-content h1 {
-  margin: 0;
-
-  font-size: clamp(36px,
-      6vw,
-      72px);
-
-  font-weight: 700;
-  letter-spacing: 0.08em;
-
-  color: #0e1a22;
+  font-size: clamp(52px, 16vw, 280px);
+  font-weight: 600;
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  margin-left: -0.04em;
 }
-
 
 .entry-content p {
-  margin: 20px 0 0;
-
-  font-size: 16px;
+  margin-top: 32px;
+  font-size: 20px;
   font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-
-  color: #1a2a33;
-
-  animation:
-    entry-pulse 2s ease-in-out infinite;
+  color: var(--accent);
 }
 
+/* ---------- Top bar ---------- */
 
-.entry-line {
-  width: 102px;
-  height: 1px;
-
-  margin-top: 8px;
-
-  background: #0e1a22;
-
-  transform-origin: center;
-
-  animation:
-    entry-line-pulse 2s ease-in-out infinite;
-}
-
-
-/* =========================================================
-   ENTRY ANIMATIONS
-   ========================================================= */
-
-@keyframes entry-pulse {
-
-  0%,
-  100% {
-    opacity: 0.45;
-  }
-
-  50% {
-    opacity: 1;
-  }
-}
-
-
-@keyframes entry-line-pulse {
-
-  0%,
-  100% {
-    transform: scaleX(0.5);
-    opacity: 0.3;
-  }
-
-  50% {
-    transform: scaleX(1);
-    opacity: 1;
-  }
-}
-
-
-/* =========================================================
-   REDUCED MOTION
-   ========================================================= */
-
-@media (prefers-reduced-motion: reduce) {
-
-  .entry-screen {
-    transition: none;
-  }
-
-  .entry-content p,
-  .entry-line {
-    animation: none;
-  }
-
-}
-
-/* =========================================================
-   APP
-   ========================================================= */
-
-#app {
-  min-height: 100vh;
-  min-height: 100dvh;
-  padding: 20px 20px;
-}
-
-/* =========================================================
-   HEADER
-   ========================================================= */
-
-.game-header {
-  text-align: center;
-}
-
-/* =========================================================
-   GAME CONTAINER
-   ========================================================= */
-
-.game-container {
-  position: relative;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-/* =========================================================
-   GAME TOPBAR
-   ========================================================= */
+.game-header { margin-bottom: 8px; }
 
 .game-topbar {
-  position: relative;
-  z-index: var(--z-topbar);
-
   display: flex;
   align-items: center;
   justify-content: space-between;
-
-  width: 100%;
-  min-height: 44px;
+  min-height: 48px;
 }
 
-/* =========================================================
-   GAME ICON BUTTON
-   ========================================================= */
+.game-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 
 .game-icon-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
-  flex: 0 0 40px;
-
-  width: 40px;
-  height: 40px;
-
-  margin: 0;
+  width: 48px;
+  height: 48px;
   padding: 0;
-
-  box-sizing: border-box;
-
-  border: 1px solid #dbe3e4;
-  border-radius: 10px;
-
-  background: rgba(255, 255, 255, 0.92);
-  color: #12202b;
-
-  cursor: pointer;
-
-  appearance: none;
-  -webkit-appearance: none;
-
-  box-shadow:
-    0 2px 8px rgba(18, 32, 43, 0.05);
-
-  transition:
-    background-color var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-fast) var(--ease-out);
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  transition: background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
 }
 
-.game-icon-button:hover {
-  background: #ffffff;
-  border-color: #b4c3c5;
+.game-icon-button:hover { background: var(--step-1); }
+.game-icon-button:active { background: var(--step-2); }
 
-  transform: translateY(-1px);
-
-  box-shadow:
-    0 4px 12px rgba(18, 32, 43, 0.08);
+.game-icon-button[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--ground);
 }
-
-.game-icon-button:active {
-  transform: translateY(0);
-}
-
-.game-icon-button:focus-visible {
-  outline: 2px solid #12202b;
-  outline-offset: 2px;
-}
-
-/* =========================================================
-   TOPBAR SVG ICONS
-   ========================================================= */
 
 .game-icon-button svg {
-  display: block;
-
-  width: 18px;
-  height: 18px;
-
-  flex: 0 0 18px;
-
-  overflow: visible;
-
+  width: 24px;
+  height: 24px;
   fill: none;
   stroke: currentColor;
-
-  stroke-width: 1.8;
+  stroke-width: 1.75;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
-/* =========================================================
-   SOUND CONTROLS
-   ========================================================= */
+/* ---------- Sound ---------- */
 
-.sound-controls {
-  position: relative;
-
-  display: flex;
-  align-items: center;
-
-  margin-left: auto;
-}
-
-/* =========================================================
-   SOUND PANEL
-   ========================================================= */
+.sound-controls { position: relative; }
 
 .sound-panel {
   position: absolute;
-
-  top: calc(100% + 10px);
+  top: calc(100% + 8px);
   right: 0;
-
   z-index: var(--z-popover);
-
-  width: 250px;
-
-  padding: 18px;
-
-  box-sizing: border-box;
-
-  border: 1px solid #dbe3e4;
-  border-radius: 14px;
-
-  background: rgba(255, 255, 255, 0.98);
-
-  box-shadow:
-    0 12px 32px rgba(18, 32, 43, 0.12);
+  display: grid;
+  gap: 20px;
+  width: 288px;
+  padding: 24px;
+  background: #fff;
+  box-shadow: var(--float);
 }
 
-.sound-panel[hidden] {
-  display: none;
-}
+.sound-panel-header span { font-size: 17px; font-weight: 600; }
 
-.sound-panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  margin-bottom: 18px;
-
-  color: #12202b;
-
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-}
-
-.sound-control {
-  display: flex;
-  flex-direction: column;
-
-  gap: 8px;
-
-  margin-top: 14px;
-}
+.sound-control { display: grid; gap: 10px; }
 
 .sound-control-label {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-
-  color: #667a7e;
-
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 15px;
 }
 
 .sound-control input[type="range"] {
-  display: block;
-
   width: 100%;
-  height: 4px;
-
   margin: 0;
-  padding: 0;
-
-  cursor: pointer;
-
-  accent-color: var(--accent);
+  accent-color: var(--ink);
 }
-
-/* =========================================================
-   SOUND MUTE BUTTON
-   ========================================================= */
 
 .sound-mute-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 100%;
-  min-height: 36px;
-
-  margin-top: 18px;
-  padding: 8px 12px;
-
-  border: 1px solid #dbe3e4;
-  border-radius: 8px;
-
-  background: #f6f9f8;
-  color: #12202b;
-
-  font-family: inherit;
-  font-size: 12px;
+  padding: 14px 16px;
+  border: 0;
+  background: var(--step-1);
   font-weight: 600;
-
-  cursor: pointer;
-
-  transition:
-    background-color var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out);
+  transition: background-color var(--dur-fast) var(--ease-out);
 }
 
-.sound-mute-button:hover {
-  background: #ffffff;
-  border-color: #b4c3c5;
-}
+.sound-mute-button:hover { background: var(--step-2); }
 
-.sound-mute-button:focus-visible {
-  outline: 2px solid #12202b;
-  outline-offset: 2px;
-}
-
-/* =========================================================
-   APP / MODE MENU
-   ========================================================= */
+/* ---------- Menus: mode, level, hand-off, lobby ---------- */
 
 .game-mode-menu {
-  width: min(680px, 100%);
-  margin: 0 auto;
-  padding: 20px 24px 20px;
-}
-
-.game-mode-header {
-    margin-top: 50px;
-    margin-bottom: 20px;
-}
-
-#online-screen {
-  margin-top: 45px;
-}
-
-.game-mode-eyebrow {
-  display: block;
-  margin-bottom: 10px;
-
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-
-  opacity: 0.8;
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  column-gap: 64px;
+  row-gap: 40px;
+  align-items: start;
+  padding-top: clamp(24px, 9vh, 112px);
 }
 
 .game-mode-header h2 {
-  margin: 0;
-
-  font-size: clamp(32px, 6vw, 48px);
-  font-weight: 700;
+  font-size: clamp(40px, 5.6vw, 88px);
+  font-weight: 600;
+  line-height: 0.98;
   letter-spacing: -0.04em;
 }
 
 .game-mode-header p {
-  margin: 10px 0 0;
-
-  font-size: 15px;
-}
-
-/* =========================================================
-   MODE LIST
-   ========================================================= */
-
-.game-mode-options {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-/* =========================================================
-   MODE BUTTON
-   ========================================================= */
-
-.game-mode-button {
-  position: relative;
-
-  display: flex;
-  align-items: center;
-
-  width: 100%;
-  min-height: 92px;
-
-  padding: 20px 22px;
-
-  border: 1px solid rgba(127, 127, 127, 0.22);
-  border-radius: 14px;
-
-  background: transparent;
-  color: inherit;
-
-  text-align: left;
-
-  cursor: pointer;
-
-  transition:
-    border-color var(--dur-fast) var(--ease-out),
-    background var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out);
-}
-
-.game-mode-button:hover {
-  border-color: rgba(127, 127, 127, 0.5);
-
-  background: rgba(127, 127, 127, 0.05);
-
-  transform: translateY(-2px);
-}
-
-.game-mode-button:active {
-  transform: translateY(0);
-}
-
-/* =========================================================
-   MODE NUMBER
-   ========================================================= */
-
-.game-mode-number {
-  width: 48px;
-
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-
-  opacity: 0.35;
-}
-
-/* =========================================================
-   MODE CONTENT
-   ========================================================= */
-
-.game-mode-content {
-  display: flex;
-  flex-direction: column;
-
-  gap: 5px;
-
-  min-width: 0;
-}
-
-.game-mode-title {
-  font-size: 17px;
-  font-weight: 650;
-}
-
-.game-mode-description {
-  font-size: 13px;
-  opacity: 0.5;
-}
-
-/* =========================================================
-   MODE ARROW
-   ========================================================= */
-
-.game-mode-arrow {
-  margin-left: auto;
-
-  font-size: 22px;
-
-  opacity: 0.3;
-
-  transition:
-    opacity var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out);
-}
-
-.game-mode-button:hover .game-mode-arrow {
-  opacity: 0.8;
-  transform: translateX(4px);
-}
-
-/* =========================================================
-   ONLINE / UNAVAILABLE
-   ========================================================= */
-
-.game-mode-button.disabled {
-  cursor: default;
-  opacity: 0.45;
-}
-
-.game-mode-button.disabled:hover {
-  border-color: rgba(127, 127, 127, 0.22);
-  background: transparent;
-  transform: none;
-}
-
-.game-mode-status {
-  margin-left: auto;
-
-  padding: 5px 8px;
-
-  border: 1px solid rgba(127, 127, 127, 0.2);
-  border-radius: 6px;
-
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-
-  opacity: 0.55;
-}
-
-/* =========================================================
-   GAME STATUS
-   ========================================================= */
-
-.game-status {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 32px;
-}
-
-#turn-status {
-  padding: 10px 18px;
-  color: #12202b;
-  font-size: 17px;
-  font-weight: 700;
-
-  transition: color var(--dur-base) var(--ease-out);
-}
-
-/* The message re-runs this each time it changes (ui/status.ts). */
-@media (prefers-reduced-motion: no-preference) {
-  #turn-status.status-swap {
-    animation: status-swap var(--dur-base) var(--ease-out);
-  }
-}
-
-@keyframes status-swap {
-  from {
-    opacity: 0;
-    transform: translateY(calc(var(--rise) / 2));
-  }
-
-  transition: color var(--dur-base) var(--ease-out);
-}
-
-/* The message re-runs this each time it changes (ui/status.ts). */
-@media (prefers-reduced-motion: no-preference) {
-  #turn-status.status-swap {
-    animation: status-swap var(--dur-base) var(--ease-out);
-  }
-}
-
-@keyframes status-swap {
-  from {
-    opacity: 0;
-    transform: translateY(calc(var(--rise) / 2));
-  }
-}
-
-/* =========================================================
-   PLAYER TURN
-   ========================================================= */
-
-#turn-status.player-turn {
-  color: #2a7d4f;
-}
-
-/* =========================================================
-   ENEMY TURN
-   ========================================================= */
-
-#turn-status.enemy-turn {
-  color: #991b1b;
-}
-
-/* =========================================================
-   GAME OVER
-   ========================================================= */
-
-#turn-status.game-over {
-  color: var(--ink);
-}
-
-/* =========================================================
-   MAIN GAME LAYOUT
-   ========================================================= */
-
-.game-layout {
-  display: grid;
-
-  grid-template-columns:
-    190px 403px 403px 190px;
-
-  align-items: center;
-  justify-content: center;
-
-  column-gap: 32px;
-  row-gap: 24px;
-}
-
-/* =========================================================
-   BOARDS
-   ========================================================= */
-
-.board-section {
-  width: 403px;
-  text-align: center;
-}
-
-.board-section h2 {
-  margin: 0 0 16px;
-  font-size: 17px;
-}
-
-.board {
-  display: grid;
-
-  grid-template-columns:
-    20px repeat(10, 34px);
-
-  grid-template-rows:
-    20px repeat(10, 34px);
-
-  gap: 3px;
-
-  width: 403px;
-
-  padding: 8px;
-
-  --gap: 3px;
-
-  background: linear-gradient(160deg, var(--sea-frame-top), var(--sea-frame-bottom));
-  border-radius: 12px;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.07),
-    0 18px 32px -20px rgba(18, 32, 43, 0.55);
-}
-
-/* =========================================================
-   BOARD COORDINATES
-   ========================================================= */
-
-.board-corner {
-  width: 20px;
-  height: 20px;
-}
-
-.board-label {
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  width: 100%;
-  height: 100%;
-
-  color: rgba(214, 234, 238, 0.72);
-
-  font-size: 10px;
-  font-weight: 700;
-
-  user-select: none;
-}
-
-/* =========================================================
-   CELLS
-   ========================================================= */
-
-.cell {
-  position: relative;
-  isolation: isolate;
-
-  width: 34px;
-  height: 34px;
-
-  padding: 0;
-  border: 0;
-  border-radius: 4px;
-
-  background:
-    linear-gradient(165deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 55%),
-    #2b7186;
-
-  cursor: pointer;
-
-  transition:
-    background-color var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out),
-    filter var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-fast) var(--ease-out);
-}
-
-.cell:hover {
-  filter: brightness(1.18);
-  transform: scale(1.04);
-}
-
-/* =========================================================
-   PLAYER SHIPS
-   ========================================================= */
-
-.cell.ship {
-  /* The hull itself is drawn by .cell.hull::before. */
-  position: relative;
-}
-
-/* =========================================================
-   MOVABLE SHIPS
-   ========================================================= */
-
-.cell.ship.movable {
-  cursor: pointer;
-
-  transition:
-    background-color var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-fast) var(--ease-out);
-}
-
-.cell.ship.movable:hover {
-  transform: none;
-  box-shadow: none;
-  filter: brightness(1.14);
-}
-
-/* =========================================================
-   HIT
-   ========================================================= */
-
-.cell.hit {
-  color: transparent;
-  font-size: 0;
-  text-shadow: none;
-}
-
-/* =========================================================
-   MISS
-   ========================================================= */
-
-.cell.miss {
-  color: transparent;
-  font-size: 0;
-}
-
-/* =========================================================
-   SUNK
-   ========================================================= */
-
-.cell.sunk {
-  color: transparent;
-}
-
-/* =========================================================
-   SHOT ANIMATION
-   ========================================================= */
-
-@keyframes shot-impact {
-  0% {
-    transform: scale(0.72);
-    opacity: 0.45;
-  }
-
-  45% {
-    transform: scale(1.12);
-    opacity: 1;
-  }
-
-  75% {
-    transform: scale(0.96);
-  }
-
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.cell.shot-animation {
-  animation: shot-impact var(--dur-base) var(--ease-out);
-}
-
-.cell.hit.shot-animation {
-  box-shadow:
-    0 0 0 2px rgba(200, 56, 47, 0.18),
-    0 0 14px rgba(200, 56, 47, 0.35);
-}
-
-.cell.miss.shot-animation {
-  box-shadow:
-    0 0 0 2px rgba(113, 128, 150, 0.12);
-}
-
-.cell.sunk.shot-animation {
-  animation: sunk-impact var(--dur-slow) var(--ease-out);
-
-  box-shadow:
-    0 0 0 2px rgba(127, 29, 29, 0.2),
-    0 0 16px rgba(127, 29, 29, 0.35);
-}
-
-@keyframes sunk-impact {
-  0% {
-    transform: scale(0.75);
-    opacity: 0.4;
-  }
-
-  35% {
-    transform: scale(1.16);
-    opacity: 1;
-  }
-
-  65% {
-    transform: scale(0.94);
-  }
-
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-/* =========================================================
-   FLEET PANELS
-   ========================================================= */
-
-.fleet-section {
-  width: 190px;
-  min-width: 0;
-}
-
-.fleet-section:nth-child(1) {
-  text-align: right;
-}
-
-.fleet-section:nth-child(4) {
-  text-align: left;
-}
-
-.fleet-section h3 {
-  margin: 0 0 16px;
-
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-
-  color: #667a7e;
-}
-
-.fleet-list {
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-}
-
-.fleet-section:nth-child(1) .fleet-ship {
-  justify-content: flex-end;
-}
-
-.fleet-section:nth-child(4) .fleet-ship {
-  justify-content: flex-start;
-}
-
-.fleet-ship {
-  position: relative;
-
-  display: flex;
-  align-items: center;
-
-  gap: 8px;
-
-  padding: 8px;
-
-  border-radius: 8px;
-
-  background: white;
-  border: 1px solid #dbe3e4;
-
-  transition:
-    opacity var(--dur-base) var(--ease-out),
-    transform var(--dur-base) var(--ease-out),
-    border-color var(--dur-base) var(--ease-out),
-    box-shadow var(--dur-base) var(--ease-out),
-    background-color var(--dur-base) var(--ease-out);
-}
-
-.fleet-ship-visual {
-  display: flex;
-  gap: 1px;
-
-  flex-shrink: 0;
-}
-
-.ship-segment {
-  width: 13px;
-  height: 9px;
-
-  border-radius: 1px;
-
-  background: #9fb1b8;
-
-  transition:
-    background-color var(--dur-base) var(--ease-out),
-    box-shadow var(--dur-base) var(--ease-out);
-}
-
-.fleet-ship-name {
-  font-size: 11px;
-  font-weight: 600;
-  color: #12202b;
-}
-
-.fleet-ship.sunk {
-  opacity: 0.45;
-}
-
-.fleet-ship.sunk::after {
-  content: "";
-
-  position: absolute;
-
-  left: 6px;
-  right: 6px;
-
-  top: 50%;
-
-  height: 2px;
-
-  background: #7f1d1d;
-
-  transform: rotate(-8deg);
-}
-
-.fleet-ship.sunk .ship-segment {
-  background: #7f1d1d;
-}
-
-/* =========================================================
-   FLEET PLACEMENT
-   ========================================================= */
-
-.fleet-ship.selectable {
-  cursor: pointer;
-
-  transition:
-    opacity var(--dur-base) var(--ease-out),
-    transform var(--dur-base) var(--ease-out),
-    border-color var(--dur-base) var(--ease-out),
-    box-shadow var(--dur-base) var(--ease-out),
-    background-color var(--dur-base) var(--ease-out);
-}
-
-.fleet-ship.selectable:hover {
-  transform: translateX(-2px);
-
-  border-color: #b4c3c5;
-
-  box-shadow:
-    0 4px 12px rgba(18, 32, 43, 0.08);
-}
-
-.fleet-ship.selected {
-  transform: translateX(-3px);
-  border-color: var(--accent);
-  background: #f1f8f8;
-  box-shadow:
-    0 0 0 3px rgba(38, 115, 122, 0.14),
-    0 5px 14px rgba(18, 32, 43, 0.08);
-}
-
-.fleet-ship.selected .ship-segment {
-  background: rgba(38, 115, 122, 0.2);
-}
-
-/* =========================================================
-   PLACEMENT PREVIEW
-   ========================================================= */
-
-.cell.placement-preview {
-  background: #9fcbd6;
-  box-shadow:
-    inset 0 0 0 2px #ffffff,
-    0 0 10px rgba(255, 255, 255, 0.28);
-  transform: scale(1.04);
-}
-
-.cell.placement-invalid {
-  background: #c8382f;
-  box-shadow:
-    inset 0 0 0 2px #ffd3cf,
-    0 0 10px rgba(200, 56, 47, 0.35);
-  transform: scale(1.04);
-}
-
-/* =========================================================
-   SUNK FLEET ANIMATION
-   ========================================================= */
-
-@keyframes fleet-sunk {
-  0% {
-    transform: scale(0.92);
-    opacity: 0.4;
-  }
-
-  45% {
-    transform: scale(1.04);
-    opacity: 1;
-  }
-
-  70% {
-    transform: scale(0.98);
-  }
-
-  100% {
-    transform: scale(1);
-    opacity: 0.45;
-  }
-}
-
-.fleet-ship.sunk-animation {
-  animation: fleet-sunk var(--dur-slow) var(--ease-out);
-}
-
-.fleet-ship.sunk-animation .ship-segment {
-  animation: segment-sunk var(--dur-base) var(--ease-out);
-}
-
-@keyframes segment-sunk {
-  0% {
-    transform: scaleX(0.7);
-    opacity: 0.5;
-  }
-
-  60% {
-    transform: scaleX(1.08);
-    opacity: 1;
-  }
-
-  100% {
-    transform: scaleX(1);
-    opacity: 1;
-  }
-}
-
-/* =========================================================
-   ENEMY BOARD INTERACTION
-   ========================================================= */
-
-.cell.available {
-  cursor: crosshair;
-}
-
-.cell.available:hover {
-  transform: scale(1.06);
-  filter: brightness(1.22);
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
-}
-
-.cell.disabled {
-  cursor: default;
-  pointer-events: none;
-}
-
-.cell.disabled:hover {
-  transform: none;
-  box-shadow: none;
-  filter: none;
-}
-
-/* =========================================================
-   PLACEMENT CONTROLS
-   ========================================================= */
-
-.placement-controls {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
   margin-top: 28px;
+  max-width: 34ch;
+  font-size: 19px;
 }
 
-.placement-button {
-  padding: 9px 16px;
+.game-mode-eyebrow,
+.game-mode-number { display: none; }
 
-  border: 1px solid #dbe3e4;
-  border-radius: 7px;
-
-  background: white;
-  color: #12202b;
-
-  font-size: 13px;
-  font-weight: 600;
-
-  cursor: pointer;
-
-  transition:
-    background-color var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-fast) var(--ease-out);
-}
-
-.placement-button:hover {
-  background: #f7faf9;
-  border-color: #b4c3c5;
-
-  transform: translateY(-1px);
-
-  box-shadow:
-    0 3px 8px rgba(18, 32, 43, 0.06);
-}
-
-.placement-button:active {
-  transform: translateY(0);
-}
-
-
-
-.placement-button:disabled {
-  opacity: 0.45;
-  cursor: default;
-  pointer-events: none;
-}
-
-/* =========================================================
-   NEW GAME BUTTON
-   ========================================================= */
-
-.new-game-button {
-  padding: 9px 16px;
-
-  border: 1px solid #dbe3e4;
-  border-radius: 7px;
-
-  background: white;
-  color: #12202b;
-
-  font-size: 13px;
-  font-weight: 600;
-
-  cursor: pointer;
-
-  transition:
-    background-color var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-fast) var(--ease-out);
-}
-
-.new-game-button:hover {
-  background: #f7faf9;
-  border-color: #b4c3c5;
-
-  transform: translateY(-1px);
-
-  box-shadow:
-    0 3px 8px rgba(18, 32, 43, 0.06);
-}
-
-.new-game-button:active {
-  transform: translateY(0);
-}
-
-.new-game-button:disabled {
-  opacity: 0.45;
-  cursor: default;
-  pointer-events: none;
-}
-
-/* =========================================================
-   RESULTS SCREEN
-   ========================================================= */
-
-.results-screen {
-  /* One fixed width, so nothing reflows when the boards are shown/hidden. */
-  width: min(900px, 100%);
-  text-align: center;
-}
-
-.results-headline {
-  margin: 0;
-
-  font-size: clamp(52px, 13vw, 96px);
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  line-height: 1;
-}
-
-/* Focused programmatically so screen readers announce the outcome; it is
-   not interactive, so no focus ring. */
-.results-headline:focus {
-  outline: none;
-}
-
-.results-headline--victory {
-  color: #2a7d4f;
-}
-
-.results-headline--defeat {
-  color: #991b1b;
-}
-
-/* Two cards side by side (your attack / enemy attack), duration below. */
-.results-groups {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-
-  margin: 36px 0 0;
-
-  text-align: left;
-}
-
-.results-group {
-  padding: 15px 20px 15px;
-  border: 1px solid rgba(127, 127, 127, 0.22);
-  border-radius: 14px;
-}
-
-.results-group--match {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  gap: 24px;
-}
-
-.results-group--match .results-group-title {
-  margin: 0;
-}
-
-.results-group--match .results-stats {
-  flex: 1;
-}
-
-/* Each side has its own colour (green = you / Player 1, red = enemy /
-   Player 2): accent bar on top, soft tint, and a coloured name. */
-.results-group--attack,
-.results-group--defense {
-  border-top: 4px solid var(--side-color);
-  background: transparent;
-}
-
-.results-group--attack {
-  /*--side-color: #2a7d4f;
-  --meter-color: #2a7d4f;*/
-  --side-color: #26737a;
-  --meter-color: #26737a;
-}
-
-.results-group--defense {
-  /*--side-color: #991b1b;
-  --meter-color: #991b1b;*/
-  --side-color: #5f7377;
-  --meter-color: #5f7377;
-}
-
-.results-player--one {
-  color: #26737a;
-  font-weight: 600;
-}
-
-.results-player--two {
-  color: #5f7377;
-  font-weight: 600;
-}
-
-.results-group-title {
-  margin: 0 0 6px;
-
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-
-  opacity: 0.5;
-}
-
-/* The side's name is the first thing you read in the card. */
-.results-group--attack .results-group-title,
-.results-group--defense .results-group-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  margin-bottom: 8px;
-
-  color: var(--side-color);
-  font-size: 15px;
-  letter-spacing: 0.1em;
-
-  opacity: 1;
-}
-
-.results-group--attack .results-group-title::before,
-.results-group--defense .results-group-title::before {
-  content: '';
-
-  width: 10px;
-  height: 10px;
-
-  background: var(--side-color);
-  border-radius: 50%;
-}
-
-.results-stats {
-  margin: 0;
-  padding: 0;
-
-  list-style: none;
-}
-
-/*
- * The DOM reads "17 shots" (value, then label) for screen readers; the
- * visual order is flipped so the label sits left and the number right.
- */
-.results-stat {
-  position: relative;
-
-  display: flex;
-  flex-direction: row-reverse;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
-
-  padding: 12px 0;
-
-  border-top: 1px solid rgba(127, 127, 127, 0.16);
-}
-
-.results-stat:first-child {
-  border-top: 0;
-}
-
-.results-stat-value {
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
-  font-variant-numeric: tabular-nums;
-}
-
-.results-stat-label {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-
-  opacity: 0.55;
-}
-
-/* Accuracy is drawn as a thin bar under the row (--meter is 0-100). */
-.results-stat--meter {
-  padding-bottom: 18px;
-}
-
-.results-stat--meter::before,
-.results-stat--meter::after {
-  content: '';
-
-  position: absolute;
-  left: 0;
-  bottom: 8px;
-
-  height: 4px;
-
-  border-radius: 999px;
-}
-
-.results-stat--meter::before {
-  right: 0;
-
-  background: rgba(127, 127, 127, 0.18);
-}
-
-.results-stat--meter::after {
-  width: calc(var(--meter, 0) * 1%);
-
-  background: var(--meter-color, #2a7d4f);
-}
-
-.results-actions {
-  display: flex;
-  gap: 12px;
-
-  margin-top: 24px;
-}
-
-.results-new-game,
-.results-view-boards {
-  flex: 1;
-
-  min-height: 56px;
-  padding: 16px 22px;
-
-  border: 1px solid #12202b;
-  border-radius: 14px;
-
-  background: #12202b;
-  color: white;
-
-  font-size: 16px;
-  font-weight: 700;
-
-  cursor: pointer;
-
-  transition:
-    background-color var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out);
-}
-
-.results-new-game:hover {
-  background: #1f3340;
-
-  transform: translateY(-2px);
-}
-
-.results-view-boards {
-  border: 1px solid rgba(127, 127, 127, 0.45);
-  border-radius: 14px;
-
-  background: transparent;
-  color: inherit;
-
-  font-size: 16px;
-  font-weight: 700;
-
-  cursor: pointer;
-
-  transition:
-    background-color var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out);
-}
-
-.results-view-boards:hover {
-  background: rgba(127, 127, 127, 0.12);
-
-  transform: translateY(-2px);
-}
-
-.results-new-game:active,
-.results-view-boards:active {
-  transform: translateY(0);
-}
-
-.results-new-game:focus-visible,
-.results-view-boards:focus-visible {
-  outline: 3px solid rgba(32, 144, 75, 0.55);
-  outline-offset: 3px;
-}
-
-/* Read-only snapshot of both boards behind "View boards". */
-/* Always two columns: the boards shrink with the available width instead
-   of wrapping onto separate rows. */
-.results-boards {
-  display: flex;
-  flex-wrap: nowrap;
-  justify-content: center;
-  gap: clamp(8px, 2vw, 16px);
-
-  /* Compact: the two boards together take about half of the screen width. */
-  max-width: 520px;
-
-  margin: 28px auto 0;
-}
-
-/* Same 16px gutter as the stat cards, so both edges line up with them. */
-.results-boards .board-section {
-  flex: 1 1 0;
-
-  width: auto;
-  min-width: 0;
-}
-
-.results-boards[hidden] {
-  display: none;
-}
-
-.results-board-title {
-  margin: 0 0 8px;
-
-  font-size: 14px;
-}
-
-/* Same colour code as the stat cards above. */
-.board-section--player .results-board-title {
-  color: #26737a;
-}
-
-.board-section--opponent .results-board-title {
-  color: #5f7377;
-}
-
-.results-boards .board {
-  box-sizing: border-box;
-
-  /* minmax(0, …): tracks may shrink below their content, so the boards
-     scale down with the screen instead of overflowing it. */
-  grid-template-columns: minmax(0, 1.4fr) repeat(10, minmax(0, 3fr));
-  grid-template-rows: auto;
-
-  --gap: clamp(1px, 0.5vw, 3px);
-  gap: var(--gap);
-
-  width: 100%;
-  padding: clamp(3px, 1.2vw, 8px);
-}
-
-.results-boards .board-corner {
-  width: auto;
-  height: auto;
-}
-
-.board--readonly .cell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 100%;
-  height: auto;
-  min-height: 0;
-
-  aspect-ratio: 1;
-
-  /* The × / • marks shrink with the cell instead of stretching its row. */
-  overflow: hidden;
-  overflow: clip;
-  overflow-clip-margin: 3px;
-  font-size: clamp(6px, 1.6vw, 10px);
-  line-height: 1;
-
-  pointer-events: none;
-  cursor: default;
-}
-
-.results-boards .board-label {
-  font-size: clamp(5px, 1.2vw, 8px);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .results-screen:not([hidden]) {
-    animation: screen-enter var(--dur-base) var(--ease-out) var(--enter-delay) backwards;
-  }
-}
-
-@media (max-width: 640px) {
-  .results-groups {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .results-group--match {
-    grid-column: auto;
-  }
-}
-
-@media (max-width: 480px) {
-  .results-actions {
-    flex-direction: column;
-  }
-}
-
-/* =========================================================
-   ONLINE LOBBY
-   ========================================================= */
-
+.game-mode-options,
 .lobby-body {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
-.lobby-join {
-  display: flex;
-  gap: 10px;
+.game-mode-button {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 28px;
+  border: 0;
+  border-radius: 0;
+  background: var(--step-1);
+  color: var(--ink);
+  text-align: left;
+  transition: background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
 }
+
+.game-mode-button:hover,
+.game-mode-button:focus-visible {
+  background: var(--ink);
+  color: var(--ground);
+}
+
+.game-mode-content { display: grid; gap: 6px; }
+
+.game-mode-title {
+  font-size: clamp(26px, 2.6vw, 36px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+
+.game-mode-description { font-size: 16px; line-height: 1.4; }
+
+.game-mode-arrow {
+  font-size: 28px;
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+.game-mode-button:hover .game-mode-arrow { transform: translateX(6px); }
+
+.game-mode-button.disabled { opacity: 0.4; cursor: default; }
+.game-mode-button.disabled:hover { background: var(--step-1); color: var(--ink); }
+.game-mode-button.disabled:hover .game-mode-arrow { transform: none; }
+
+.game-mode-status { margin-left: auto; font-size: 14px; font-weight: 600; }
+
+/* Lobby */
+
+.lobby-body { gap: 12px; }
+
+.lobby-join { display: flex; gap: 8px; }
 
 .lobby-input {
   flex: 1;
   min-width: 0;
-
-  padding: 16px 18px;
-
-  border: 1px solid rgba(127, 127, 127, 0.22);
-  border-radius: 14px;
-
-  background: transparent;
-  color: inherit;
-
-  font: inherit;
-  font-size: 17px;
-  font-weight: 650;
-  letter-spacing: 0.3em;
+  height: 68px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: 0;
+  background: var(--step-1);
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
 .lobby-input::placeholder {
-  letter-spacing: 0.12em;
+  color: var(--ink);
+  font-size: 17px;
   font-weight: 500;
-  opacity: 0.35;
-}
-
-.lobby-input:focus-visible {
-  outline: 2px solid #12202b;
-  outline-offset: 2px;
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: 0.55;
 }
 
 .lobby-join-button {
-  padding: 0 24px;
-
+  min-height: 68px;
+  padding: 0 32px;
   border: 0;
-  border-radius: 14px;
-
-  background: #12202b;
-  color: white;
-
+  border-radius: 0;
+  background: var(--ink);
+  color: var(--ground);
+  font-size: 17px;
   font-weight: 600;
-
-  cursor: pointer;
-
-  transition:
-    background-color var(--dur-fast) var(--ease-out),
-    opacity var(--dur-fast) var(--ease-out);
+  transition: background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
 }
 
-.lobby-join-button:hover:not(:disabled) {
-  background: #1f3340;
-}
-
-.lobby-join-button:disabled {
-  opacity: 0.45;
-  cursor: default;
-}
+.lobby-join-button:hover:not(:disabled) { background: var(--accent); color: var(--ink); }
+.lobby-join-button:disabled { opacity: 0.35; cursor: default; }
 
 .lobby-code {
-  padding: 28px 16px;
-
-  border: 1px dashed rgba(127, 127, 127, 0.5);
-  border-radius: 14px;
-
-  text-align: center;
-  font-size: 40px;
-  font-weight: 800;
-  letter-spacing: 0.35em;
-  text-indent: 0.35em;
-
+  padding: 36px 24px;
+  background: var(--step-1);
+  font-size: clamp(44px, 8vw, 104px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.14em;
+  text-indent: 0.14em;
   user-select: all;
-}
-
-.lobby-body>.lobby-join-button {
-  min-height: 48px;
 }
 
 .lobby-link {
   align-self: flex-start;
-
-  padding: 8px 0;
-
+  padding: 10px 0;
   border: 0;
   background: none;
-  color: #667a7e;
-
-  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
-.lobby-link:hover {
-  color: #12202b;
-}
+.lobby-link:hover { color: var(--accent); }
 
 .lobby-error {
-  margin: 0;
-  padding: 12px 14px;
-
-  border: 1px solid rgba(197, 48, 48, 0.35);
-  border-radius: 10px;
-
-  background: rgba(197, 48, 48, 0.07);
-  color: #c53030;
-
-  font-size: 14px;
+  padding: 16px 20px;
+  background: rgba(255, 90, 54, 0.18);
+  font-size: 16px;
+  font-weight: 500;
 }
 
-/* =========================================================
-   LARGE TABLETS / SMALL DESKTOP
-   ========================================================= */
+/* ---------- Game ---------- */
 
-@media (max-width: 1330px) {
-  .game-layout {
-    grid-template-columns:
-      160px 369px 369px 160px;
-
-    column-gap: 28px;
-    row-gap: 24px;
-  }
-
-  .board-section {
-    width: 369px;
-  }
-
-  .fleet-section {
-    width: 160px;
-  }
-
-  .board {
-    grid-template-columns:
-      18px repeat(10, 31px);
-
-    grid-template-rows:
-      18px repeat(10, 31px);
-
-    gap: 3px;
-
-    width: 369px;
-
-    padding: 7px;
-  }
-
-  .board-label {
-    font-size: 9px;
-  }
-
-  .board-corner {
-    width: 18px;
-    height: 18px;
-  }
-
-  .cell {
-    width: 31px;
-    height: 31px;
-  }
-
-  .fleet-ship {
-    gap: 6px;
-    padding: 7px;
-  }
-
-  .fleet-ship-name {
-    font-size: 10px;
-  }
-
-  .ship-segment {
-    width: 11px;
-    height: 8px;
-  }
+.game-container {
+  max-width: 1180px;
+  margin: 0 auto;
 }
 
-/* =========================================================
-   TABLET
-   ========================================================= */
+.game-status { margin: 16px 0 28px; }
 
-@media (max-width: 1050px) {
-  .game-layout {
-    grid-template-columns:
-      150px 349px 349px 150px;
-
-    column-gap: 20px;
-    row-gap: 24px;
-  }
-
-  .board-section {
-    width: 349px;
-  }
-
-  .fleet-section {
-    width: 150px;
-  }
-
-  .board {
-    grid-template-columns:
-      18px repeat(10, 29px);
-
-    grid-template-rows:
-      18px repeat(10, 29px);
-
-    gap: 3px;
-
-    width: 349px;
-
-    padding: 7px;
-  }
-
-  .board-label {
-    font-size: 9px;
-  }
-
-  .board-corner {
-    width: 18px;
-    height: 18px;
-  }
-
-  .cell {
-    width: 29px;
-    height: 29px;
-  }
-
-  .fleet-ship-name {
-    font-size: 9px;
-  }
-
-  .ship-segment {
-    width: 10px;
-    height: 7px;
-  }
+#turn-status {
+  display: block;
+  font-size: clamp(30px, 4vw, 52px);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
 }
 
-/* =========================================================
-   MOBILE / NARROW SCREEN
-   ========================================================= */
+#turn-status.player-turn,
+#turn-status.game-over { color: var(--ink); }
+#turn-status.enemy-turn { color: var(--ink-soft); }
 
-@media (max-width: 850px) {
-  #app {
-    padding-top: 32px;
-  }
-
-  .game-topbar {
-    margin-bottom: 4px;
-  }
-
-  .game-layout {
-    grid-template-columns: 1fr;
-
-    justify-items: center;
-
-    gap: 28px;
-  }
-
-  .board-section {
-    width: auto;
-  }
-
-  .fleet-section {
-    width: min(280px, 100%);
-  }
-
-  .board-section:nth-child(2) {
-    order: 1;
-  }
-
-  .board-section:nth-child(3) {
-    order: 2;
-  }
-
-  .fleet-section:nth-child(1) {
-    order: 3;
-    text-align: center;
-  }
-
-  .fleet-section:nth-child(4) {
-    order: 4;
-    text-align: center;
-  }
-
-  .fleet-section:nth-child(1) .fleet-ship,
-  .fleet-section:nth-child(4) .fleet-ship {
-    justify-content: center;
-  }
-
-  .fleet-section h3 {
-    text-align: center;
-  }
-
-  .sound-panel {
-    right: 0;
-    width: 230px;
-  }
+.game-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-areas:
+    "pb eb"
+    "pf ef";
+  column-gap: 56px;
+  row-gap: 20px;
+  align-items: start;
 }
 
-/* =========================================================
-   SMALL MOBILE
-   ========================================================= */
+.game-layout > :nth-child(1) { grid-area: pf; }
+.game-layout > :nth-child(2) { grid-area: pb; }
+.game-layout > :nth-child(3) { grid-area: eb; }
+.game-layout > :nth-child(4) { grid-area: ef; }
 
-@media (max-width: 420px) {
-  #app {
-    padding: 24px 12px;
-  }
+.board-section { width: 100%; max-width: 560px; }
 
-
-  .game-topbar {
-    min-height: 40px;
-  }
-
-  .game-icon-button {
-    width: 36px;
-    height: 36px;
-
-    flex-basis: 36px;
-  }
-
-  .game-icon-button svg {
-    width: 17px;
-    height: 17px;
-
-    flex-basis: 17px;
-  }
-
-  .sound-panel {
-    width: min(230px, calc(100vw - 24px));
-  }
-
-  .game-status {
-    margin-bottom: 24px;
-  }
-
-  #turn-status {
-    font-size: 13px;
-    padding: 9px 15px;
-  }
-
-  .board {
-    grid-template-columns:
-      17px repeat(10, 27px);
-
-    grid-template-rows:
-      17px repeat(10, 27px);
-
-    gap: 2px;
-
-    width: 317px;
-
-    padding: 6px;
-  }
-
-  .board-label {
-    font-size: 8px;
-  }
-
-  .board-corner {
-    width: 17px;
-    height: 17px;
-  }
-
-  .cell {
-    width: 27px;
-    height: 27px;
-  }
-
-  .board-section h2 {
-    font-size: 15px;
-    margin-bottom: 12px;
-  }
-
-  .placement-controls {
-    gap: 8px;
-    margin-top: 22px;
-  }
-
-  .placement-button {
-    padding: 8px 13px;
-    font-size: 12px;
-  }
-
-  .new-game-button {
-    margin-top: 28px;
-  }
+.board-section h2,
+.results-board-title {
+  margin-bottom: 14px;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
-/* =========================================================
-   MATCH HISTORY
-   ========================================================= */
+/* Board */
 
-.game-topbar-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  margin-left: auto;
+.board {
+  display: grid;
+  grid-template-columns: 24px repeat(10, minmax(0, 1fr));
+  grid-template-rows: 24px;
+  grid-auto-rows: auto;
+  width: 100%;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.history-screen {
-  width: min(760px, 100%);
-}
+.board-corner { width: auto; height: auto; }
 
-.history-headline:focus {
-  outline: none;
-}
-
-.history-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-
-  margin: 0;
-  padding: 0;
-
-  list-style: none;
-}
-
-.history-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-
-  padding: 12px 16px;
-  border: 1px solid rgba(127, 127, 127, 0.22);
-  border-left: 4px solid var(--row-color, #2a7d4f);
-  border-radius: 12px;
-}
-
-.history-row--victory {
-  --row-color: #2a7d4f;
-}
-
-.history-row--defeat {
-  --row-color: #991b1b;
-}
-
-/* Local has no "you": neutral colours for either winner. */
-.history-row--local {
-  --row-color: #26737a;
-}
-
-.history-row--local.history-row--defeat {
-  --row-color: #5f7377;
-}
-
-.history-row-main {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.history-row-outcome {
-  font-weight: 700;
-  color: var(--row-color);
-}
-
-.history-row-meta,
-.history-row-numbers {
-  font-size: 13px;
-
-  opacity: 0.75;
-}
-
-.history-row-numbers {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-
-.history-clear {
-  align-self: flex-start;
-
-  margin-top: 16px;
-  padding: 10px 18px;
-
-  border: 1px solid rgba(127, 127, 127, 0.45);
-  border-radius: 12px;
-
-  background: transparent;
-  color: inherit;
-
-  font-weight: 700;
-
-  cursor: pointer;
-}
-
-.history-clear:hover {
-  background: rgba(127, 127, 127, 0.12);
-}
-
-.history-clear:focus-visible {
-  outline: 3px solid rgba(32, 144, 75, 0.55);
-  outline-offset: 3px;
-}
-
-@media (max-width: 640px) {
-  .history-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-  }
-
-  .history-row-numbers {
-    text-align: left;
-  }
-}
-
-
-/* =========================================================
-   CONFIRM DIALOG
-   ========================================================= */
-
-.confirm-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-dialog);
-
+.board-label {
   display: flex;
   align-items: center;
   justify-content: center;
-
-  padding: 24px;
-
-  background: rgba(18, 32, 43, 0.45);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-soft);
 }
 
-.confirm-dialog {
-  width: min(420px, 100%);
-
-  padding: 24px;
-
-  border: 1px solid #dbe3e4;
-  border-radius: 16px;
-
-  background: #ffffff;
-  color: #12202b;
-
-  box-shadow: 0 20px 48px rgba(18, 32, 43, 0.28);
-}
-
-.confirm-title {
-  margin: 0 0 8px;
-
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-
-.confirm-message {
-  margin: 0;
-
-  font-size: 15px;
-  line-height: 1.5;
-
-  opacity: 0.8;
-}
-
-.confirm-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-
-  margin-top: 22px;
-}
-
-.confirm-button {
-  min-height: 44px;
-  padding: 10px 20px;
-
-  border: 1px solid transparent;
-  border-radius: 12px;
-
-  font-weight: 700;
-
-  cursor: pointer;
-
-  transition:
-    background-color var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out);
-}
-
-.confirm-button:hover {
-  transform: translateY(-1px);
-}
-
-.confirm-button:active {
-  transform: translateY(0);
-}
-
-.confirm-button:focus-visible {
-  outline: 3px solid rgba(91, 141, 239, 0.6);
-  outline-offset: 2px;
-}
-
-.confirm-button--cancel {
-  border-color: rgba(127, 127, 127, 0.45);
-
+.cell {
+  position: relative;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
   background: transparent;
-  color: inherit;
+  font-size: 0;
+  cursor: default;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.confirm-button--cancel:hover {
-  background: rgba(127, 127, 127, 0.12);
+.cell::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  background: var(--step-1);
+  transition: background-color var(--dur-fast) var(--ease-out);
 }
 
-.confirm-button--accept {
-  background: #12202b;
-  color: #ffffff;
+.cell.available { cursor: pointer; }
+.cell.available:hover::before { background: var(--step-2); }
+.cell.disabled { cursor: default; }
+.cell.ship.movable { cursor: grab; }
+
+/* Ships: one continuous bar across the cells it covers. */
+
+.cell.hull::before { background: var(--ink); }
+
+.cell.hull-h::before { inset: 2px 0; }
+.cell.hull-h.hull-bow::before { left: 2px; }
+.cell.hull-h.hull-stern::before { right: 2px; }
+
+.cell.hull-v::before { inset: 0 2px; }
+.cell.hull-v.hull-bow::before { top: 2px; }
+.cell.hull-v.hull-stern::before { bottom: 2px; }
+
+/* Shots */
+
+.cell.miss::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 22%;
+  height: 22%;
+  margin: auto;
+  border-radius: 50%;
+  background: var(--ink-soft);
 }
 
-.confirm-button--danger {
-  background: #991b1b;
-  color: #ffffff;
+.cell.hit::before,
+.cell.sunk::before { background: var(--accent); }
+
+.cell.sunk::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 24%;
+  height: 24%;
+  margin: auto;
+  background: var(--ink);
 }
 
-.confirm-button--danger:hover {
-  background: #7f1616;
+/* Placement preview */
+
+.cell.placement-preview::before { background: var(--ink); opacity: 0.4; }
+.cell.placement-invalid::before { background: var(--accent); opacity: 0.6; }
+
+/* ---------- Fleet ---------- */
+
+.fleet-section { width: 100%; max-width: 560px; }
+
+.fleet-section h3 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
-@media (max-width: 480px) {
-  .confirm-actions {
-    flex-direction: column-reverse;
-  }
+.fleet-list { display: flex; flex-wrap: wrap; gap: 8px; }
 
-  .confirm-button {
-    width: 100%;
-  }
+.fleet-progress {
+  display: flex;
+  align-items: center;
+  flex: 1 1 100%;
+  gap: 14px;
+  margin-bottom: 4px;
 }
 
+.fleet-progress-label { font-size: 15px; font-weight: 600; }
 
-/* =========================================================
-   STATISTICS
-   ========================================================= */
+.fleet-progress-pips { display: flex; gap: 4px; }
+
+.fleet-progress-pip {
+  width: 12px;
+  height: 12px;
+  background: var(--step-2);
+  transition: background-color var(--dur-base) var(--ease-out);
+}
+
+.fleet-progress-pip.filled { background: var(--ink); }
+.fleet-progress-pip.current { background: var(--accent); }
+
+.fleet-ship {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 0;
+  background: var(--step-1);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  transition: background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.fleet-ship-visual { display: flex; gap: 2px; }
+
+.ship-segment {
+  width: 10px;
+  height: 10px;
+  background: currentColor;
+}
+
+.fleet-ship-name { line-height: 1.2; }
+
+.fleet-ship.selectable { cursor: pointer; }
+.fleet-ship.selectable:hover { background: var(--step-2); }
+.fleet-ship.placed { opacity: 0.45; }
+
+.fleet-ship.selected {
+  background: var(--ink);
+  color: var(--ground);
+  opacity: 1;
+}
+
+.fleet-ship.sunk { background: transparent; }
+.fleet-ship.sunk .ship-segment { background: var(--accent); }
+.fleet-ship.sunk .fleet-ship-name { text-decoration: line-through; opacity: 0.6; }
+
+/* ---------- Controls ---------- */
+
+.placement-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 32px;
+}
+
+.placement-button,
+.new-game-button {
+  min-height: 56px;
+  padding: 0 28px;
+  border: 0;
+  border-radius: 0;
+  font-size: 17px;
+  font-weight: 600;
+  transition: background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out);
+}
+
+.placement-button { background: var(--step-1); color: var(--ink); }
+.placement-button:hover:not(:disabled) { background: var(--step-2); }
+.placement-button:disabled { opacity: 0.35; cursor: default; }
+
+#rotate-ship { order: 1; }
+#reset-fleet { order: 2; }
+
+.new-game-button {
+  order: 3;
+  margin-left: auto;
+  background: var(--ink);
+  color: var(--ground);
+}
+
+.new-game-button:hover:not(:disabled) { background: var(--ink-soft); }
+
+.new-game-button:disabled {
+  background: var(--step-1);
+  color: var(--ink);
+  opacity: 0.4;
+  cursor: default;
+}
+
+.new-game-button.start-battle-button:not(:disabled) {
+  background: var(--accent);
+  color: var(--ink);
+}
+
+.new-game-button.start-battle-button:not(:disabled):hover { background: var(--ink); color: var(--ground); }
+
+/* ---------- Phases ---------- */
+
+/* Placing: only your board, centred. */
+.game-container[data-phase='placement'] { max-width: 560px; }
+.game-container[data-phase='placement'] .game-layout {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "pb" "pf";
+}
+.game-container[data-phase='placement'] .game-layout > :nth-child(3),
+.game-container[data-phase='placement'] .game-layout > :nth-child(4) { display: none; }
+
+/* Battle and after: nothing to rotate or reset. */
+.game-container[data-phase='battle'] #rotate-ship,
+.game-container[data-phase='battle'] #reset-fleet,
+.game-container[data-phase='game-over'] #rotate-ship,
+.game-container[data-phase='game-over'] #reset-fleet { display: none; }
+
+.game-container[data-phase='battle'] .new-game-button,
+.game-container[data-phase='game-over'] .new-game-button {
+  margin-left: 0;
+  background: var(--step-1);
+  color: var(--ink);
+}
+
+.game-container[data-phase='battle'] .new-game-button:hover,
+.game-container[data-phase='game-over'] .new-game-button:hover { background: var(--step-2); }
+
+/* ---------- Results ---------- */
+
+.results-screen,
+.history-screen {
+  display: block;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.results-screen .game-mode-header h2,
+.history-screen .game-mode-header h2 { font-size: clamp(44px, 7vw, 104px); }
+
+.results-headline:focus,
+.history-headline:focus { outline: none; }
+
+.results-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 8px;
+  margin-top: 48px;
+}
+
+.results-group {
+  display: grid;
+  align-content: start;
+  gap: 24px;
+  padding: 28px;
+  background: var(--step-1);
+}
+
+.results-group-title { font-size: 19px; font-weight: 600; }
+
+.results-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.results-stat {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  align-content: start;
+}
+
+.results-stat-value {
+  font-size: 44px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.results-stat-label { font-size: 15px; }
+
+.results-stat--meter,
+.stats-card--meter { padding-bottom: 20px; }
+
+.results-stat--meter::before,
+.results-stat--meter::after,
+.stats-card--meter::before,
+.stats-card--meter::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 6px;
+}
+
+.results-stat--meter::before,
+.stats-card--meter::before { right: 0; background: var(--step-2); }
+
+.results-stat--meter::after,
+.stats-card--meter::after {
+  width: calc(var(--meter, 0) * 1%);
+  background: var(--ink);
+}
+
+.stats-card--meter { position: relative; }
+.stats-card--meter::before,
+.stats-card--meter::after { left: 24px; bottom: 24px; }
+.stats-card--meter::before { right: 24px; }
+
+.results-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 32px;
+}
+
+.results-new-game,
+.results-view-boards {
+  min-height: 56px;
+  padding: 0 28px;
+  border: 0;
+  border-radius: 0;
+  font-size: 17px;
+  font-weight: 600;
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+
+.results-new-game { background: var(--accent); color: var(--ink); }
+.results-new-game:hover { background: var(--ink); color: var(--ground); }
+.results-view-boards { background: var(--step-1); color: var(--ink); }
+.results-view-boards:hover { background: var(--step-2); }
+
+.results-boards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 56px;
+  row-gap: 32px;
+  margin-top: 48px;
+}
+
+.board--readonly .cell { cursor: default; }
+
+/* ---------- Statistics and history ---------- */
+
+.stats-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 40px 0 24px;
+}
 
 .stats-segments {
   position: relative;
-
   display: inline-flex;
   align-self: flex-start;
-  gap: 4px;
+  gap: 0;
   max-width: 100%;
-
   padding: 4px;
-
-  border: 1px solid rgba(127, 127, 127, 0.3);
-  border-radius: 999px;
-
-  background: rgba(127, 127, 127, 0.08);
+  background: var(--step-1);
 }
 
-/* An inline-flex display would override the hidden attribute. */
-.stats-segments[hidden] {
-  display: none;
-}
+.stats-segments[hidden] { display: none; }
 
-/* One pill that slides under whichever option is selected. */
 .stats-indicator {
   position: absolute;
   top: 4px;
   bottom: 4px;
   left: 0;
-
   width: 0;
-
-  border-radius: 999px;
-
-  background: var(--accent);
-
-
+  background: var(--ink);
   transition:
     transform var(--dur-base) var(--ease-out),
     width var(--dur-base) var(--ease-out);
@@ -2391,664 +819,210 @@ input {
 .stats-segment {
   position: relative;
   z-index: 1;
-
-  padding: 8px 18px;
-
+  padding: 11px 20px;
   border: 0;
-  border-radius: 999px;
-
+  border-radius: 0;
   background: transparent;
-  color: inherit;
-
-  font: inherit;
-  font-weight: 700;
-  white-space: nowrap;
-
-  cursor: pointer;
-
-  opacity: 0.75;
-
-  transition:
-    color var(--dur-fast) var(--ease-out),
-    opacity var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out);
-}
-
-.stats-segment:hover {
-  background: rgba(127, 127, 127, 0.16);
-
-  opacity: 1;
-}
-
-/* The indicator provides the background; the text turns white over it. */
-.stats-segment[aria-selected='true'],
-.stats-segment[aria-selected='true']:hover {
-  background: transparent;
-  color: #fff;
-
-  opacity: 1;
-}
-
-.stats-segment:focus-visible {
-  outline: 3px solid rgba(32, 144, 75, 0.55);
-  outline-offset: 2px;
-}
-
-/* The level filter slides in from the section filter when VS AI is picked. */
-@keyframes stats-reveal {
-  from {
-    opacity: 0;
-    transform: translateX(-12px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.stats-segments--reveal {
-  animation: stats-reveal var(--dur-base) var(--ease-out);
-}
-
-/* Section filter with the AI level filter to its right (wraps below on phones). */
-.stats-filters {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px 14px;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.history-screen .history-note {
-  margin: 4px 0 16px;
-
   font-size: 15px;
-
-  opacity: 0.8;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: color var(--dur-fast) var(--ease-out);
 }
+
+.stats-segment[aria-selected='true'] { color: var(--ground); }
+
+.history-screen .history-note { font-size: 15px; margin-bottom: 16px; }
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-
-  margin: 0;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px;
 }
 
 .stats-card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-
-  padding: 14px 16px 16px;
-  overflow: hidden;
-
-  border: 1px solid rgba(127, 127, 127, 0.22);
-  border-radius: 12px;
+  display: grid;
+  align-content: space-between;
+  gap: 20px;
+  min-height: 156px;
+  padding: 24px;
+  background: var(--step-1);
 }
 
-.stats-card-label {
-  font-size: 13px;
-
-  opacity: 0.75;
-}
+.stats-card-label { font-size: 15px; }
 
 .stats-card-value {
+  font-size: 52px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.035em;
+}
+
+.stats-card--meter { padding-bottom: 48px; }
+
+.stats-grid--empty .stats-card-value { opacity: 0.3; }
+
+.stats-empty { display: grid; gap: 8px; padding: 40px 0; }
+.stats-empty-title { display: block; font-size: 28px; font-weight: 600; letter-spacing: -0.02em; }
+.stats-empty-text { display: block; }
+
+.stats-reset,
+.history-clear {
+  margin-top: 24px;
+  padding: 10px 0;
+  border: 0;
+  background: none;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.stats-reset:hover,
+.history-clear:hover { color: var(--accent); }
+
+.history-list {
+  display: grid;
+  gap: 8px;
   margin: 0;
-
-  font-size: 26px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
+  padding: 0;
+  list-style: none;
 }
 
-/* Win rate and accuracy are drawn as a thin bar (--meter is 0-100). */
-.stats-card--meter::before,
-.stats-card--meter::after {
-  content: '';
-
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  height: 4px;
+.history-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  background: var(--step-1);
 }
 
-.stats-card--meter::before {
-  right: 0;
+.history-row--victory { background: var(--ink); color: var(--ground); }
 
-  background: rgba(127, 127, 127, 0.22);
+.history-row-main { display: grid; gap: 2px; }
+.history-row-outcome { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
+.history-row-meta { font-size: 15px; }
+.history-row-numbers { font-size: 16px; font-weight: 500; text-align: right; }
+
+/* Empty history: the drawn miniature goes, the words stay. */
+.history-empty { display: grid; gap: 8px; padding: 40px 0; font-size: 19px; }
+.history-empty-board { display: none; }
+
+/* ---------- Dialog ---------- */
+
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-dialog);
+  display: grid;
+  place-items: center;
+  padding: var(--gutter);
+  background: rgba(12, 18, 21, 0.55);
 }
 
-.stats-card--meter::after {
-  width: calc(var(--meter, 0) * 1%);
-
-  background: #26737a;
-
-  transition: width var(--dur-slow) var(--ease-out);
+.confirm-dialog {
+  width: min(460px, 100%);
+  padding: 32px;
+  background: var(--ground);
+  box-shadow: var(--float);
 }
 
-/* Opening the screen: cards rise in one after another (--i is their index),
-   and the bars fill from empty to their value. */
-@media (prefers-reduced-motion: no-preference) {
-  .stats-card {
-    animation: screen-enter var(--dur-base) var(--ease-out) backwards;
-    animation-delay: calc(var(--i, 0) * 55ms);
-  }
+.confirm-title { font-size: 30px; font-weight: 600; line-height: 1.1; letter-spacing: -0.03em; }
+.confirm-message { margin-top: 12px; }
 
-  .stats-card--meter::after {
-    animation: stats-meter-in calc(var(--dur-slow) * 1.5) var(--ease-out) backwards;
-    animation-delay: calc(var(--i, 0) * 55ms + 120ms);
-  }
+.confirm-actions { display: flex; gap: 8px; margin-top: 32px; }
 
-  /* Switching between statistics and history slides the new view in from
-     the side of the button that was pressed (--enter-x, set in main.ts) once
-     a copy of the old view has slid out the other way (screenTransitions.ts).
-     The children skip their own entrance so nothing animates twice. */
-  /* Switching between statistics and history slides the new view in from
-     the side of the button that was pressed (--enter-x, set in main.ts) once
-     a copy of the old view has slid out the other way (screenTransitions.ts).
-     The children skip their own entrance so nothing animates twice. */
-  .records-enter {
-    animation: records-in var(--dur-base) var(--ease-out) var(--dur-exit) backwards;
-  }
+.confirm-button {
+  flex: 1;
+  min-height: 56px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 0;
+  font-weight: 600;
+  transition: background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
 
-  .records-enter .stats-card,
-  .records-enter .history-row {
-    animation: none;
-  }
+.confirm-button--cancel { background: var(--step-1); color: var(--ink); }
+.confirm-button--cancel:hover { background: var(--step-2); }
+.confirm-button--accept { background: var(--ink); color: var(--ground); }
+.confirm-button--accept:hover { background: var(--ink-soft); }
+.confirm-button--danger { background: var(--accent); color: var(--ink); }
+.confirm-button--danger:hover { background: var(--ink); color: var(--ground); }
 
-  /* Opening from the menu: history rows rise in one after another, like the
-     statistics cards. */
-  .history-row {
-    animation: screen-enter var(--dur-base) var(--ease-out) backwards;
-    animation-delay: calc(min(var(--i, 0), 9) * 40ms);
-  }
+/* ---------- Motion ---------- */
+
+@keyframes screen-enter {
+  from { opacity: 0; transform: translateY(var(--rise)); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes screen-exit {
+  to { opacity: 0; transform: translate(var(--exit-x, 0px), var(--exit-y, -6px)); }
 }
 
 @keyframes records-in {
-  from {
-    opacity: 0;
-    transform: translateX(var(--enter-x, 0px));
-  }
+  from { opacity: 0; transform: translateX(var(--enter-x, 0px)); }
+  to { opacity: 1; transform: none; }
 }
 
-@keyframes stats-meter-in {
-  from {
-    width: 0;
-  }
+@keyframes status-swap {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .stats-indicator,
-  .stats-segment,
-  .stats-card--meter::after {
-    transition: none;
-  }
-
-  .stats-segments--reveal {
-    animation: none;
-  }
+@keyframes shot-pop {
+  0% { transform: scale(0.4); }
+  60% { transform: scale(1.08); }
+  100% { transform: scale(1); }
 }
 
-@media (max-width: 640px) {
-  .stats-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .stats-segment {
-    padding: 8px 14px;
-  }
+@keyframes hull-in {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: none; }
 }
 
-
-/* =========================================================
-   DESIGN UPGRADES
-   (additive layer: tokens above, hooks below)
-   ========================================================= */
-
-::selection {
-  background: rgba(38, 115, 122, 0.2);
+@keyframes fleet-sunk {
+  0%, 100% { transform: none; }
+  40% { transform: translateX(-3px); }
+  70% { transform: translateX(3px); }
 }
 
-/* Typography: balanced headings, no orphaned last words, mono coordinates. */
-h1,
-h2,
-h3 {
-  text-wrap: balance;
+@keyframes stats-reveal {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: none; }
 }
 
-p,
-.game-mode-description {
-  text-wrap: pretty;
+@keyframes meter-in {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
 }
 
-.board-label {
-  font-family: var(--font-mono);
+@keyframes overlay-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes overlay-out { from { opacity: 1; } to { opacity: 0; } }
+
+@keyframes dialog-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
 }
 
-/* One consistent keyboard focus ring. :where() keeps specificity at zero,
-   so the more specific rings defined earlier still win. */
-:where(button, input, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+@keyframes dialog-out {
+  from { opacity: 1; transform: none; }
+  to { opacity: 0; transform: translateY(8px); }
 }
 
-.entry-screen:focus-visible {
-  outline-offset: -8px;
+@keyframes popover-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
 }
 
-/* Primary action: the JS already toggles .start-battle-button once the
-   fleet is complete, so Start Battle finally reads as the next step. */
-.new-game-button.start-battle-button:not(:disabled) {
-  border-color: var(--ink);
-  background: var(--ink);
-  color: #ffffff;
-}
-
-.new-game-button.start-battle-button:not(:disabled):hover {
-  border-color: #1f3340;
-  background: #1f3340;
-  box-shadow: 0 6px 14px rgba(18, 32, 43, 0.22);
-}
-
-/* Surface: a fixed, non-interactive grain layer breaks the flat fill.
-   Never applied to scrolling containers, so it costs no repaints. */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.05;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E");
-}
-
-@media (prefers-reduced-motion: reduce) {
-
-  .cell,
-  .game-mode-button,
-  .game-mode-arrow,
-  .fleet-ship,
-  .placement-button,
-  .new-game-button {
-    transition: none;
-  }
-
-  .cell.shot-animation,
-  .cell.sunk.shot-animation {
-    animation: none;
-  }
-
-}
-
-
-/* =========================================================
-   SHIPS & SHOTS
-   Flat, single-colour silhouettes on calm water. Hulls are drawn
-   on ::before (below any text), shots on ::after. The renderer
-   tags ship cells with
-   .hull .hull-h|v .hull-bow|mid|stern .hull-<name> [.hull-bridge].
-   ========================================================= */
-
-.cell.hull::before,
-.cell.hit::after,
-.cell.miss::after {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  pointer-events: none;
-}
-
-.cell.hull {
-  --hull: #dde6e9;
-  --deck: #c3d0d5;
-  --deck-size: 100% 42%;
-  --bridge: #8ea2aa;
-  --bridge-size: 0 0;
-}
-
-.cell.hull::before {
-  /* Horizontal ship. It overlaps the grid gap (plus 1px against subpixel
-     seams) so the hull reads as one piece. */
-  inset: 15% calc(var(--gap) * -1 - 1px) 15% 0;
-
-  background:
-    linear-gradient(var(--bridge), var(--bridge)) center / var(--bridge-size) no-repeat,
-    linear-gradient(var(--deck), var(--deck)) center / var(--deck-size) no-repeat,
-    var(--hull);
-}
-
-.cell.hull-v {
-  --deck-size: 42% 100%;
-}
-
-.cell.hull-v::before {
-  inset: 0 15% calc(var(--gap) * -1 - 1px) 15%;
-}
-
-.cell.hull-h.hull-stern::before {
-  right: 0;
-}
-
-.cell.hull-v.hull-stern::before {
-  bottom: 0;
-}
-
-.cell.hull-h.hull-bow::before {
-  clip-path: polygon(0 50%, 42% 0, 100% 0, 100% 100%, 42% 100%);
-}
-
-.cell.hull-h.hull-stern::before {
-  clip-path: polygon(0 0, 82% 0, 100% 16%, 100% 84%, 82% 100%, 0 100%);
-}
-
-.cell.hull-v.hull-bow::before {
-  clip-path: polygon(50% 0, 100% 42%, 100% 100%, 0 100%, 0 42%);
-}
-
-.cell.hull-v.hull-stern::before {
-  clip-path: polygon(0 0, 100% 0, 100% 82%, 84% 100%, 16% 100%, 0 82%);
-}
-
-.cell.hull-h.hull-bridge {
-  --bridge-size: 30% 62%;
-}
-
-.cell.hull-v.hull-bridge {
-  --bridge-size: 62% 30%;
-}
-
-/* Each class of ship differs by proportion and tone, not by decoration. */
-.cell.hull-carrier {
-  --deck: #cdd9dd;
-  --deck-size: 100% 72%;
-}
-
-.cell.hull-h.hull-carrier {
-  --deck-size: 100% 72%;
-}
-
-.cell.hull-v.hull-carrier {
-  --deck-size: 72% 100%;
-}
-
-.cell.hull-submarine {
-  --hull: #9db0b8;
-  --deck: #9db0b8;
-  --bridge: #647a83;
-}
-
-/* Wrecks. */
-.cell.sunk.hull {
-  --hull: #94615c;
-  --deck: #7a4a45;
-  --bridge: #52302d;
-}
-
-/* Shots: a solid disc is a hit, a hollow ring is a miss. */
-.cell.hit::after {
-  inset: 29%;
-  border-radius: 50%;
-  background: #d9433a;
-  box-shadow:
-    0 0 0 2px rgba(255, 255, 255, 0.92),
-    0 2px 5px rgba(8, 24, 32, 0.35);
-}
-
-.cell.miss::after {
-  inset: 31%;
-  border: 2px solid rgba(255, 255, 255, 0.72);
-  border-radius: 50%;
-}
-
-@media (max-width: 420px) {
-  .board {
-    --gap: 2px;
-  }
-}
-
-
-/* =========================================================
-   FLEET PLACEMENT PROGRESS
-   Hollow segments = still to place, filled = placed.
-   ========================================================= */
-
-.fleet-progress {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
-
-  margin-bottom: 3px;
-
-  color: #667a7e;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.fleet-progress.complete {
-  color: var(--accent);
-}
-
-.fleet-progress-pips {
-  display: flex;
-  gap: 3px;
-}
-
-.fleet-progress-pip {
-  width: calc(var(--size, 3) * 5px);
-  height: 6px;
-
-  border-radius: 3px;
-
-  box-shadow: inset 0 0 0 1.5px #b4c3c5;
-
-  transition:
-    background-color var(--dur-base) var(--ease-out),
-    box-shadow var(--dur-base) var(--ease-out);
-}
-
-.fleet-progress-pip.current {
-  box-shadow: inset 0 0 0 1.5px var(--accent);
-}
-
-.fleet-progress-pip.filled {
-  background: var(--accent);
-  box-shadow: none;
-}
-
-/* Still to place: outlined hull. */
-.fleet-ship.selectable .ship-segment {
-  background: transparent;
-  box-shadow: inset 0 0 0 1.5px #8ea2aa;
-}
-
-.fleet-ship.selected .ship-segment {
-  background: rgba(38, 115, 122, 0.2);
-  box-shadow: inset 0 0 0 1.5px var(--accent);
-}
-
-/* Placed: solid hull and a check badge. */
-.fleet-ship.placed {
-  border-color: rgba(38, 115, 122, 0.35);
-}
-
-.fleet-ship.placed .ship-segment {
-  background: #5d727b;
-}
-
-.fleet-ship.placed::before {
-  content: "";
-  position: absolute;
-  top: -6px;
-  right: -6px;
-
-  width: 16px;
-  height: 16px;
-
-  border: 2px solid #f2f5f5;
-  border-radius: 50%;
-
-  background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.8 6.3l2.3 2.3 4.1-4.6' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
-      center / 10px no-repeat,
-    var(--accent);
-}
-
-/* =========================================================
-   EMPTY STATE: HISTORY
-   ========================================================= */
-
-.history-empty {
-  width: min(100%, 400px);
-  margin-top: 8px;
-  padding: 18px;
-
-  border-radius: 16px;
-
-  background:
-    radial-gradient(120% 90% at 20% 0%, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0) 60%),
-    linear-gradient(160deg, var(--sea-frame-top), var(--sea-frame-bottom));
-
-  box-shadow: 0 10px 28px rgba(15, 49, 64, 0.18);
-
-  box-shadow: 0 10px 28px rgba(15, 49, 64, 0.18);
-}
-
-.history-empty-board {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.history-empty-cell {
-  fill: #2b7186;
-}
-
-.history-empty-hull {
-  fill: #dde6e9;
-}
-
-.history-empty-deck {
-  fill: #c3d0d5;
-}
-
-.history-empty-bridge {
-  fill: #8ea2aa;
-}
-
-.history-empty-miss {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.6);
-  stroke-width: 2;
-}
-
-.history-empty-target {
-  fill: rgba(255, 255, 255, 0.06);
-  stroke: rgba(255, 255, 255, 0.7);
-  stroke-width: 1.5;
-  stroke-dasharray: 5 4;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .history-empty-target {
-    animation: entry-pulse 2s ease-in-out infinite;
-  }
-}
-
-/* =========================================================
-   MOTION BETWEEN SCREENS
-   Screens switch with the hidden attribute, so each one animates
-   in when it is shown. :where() keeps this at the lowest priority:
-   the results screen keeps its own entrance.
-   ========================================================= */
-
-@keyframes screen-enter {
-  from {
-    opacity: 0;
-    transform: translateY(var(--rise));
-  }
-
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-
-  :where(.game-mode-menu, .game-container):not([hidden]) {
-    animation: screen-enter var(--dur-base) var(--ease-out) var(--enter-delay) backwards;
-  }
-
-}
-
-/* =========================================================
-   TOUCH & PRESSED STATES
-   ========================================================= */
-
-.fleet-ship.selectable:active {
-  transform: translateX(-1px) scale(0.985);
-}
-
-.cell.available:active {
-  transform: scale(0.94);
-}
-
-/* Touch screens have no real hover: don't leave scaled / lifted
-   elements behind after a tap. */
-@media (hover: none) {
-
-  .cell:hover,
-  .cell.available:hover,
-  .fleet-ship.selectable:hover,
-  .placement-button:hover,
-  .new-game-button:hover,
-  .game-mode-button:hover {
-    transform: none;
-    filter: none;
-    box-shadow: none;
-  }
-
-}
-
-
-/* =========================================================
-   SCREEN EXIT
-   A frozen copy of the leaving screen (see ui/screenTransitions.ts)
-   fades out over the new one. The doubled class beats the entrance
-   animations that the copy also matches.
-   ========================================================= */
-
-@keyframes screen-exit {
-  to {
-    opacity: 0;
-    transform: translate(var(--exit-x, 0px), var(--exit-y, -6px));
-  }
-}
-
+/* A frozen copy of the screen that is leaving (ui/screenTransitions.ts). */
 .screen-exit-clone.screen-exit-clone:not([hidden]) {
   position: fixed;
   margin: 0;
-  box-sizing: border-box;
   z-index: var(--z-exit);
   pointer-events: none;
   animation: screen-exit var(--dur-exit) var(--ease-in) forwards;
 }
 
-/* The copy is a still picture: anything inside it that animates on insert
-   (stat cards, meters, history rows) must stay put while it fades. */
-.screen-exit-clone.screen-exit-clone *,
-.screen-exit-clone.screen-exit-clone *::before,
-.screen-exit-clone.screen-exit-clone *::after {
-  animation: none;
-  transition: none;
-  animation: screen-exit var(--dur-exit) var(--ease-in) forwards;
-}
-
-/* The copy is a still picture: anything inside it that animates on insert
-   (stat cards, meters, history rows) must stay put while it fades. */
 .screen-exit-clone.screen-exit-clone *,
 .screen-exit-clone.screen-exit-clone *::before,
 .screen-exit-clone.screen-exit-clone *::after {
@@ -3056,443 +1030,83 @@ body::before {
   transition: none;
 }
 
-/* =========================================================
-   EMPTY STATE: STATISTICS
-   ========================================================= */
-
-.stats-empty {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-
-  margin-bottom: 12px;
-
-  padding: 14px 16px;
-
-  border: 1px dashed #b4c3c5;
-  border-radius: 12px;
-
-  background: rgba(255, 255, 255, 0.55);
-  color: #55666b;
-  font-size: 13px;
-}
-
-.stats-empty[hidden] {
-  display: none;
-}
-
-.stats-empty::before {
-  content: "";
-  flex-shrink: 0;
-
-  width: 18px;
-  height: 18px;
-
-  border: 2px solid var(--accent);
-  border-radius: 50%;
-}
-
-.stats-empty-title {
-  display: block;
-
-  color: var(--ink);
-  font-weight: 700;
-}
-
-.stats-empty-text {
-  display: block;
-}
-
-/* Colour, not opacity: the cards already animate their own opacity in. */
-.stats-grid--empty .stats-card-value {
-  color: #8fa0a3;
-}
-
-
-/* =========================================================
-   POPOVER & DIALOG ENTRANCE
-   (exit of the sound panel is handled by ui/screenTransitions.ts)
-   ========================================================= */
-
-@keyframes popover-in {
-  from {
-    opacity: 0;
-    transform: translateY(-6px) scale(0.98);
-  }
-
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes overlay-in {
-  from {
-    opacity: 0;
-  }
-}
-
-@keyframes dialog-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px) scale(0.97);
-  }
-
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
 @media (prefers-reduced-motion: no-preference) {
-
-  .sound-panel:not([hidden]) {
-    transform-origin: top right;
-    animation: popover-in var(--dur-base) var(--ease-out);
+  :where(.game-mode-menu, .game-container):not([hidden]) {
+    animation: screen-enter var(--dur-base) var(--ease-out) var(--enter-delay) backwards;
   }
 
-  .confirm-overlay {
-    animation: overlay-in var(--dur-base) var(--ease-out);
-  }
+  #turn-status.status-swap { animation: status-swap var(--dur-base) var(--ease-out); }
 
-  .confirm-dialog {
-    animation: dialog-in var(--dur-base) var(--ease-out);
-  }
+  .cell.shot-animation::before { animation: shot-pop 360ms var(--ease-out); }
+  .cell.sunk-animation::before { animation: shot-pop 520ms var(--ease-out); }
 
-}
-
-
-/* =========================================================
-   TOPBAR TOGGLES: OPEN STATE
-   Statistics / history stay lit while their screen is open.
-   ========================================================= */
-
-.game-icon-button[aria-pressed='true'] {
-  border-color: var(--accent);
-  background: #eaf4f4;
-  color: var(--accent);
-}
-
-/* =========================================================
-   MOTION: ERRORS, DIALOG EXIT, PRESSED
-   ========================================================= */
-
-@media (prefers-reduced-motion: no-preference) {
-
-  .lobby-error:not([hidden]) {
-    animation: screen-enter var(--dur-base) var(--ease-out);
-  }
-
-  /* The dialog is removed once this has played (ui/confirmDialog.ts). */
-  .confirm-overlay--closing {
-    pointer-events: none;
-    animation: overlay-out var(--dur-exit) var(--ease-in) forwards;
-  }
-
-  .confirm-overlay--closing .confirm-dialog {
-    animation: dialog-out var(--dur-exit) var(--ease-in) forwards;
-  }
-
-}
-
-@keyframes overlay-out {
-  to {
-    opacity: 0;
-  }
-}
-
-@keyframes dialog-out {
-  to {
-    opacity: 0;
-    transform: translateY(6px) scale(0.98);
-  }
-}
-
-/* One pressed feedback for every text button. */
-.history-clear:active,
-.lobby-join-button:active:not(:disabled),
-.sound-mute-button:active,
-.stats-segment:active {
-  transform: scale(0.98);
-}
-
-.history-clear,
-.lobby-join-button,
-.sound-mute-button {
-  transition:
-    background-color var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out),
-    opacity var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out);
-}
-
-/* Anyone who asked for less motion gets none, including anything added later. */
-@media (prefers-reduced-motion: reduce) {
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    animation-delay: 0ms !important;
-    transition-duration: 0.01ms !important;
-    transition-delay: 0ms !important;
-  }
-
-}
-
-
-/* =========================================================
-   MOTION: SHIP PLACEMENT, RESULTS ENTRANCE
-   ========================================================= */
-
-@media (prefers-reduced-motion: no-preference) {
-
-  /* A ship just placed or moved: its hull grows out from the bow, one cell
-     after another (--n is the cell's position among the new ones). */
   .cell.hull-enter::before {
-    animation: hull-in var(--dur-base) var(--ease-out) backwards;
+    animation: hull-in 260ms var(--ease-out) backwards;
     animation-delay: calc(var(--n, 0) * 45ms);
   }
 
-  .cell.hull-h.hull-enter::before {
-    transform-origin: left center;
-  }
+  .fleet-ship.sunk-animation { animation: fleet-sunk 420ms var(--ease-out); }
 
-  .cell.hull-v.hull-enter::before {
-    transform-origin: center top;
-    animation-name: hull-in-v;
-  }
+  .cell.available:active::before { transform: scale(0.9); }
+  .fleet-ship.selectable:active { transform: scale(0.97); }
+  .game-mode-button:active { transform: scale(0.995); }
 
-  /* Results: the groups, their meters and the buttons follow the headline in
-     order instead of arriving together. */
+  .stats-segments--reveal { animation: stats-reveal var(--dur-base) var(--ease-out) backwards; }
+
+  .records-enter { animation: records-in var(--dur-base) var(--ease-out) var(--dur-exit) backwards; }
+  .records-enter .stats-card,
+  .records-enter .history-row { animation: none; }
+
+  .stats-card,
   .results-group {
     animation: screen-enter var(--dur-base) var(--ease-out) backwards;
-    animation-delay: calc(var(--enter-delay) + var(--i, 0) * 70ms);
+    animation-delay: calc(var(--i, 0) * 55ms);
   }
 
-  .results-stat--meter::after {
-    animation: stats-meter-in calc(var(--dur-slow) * 1.5) var(--ease-out) backwards;
-    animation-delay: calc(var(--enter-delay) + var(--i, 0) * 70ms + 160ms);
-  }
-
-  .results-actions {
+  .history-row {
     animation: screen-enter var(--dur-base) var(--ease-out) backwards;
-    animation-delay: calc(var(--enter-delay) + 3 * 70ms + 120ms);
+    animation-delay: calc(min(var(--i, 0), 9) * 40ms);
   }
 
+  .stats-card--meter::after,
+  .results-stat--meter::after {
+    transform-origin: left;
+    animation: meter-in calc(var(--dur-slow) * 1.5) var(--ease-out) backwards;
+    animation-delay: calc(var(--i, 0) * 55ms + 120ms);
+  }
+
+  .sound-panel:not([hidden]) { animation: popover-in var(--dur-base) var(--ease-out); }
+
+  .confirm-overlay { animation: overlay-in var(--dur-base) var(--ease-out); }
+  .confirm-dialog { animation: dialog-in var(--dur-base) var(--ease-out); }
+  .confirm-overlay--closing { animation: overlay-out var(--dur-exit) var(--ease-in) forwards; }
+  .confirm-overlay--closing .confirm-dialog { animation: dialog-out var(--dur-exit) var(--ease-in) forwards; }
 }
 
-@keyframes hull-in {
-  from {
-    opacity: 0;
-    transform: scale(0.35, 0.6);
-  }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; }
 }
 
-@keyframes hull-in-v {
-  from {
-    opacity: 0;
-    transform: scale(0.6, 0.35);
-  }
+/* ---------- Narrow screens ---------- */
+
+@media (max-width: 900px) {
+  .game-mode-menu { grid-template-columns: minmax(0, 1fr); row-gap: 32px; }
+  .game-mode-header p { max-width: 40ch; }
+  .game-layout { column-gap: 32px; }
 }
 
+/* Placement: a smaller board so the board, the fleet and the buttons share one screen. */
+.game-container[data-phase='placement'] { max-width: 480px; }
+.game-container[data-phase='placement'] .board-section h2 { display: none; }
+.game-container[data-phase='placement'] .game-status { margin: 8px 0 16px; }
+.game-container[data-phase='placement'] #turn-status { font-size: clamp(28px, 3vw, 36px); }
+.game-container[data-phase='placement'] .placement-controls { margin-top: 20px; }
 
-/* =========================================================
-   PHONES
-   Touch hygiene everywhere, then a layout for narrow screens:
-   fluid boards (no fixed 317px), one board at a time while placing,
-   controls pinned to the bottom, enemy board first in battle and the
-   turn status kept in view.
-   ========================================================= */
+.game-container[data-phase='placement'] #turn-status { font-size: 26px; letter-spacing: -0.025em; }
+#enemy-fleet .fleet-ship { flex-direction: row-reverse; justify-content: flex-end; }
 
-html {
-  -webkit-tap-highlight-color: transparent;
-  -webkit-text-size-adjust: 100%;
-}
+dl, dt, dd { margin: 0; }
 
-/* No double-tap zoom delay on anything you press, and no pull-to-refresh
-   wiping a match in progress. */
-button,
-.cell,
-.fleet-ship,
-.entry-screen {
-  touch-action: manipulation;
-}
-
-body {
-  overscroll-behavior-y: contain;
-}
-
-@media (max-width: 850px) {
-
-  #app {
-    padding-left: max(12px, env(safe-area-inset-left));
-    padding-right: max(12px, env(safe-area-inset-right));
-    padding-bottom: max(20px, env(safe-area-inset-bottom));
-  }
-
-  /* Boards follow the screen width instead of a fixed size. */
-  .board-section {
-    width: 100%;
-    max-width: 420px;
-  }
-
-  .board {
-    grid-template-columns: 18px repeat(10, minmax(0, 1fr));
-    grid-template-rows: 18px;
-    grid-auto-rows: auto;
-
-    width: 100%;
-  }
-
-  .cell {
-    width: auto;
-    height: auto;
-    aspect-ratio: 1;
-  }
-
-  .board-corner {
-    width: auto;
-  }
-
-  .game-layout {
-    gap: 18px;
-  }
-
-  .board-section h2 {
-    margin-bottom: 10px;
-  }
-
-  /* Bigger targets for the top bar. */
-  .game-icon-button {
-    width: 44px;
-    height: 44px;
-
-    flex-basis: 44px;
-  }
-
-  .game-topbar {
-    min-height: 44px;
-  }
-
-  /* The turn status stays visible while the boards scroll. */
-  .game-status {
-    position: sticky;
-    top: 0;
-    z-index: calc(var(--z-topbar) - 10);
-
-    margin: 0 -12px 12px;
-    padding: 4px 12px;
-
-    background: rgba(242, 245, 245, 0.92);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-  }
-
-  /* Fleet lists become compact two-column chips. */
-  .fleet-section {
-    width: 100%;
-    max-width: 420px;
-  }
-
-  .fleet-list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-  }
-
-  .fleet-section:nth-child(1) .fleet-ship,
-  .fleet-section:nth-child(4) .fleet-ship {
-    justify-content: center;
-    min-height: 44px;
-  }
-
-  .fleet-progress {
-    grid-column: 1 / -1;
-    align-items: center;
-    margin-bottom: 0;
-  }
-
-  /* ---- Placement: only your board, everything you need in reach. ---- */
-
-  .game-container[data-phase='placement'] .board-section:nth-child(3),
-  .game-container[data-phase='placement'] .fleet-section:nth-child(4) {
-    display: none;
-  }
-
-  .game-container[data-phase='placement'] .board-section:nth-child(2) h2 {
-    display: none;
-  }
-
-  .game-container[data-phase='placement'] .placement-controls {
-    position: sticky;
-    bottom: 0;
-    z-index: calc(var(--z-topbar) - 10);
-
-    margin: 16px -12px 0;
-    padding: 10px 12px max(10px, env(safe-area-inset-bottom));
-
-    border-top: 1px solid #dbe3e4;
-    background: rgba(242, 245, 245, 0.94);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-  }
-
-  .game-container[data-phase='placement'] .placement-button,
-  .game-container[data-phase='placement'] .new-game-button {
-    flex: 1;
-    min-height: 48px;
-    margin: 0;
-  }
-
-  .game-container[data-phase='placement'] .new-game-button {
-    flex: 1.6;
-  }
-
-  /* ---- Battle: the board you tap comes first. ---- */
-
-  .game-container[data-phase='battle'] .board-section:nth-child(3) {
-    order: 0;
-  }
-
-  .game-container[data-phase='battle'] .fleet-section:nth-child(4) {
-    order: 1;
-  }
-
-  .game-container[data-phase='battle'] .board-section:nth-child(2) {
-    order: 2;
-    max-width: 300px;
-  }
-
-  .game-container[data-phase='battle'] .fleet-section:nth-child(1) {
-    order: 3;
-  }
-
-  .game-container[data-phase='battle'] .fleet-ship {
-    min-height: 0;
-    padding: 6px;
-  }
-
-  .game-container[data-phase='battle'] #rotate-ship,
-  .game-container[data-phase='battle'] #reset-fleet {
-    display: none;
-  }
-
-  .game-container[data-phase='battle'] .new-game-button,
-  .game-container[data-phase='game-over'] .new-game-button {
-    width: 100%;
-    min-height: 48px;
-    margin: 0;
-  }
-
-  .game-container[data-phase='battle'] .placement-controls,
-  .game-container[data-phase='game-over'] .placement-controls {
-    margin-top: 20px;
-  }
-
-  .game-container[data-phase='game-over'] #rotate-ship,
-  .game-container[data-phase='game-over'] #reset-fleet {
-    display: none;
-  }
-}
+/* Sentence case for the result headline (the text arrives in capitals). */
+.results-headline { text-transform: lowercase; }
+.results-headline::first-letter { text-transform: uppercase; }
