@@ -1,13 +1,37 @@
 :root {
   --font: "Geist", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* Coordinates, codes and small labels: the chart-table voice. */
+  --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 
-  --ground: #f1f3f4;
-  --step-1: #e3e7e9;
-  --step-2: #d3d9dc;
-  --ink: #0c1215;
-  --ink-soft: #4a565d;
+  /* Cool, slightly blue greys that sit with the steel ships. */
+  --ground: #eef2f4;
+  --step-1: #e0e7eb;
+  --step-2: #ccd6dc;
+  --line: rgba(13, 26, 34, 0.14);
+  --ink: #0d1a22;
+  --ink-soft: #45555f;
+  --steel: #6b7b85;
+  --steel-edge: #1f2a30;
   --accent: #ff5a36;
-  --float: 0 16px 48px rgba(12, 18, 21, 0.16);
+  --float: 0 16px 48px rgba(13, 26, 34, 0.18);
+
+  /*
+   * The one shared container: every page (menus, lobby, stats, history,
+   * results and the game) and the top bar use --page-max inside the same
+   * --gutter, so their edges are the same two vertical lines.
+   */
+  --page-wide: 1240px;
+  --page-max: var(--page-wide);
+  --page-width: min(var(--page-max), 100%);
+
+  /* Top bar. Icon buttons are 48px boxes around 24px icons; the bar is pulled
+     out by the difference so the icons themselves sit on the page edges. */
+  --topbar-h: 48px;
+  --header-gap: clamp(4px, 1vh, 8px);
+  --icon-inset: 12px;
+
+  /* Height left for a screen below the top bar (desktop: the page does not scroll). */
+  --screen-h: calc(100dvh - var(--gutter-top) - var(--gutter-bottom) - var(--topbar-h) - var(--header-gap));
 
   --gutter: clamp(24px, 4vw, 64px);
   --gutter-top: clamp(16px, 3vh, 32px);
@@ -94,7 +118,12 @@ input:focus-visible,
   display: flex;
   align-items: flex-end;
   padding: var(--gutter);
-  background: var(--ink);
+  background-color: var(--ink);
+  background-image:
+    linear-gradient(rgba(238, 242, 244, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(238, 242, 244, 0.05) 1px, transparent 1px);
+  background-size: clamp(48px, 6vw, 88px) clamp(48px, 6vw, 88px);
+  background-position: var(--gutter) var(--gutter);
   color: var(--ground);
   cursor: pointer;
   transition:
@@ -122,21 +151,59 @@ input:focus-visible,
 }
 
 .entry-content p {
+  display: flex;
+  align-items: center;
+  gap: 14px;
   margin-top: 32px;
-  font-size: 20px;
+  font-family: var(--font-mono);
+  font-size: 15px;
   font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   color: var(--accent);
+}
+
+.entry-content p::before {
+  content: "";
+  width: 32px;
+  height: 2px;
+  background: currentColor;
 }
 
 /* ---------- Top bar ---------- */
 
-.game-header { margin-bottom: clamp(4px, 1vh, 8px); }
+.game-header {
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto var(--header-gap);
+}
 
 .game-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 48px;
+  min-height: var(--topbar-h);
+  /* Optical alignment: the icons, not their hover boxes, line up with the page. */
+  margin-inline: calc(-1 * var(--icon-inset));
+}
+
+.game-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 4px;
+  margin-right: auto;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* A tiny top-down hull, the same shape and steel as the ships on the board. */
+.game-brand-mark {
+  width: 26px;
+  height: 10px;
+  background: var(--steel);
+  clip-path: polygon(0 50%, 22% 0, 100% 0, 100% 100%, 22% 100%);
 }
 
 .game-topbar-actions {
@@ -160,6 +227,7 @@ input:focus-visible,
 }
 
 .game-icon-button:hover { background: var(--step-1); }
+.game-icon-button:focus-visible { outline-offset: -2px; }
 .game-icon-button:active { background: var(--step-2); }
 
 .game-icon-button[aria-pressed='true'] {
@@ -184,14 +252,15 @@ input:focus-visible,
 .sound-panel {
   position: absolute;
   top: calc(100% + 8px);
-  right: 0;
+  /* Ends on the page edge, under the icon rather than its box. */
+  right: var(--icon-inset);
   z-index: var(--z-popover);
   display: grid;
   gap: 20px;
   width: 288px;
   padding: 24px;
   background: #fff;
-  box-shadow: var(--float);
+  box-shadow: 0 0 0 1px var(--line), var(--float);
 }
 
 .sound-panel-header span { font-size: 17px; font-weight: 600; }
@@ -203,6 +272,8 @@ input:focus-visible,
   justify-content: space-between;
   font-size: 15px;
 }
+
+.sound-control-label span:last-child { font-family: var(--font-mono); font-size: 14px; color: var(--ink-soft); }
 
 .sound-control input[type="range"] {
   width: 100%;
@@ -228,10 +299,12 @@ input:focus-visible,
   column-gap: clamp(40px, 5vw, 96px);
   row-gap: 40px;
   align-items: start;
+  /* Menus sit a little above the middle instead of hugging the top bar. */
+  align-content: center;
   width: 100%;
-  max-width: 1320px;
+  max-width: var(--page-max);
   margin: 0 auto;
-  padding-top: clamp(16px, 8vh, 112px);
+  padding: clamp(16px, 4vh, 48px) 0 clamp(16px, 10vh, 120px);
 }
 
 .game-mode-header h2 {
@@ -247,7 +320,29 @@ input:focus-visible,
   font-size: 19px;
 }
 
-.game-mode-eyebrow,
+/* A small mono label over each headline, led by a short signal-orange rule. */
+.game-mode-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: clamp(14px, 2.4vh, 24px);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.game-mode-eyebrow::before {
+  content: "";
+  flex: none;
+  width: 24px;
+  height: 2px;
+  background: var(--accent);
+}
+
 .game-mode-number { display: none; }
 
 .game-mode-options,
@@ -267,17 +362,24 @@ input:focus-visible,
   border: 0;
   border-radius: 0;
   background: var(--step-1);
+  /* A thin edge on the left that turns signal orange on hover. */
+  box-shadow: inset 3px 0 0 var(--step-2);
   color: var(--ink);
   text-align: left;
   transition: background-color var(--dur-fast) var(--ease-out),
-    color var(--dur-fast) var(--ease-out);
+    color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
 }
 
 .game-mode-button:hover,
 .game-mode-button:focus-visible {
   background: var(--ink);
+  box-shadow: inset 3px 0 0 var(--accent);
   color: var(--ground);
 }
+
+.game-mode-button:hover .game-mode-description,
+.game-mode-button:focus-visible .game-mode-description { color: rgba(238, 242, 244, 0.78); }
 
 .game-mode-content { display: grid; gap: 6px; }
 
@@ -288,17 +390,24 @@ input:focus-visible,
   letter-spacing: -0.025em;
 }
 
-.game-mode-description { font-size: 16px; line-height: 1.4; }
+.game-mode-description {
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  transition: color var(--dur-fast) var(--ease-out);
+}
 
 .game-mode-arrow {
-  font-size: 28px;
+  font-size: 26px;
+  line-height: 1;
   transition: transform var(--dur-base) var(--ease-out);
 }
 
 .game-mode-button:hover .game-mode-arrow { transform: translateX(6px); }
 
 .game-mode-button.disabled { opacity: 0.4; cursor: default; }
-.game-mode-button.disabled:hover { background: var(--step-1); color: var(--ink); }
+.game-mode-button.disabled:hover { background: var(--step-1); box-shadow: inset 3px 0 0 var(--step-2); color: var(--ink); }
+.game-mode-button.disabled:hover .game-mode-description { color: var(--ink-soft); }
 .game-mode-button.disabled:hover .game-mode-arrow { transform: none; }
 
 .game-mode-status { margin-left: auto; font-size: 14px; font-weight: 600; }
@@ -317,19 +426,28 @@ input:focus-visible,
   border: 0;
   border-radius: 0;
   background: var(--step-1);
-  font-size: 28px;
-  font-weight: 600;
-  letter-spacing: 0.16em;
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-family: var(--font-mono);
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
 }
 
+/* The ring sits inside the field so it lines up with the Join button. */
+.lobby-input:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+}
+
 .lobby-input::placeholder {
-  color: var(--ink);
+  color: var(--ink-soft);
+  font-family: var(--font);
   font-size: 17px;
   font-weight: 500;
   letter-spacing: 0;
   text-transform: none;
-  opacity: 0.55;
+  opacity: 1;
 }
 
 .lobby-join-button {
@@ -346,16 +464,18 @@ input:focus-visible,
 }
 
 .lobby-join-button:hover:not(:disabled) { background: var(--accent); color: var(--ink); }
-.lobby-join-button:disabled { opacity: 0.35; cursor: default; }
 
 .lobby-code {
+  position: relative;
   padding: clamp(24px, 4vh, 36px) 24px;
   background: var(--step-1);
-  font-size: clamp(44px, min(8vw, 12vh), 104px);
-  font-weight: 600;
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-family: var(--font-mono);
+  font-size: clamp(44px, min(8vw, 12vh), 96px);
+  font-weight: 500;
   line-height: 1;
-  letter-spacing: 0.14em;
-  text-indent: 0.14em;
+  letter-spacing: 0.1em;
+  text-indent: 0.1em;
   user-select: all;
 }
 
@@ -368,16 +488,99 @@ input:focus-visible,
   text-underline-offset: 4px;
 }
 
-.lobby-link:hover { color: var(--accent); }
+.lobby-link:hover { text-decoration-thickness: 2px; }
+
+/* Waiting for the friend: a slow signal light in the corner of the code. */
+.lobby-code::after {
+  content: "";
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 10px;
+  height: 10px;
+  background: var(--accent);
+}
 
 .lobby-error {
   padding: 16px 20px;
-  background: rgba(255, 90, 54, 0.18);
+  background: rgba(255, 90, 54, 0.14);
+  box-shadow: inset 3px 0 0 var(--accent);
   font-size: 16px;
   font-weight: 500;
 }
 
 /* ---------- Game ---------- */
+
+/*
+ * Game geometry. These only depend on the viewport, so they live on #app:
+ * the top bar reads them too, which lets a game screen narrow the shared
+ * page to the width of its boards (see "Page width per screen" below).
+ */
+#app {
+  --board-title: 42px;
+  --board-gap: clamp(32px, 4vw, 56px);
+  /* Every height around the boards, from the same values the rules below use. */
+  --turn-size: clamp(28px, min(4vw, 6vh), 52px);
+  --status-mt: clamp(4px, 1.5vh, 16px);
+  --status-mb: clamp(12px, 3vh, 28px);
+  --status-row: calc(max(var(--turn-size) * 1.05, 48px) + var(--status-mt) + var(--status-mb));
+  --layout-gap: clamp(12px, 2vh, 20px);
+  --chip-h: 38px;
+  --fleet-h: calc(2 * var(--chip-h) + 8px);
+  /* The tallest board that fits under the status, with its title and fleet. */
+  --board-fit: calc(var(--screen-h) - var(--status-row) - var(--board-title) - var(--layout-gap) - var(--fleet-h));
+  --board-max: max(240px, min(600px, var(--board-fit)));
+
+  /* Placement (wide screens): board on the left, fleet and buttons beside it. */
+  --placement-status: calc(26px * 1.05 + 24px);
+  --placement-board: max(320px, min(600px, var(--screen-h) - var(--placement-status)));
+  --panel-w: 440px;
+
+  /* Results with the boards shown: everything above the boards. */
+  --rb-gap: clamp(32px, 4vw, 56px);
+  --rb-chrome: calc(
+    clamp(8px, 4vh, 64px)                               /* page top */
+    + 13px + clamp(14px, 2.4vh, 24px)                    /* eyebrow */
+    + clamp(40px, min(5.6vw, 10vh), 88px) * 0.98          /* headline */
+    + clamp(16px, 3vh, 28px) + 19px * 1.5                 /* detail line */
+    + clamp(16px, 3vh, 32px) + 56px                       /* buttons */
+    + clamp(20px, 3vh, 40px) + 42px                       /* board titles */
+  );
+  --rb-max: max(240px, min(560px, var(--screen-h) - var(--rb-chrome)));
+}
+
+/*
+ * Page width per screen. The page (and with it the top bar) is never wider
+ * than what a screen's boards need, so when the height limits the boards the
+ * whole page narrows around them instead of opening a gap between them. The
+ * back button, title, status, boards and buttons keep sharing two edges.
+ */
+@media (min-width: 701px) {
+  #app:has(> #game-screen:not([hidden]):is([data-phase='battle'], [data-phase='game-over'])) {
+    --page-max: min(var(--page-wide), 2 * var(--board-max) + var(--board-gap));
+  }
+
+  #app:has(> #results-screen:not([hidden]) .results-boards:not([hidden])) {
+    --page-max: min(var(--page-wide), 2 * var(--rb-max) + var(--rb-gap));
+  }
+}
+
+/* Short desktop screens give narrower boards: compact the fleet chips so each
+   fleet still fits the two rows --fleet-h reserves for it. */
+@media (min-width: 701px) and (max-height: 760px) {
+  .game-container:is([data-phase='battle'], [data-phase='game-over']) .fleet-ship {
+    gap: 8px;
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+  .game-container:is([data-phase='battle'], [data-phase='game-over']) .ship-segment { width: 9px; height: 9px; }
+}
+
+@media (min-width: 1000px) {
+  #app:has(> #game-screen[data-phase='placement']:not([hidden])) {
+    --page-max: min(var(--page-wide), var(--placement-board) + var(--board-gap) + var(--panel-w));
+  }
+}
 
 /*
  * The game fills the screen below the top bar: status, then the boards
@@ -386,13 +589,8 @@ input:focus-visible,
  * space its row gets, so nothing needs a vertical scroll.
  */
 .game-container {
-  --board-title: 42px;
-  --board-gap: clamp(32px, 4vw, 56px);
-  /* Rough height of everything that is not a board; it only narrows the
-     columns so the fleets line up under boards that shrank to fit. */
-  --battle-chrome: calc(var(--gutter-top) + var(--gutter-bottom) + 280px);
-  /* Widest a board can be in its column (resolved against this container). */
-  --board-col: min(560px, (100cqw - var(--board-gap)) / 2);
+  /* Board size (labels included), resolved against this container's width. */
+  --board-col: max(240px, min(var(--board-max), (100cqw - var(--board-gap)) / 2));
 
   container-type: inline-size;
   display: grid;
@@ -403,19 +601,19 @@ input:focus-visible,
     "layout layout"
     "controls controls";
   width: 100%;
-  max-width: clamp(640px, (100dvh - var(--battle-chrome)) * 2 + var(--board-gap), 1180px);
+  max-width: var(--page-max);
   min-height: 0;
   margin: 0 auto;
 }
 
 .game-status {
   grid-area: status;
-  margin: clamp(4px, 1.5vh, 16px) 0 clamp(12px, 3vh, 28px);
+  margin: var(--status-mt) 0 var(--status-mb);
 }
 
 #turn-status {
   display: block;
-  font-size: clamp(28px, min(4vw, 6vh), 52px);
+  font-size: var(--turn-size);
   font-weight: 600;
   line-height: 1.05;
   letter-spacing: -0.035em;
@@ -428,16 +626,21 @@ input:focus-visible,
 .game-layout {
   grid-area: layout;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  /* The board row grows with the free height, but never past what the column
-     width allows, so the fleets stay right under the boards. */
-  grid-template-rows: minmax(240px, calc(var(--board-col) + var(--board-title))) auto;
+  /*
+   * Two columns exactly one board wide, pushed to the page edges: the left
+   * board starts under the back button and the right one ends under the
+   * sound button. The page is only as wide as the two boards and the gap,
+   * so the gap stays --board-gap.
+   */
+  grid-template-columns: repeat(2, var(--board-col));
+  grid-template-rows: calc(var(--board-col) + var(--board-title)) auto;
   grid-template-areas:
     "pb eb"
     "pf ef";
+  justify-content: space-between;
   align-content: start;
   column-gap: var(--board-gap);
-  row-gap: clamp(12px, 2vh, 20px);
+  row-gap: var(--layout-gap);
   align-items: start;
 }
 
@@ -446,7 +649,7 @@ input:focus-visible,
 .game-layout > :nth-child(3) { grid-area: eb; }
 .game-layout > :nth-child(4) { grid-area: ef; }
 
-.board-section { width: 100%; max-width: 560px; }
+.board-section { width: 100%; max-width: 600px; }
 
 /* In the game the board section takes its row's height and the board fits it. */
 .game-layout .board-section {
@@ -460,12 +663,28 @@ input:focus-visible,
 
 .board-section h2,
 .results-board-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin-bottom: 14px;
   font-size: 19px;
   line-height: 28px;
   font-weight: 600;
   letter-spacing: -0.01em;
 }
+
+/* The board you can fire at gets a signal-orange marker; the other one steps back. */
+.board-section h2::before {
+  content: "";
+  flex: none;
+  width: 10px;
+  height: 10px;
+  background: var(--step-2);
+  transition: background-color var(--dur-base) var(--ease-out);
+}
+
+.game-container[data-phase='battle'] .board-section:has(.cell.available) h2::before { background: var(--accent); }
+.game-container[data-phase='battle'] .board-section:not(:has(.cell.available)) h2 { color: var(--ink-soft); }
 
 /* Board */
 
@@ -485,7 +704,8 @@ input:focus-visible,
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-family: var(--font-mono);
+  font-size: 12px;
   font-weight: 500;
   color: var(--ink-soft);
 }
@@ -637,7 +857,7 @@ input:focus-visible,
 
 /* ---------- Fleet ---------- */
 
-.fleet-section { width: 100%; max-width: 560px; }
+.fleet-section { width: 100%; max-width: 600px; }
 
 .fleet-section h3 {
   position: absolute;
@@ -675,6 +895,7 @@ input:focus-visible,
 .fleet-ship {
   display: inline-flex;
   align-items: center;
+  min-height: var(--chip-h, 38px);
   gap: 12px;
   padding: 10px 14px;
   border: 0;
@@ -713,7 +934,12 @@ input:focus-visible,
 
 .fleet-ship.selectable { cursor: pointer; }
 .fleet-ship.selectable:hover { background: var(--step-2); }
-.fleet-ship.placed { opacity: 0.45; }
+/* Placed: an outline instead of a faded fill, so the name stays readable (AA). */
+.fleet-ship.placed {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--ink-soft);
+}
 
 .fleet-ship.selected {
   background: var(--ink);
@@ -721,10 +947,10 @@ input:focus-visible,
   opacity: 1;
 }
 
-.fleet-ship.sunk { background: transparent; }
-.fleet-ship:not(.selected) .ship-segment { background: #6b7b85; }
+.fleet-ship.sunk { background: transparent; box-shadow: inset 0 0 0 1px var(--line); color: var(--ink-soft); }
+.fleet-ship:not(.selected) .ship-segment { background: var(--steel); }
 .fleet-ship.sunk .ship-segment { background: var(--accent); }
-.fleet-ship.sunk .fleet-ship-name { text-decoration: line-through; opacity: 0.6; }
+.fleet-ship.sunk .fleet-ship-name { text-decoration: line-through; }
 
 /* ---------- Controls ---------- */
 
@@ -751,7 +977,22 @@ input:focus-visible,
 
 .placement-button { background: var(--step-1); color: var(--ink); }
 .placement-button:hover:not(:disabled) { background: var(--step-2); }
-.placement-button:disabled { opacity: 0.35; cursor: default; }
+
+/* Reset is the least important action: an outline, not a fill. */
+#reset-fleet { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+#reset-fleet:hover:not(:disabled) { background: var(--step-1); }
+
+/* Disabled reads as "not yet", not as a faded secondary button. */
+.placement-button:disabled,
+.new-game-button:disabled,
+.lobby-join-button:disabled,
+.confirm-button:disabled {
+  background: var(--step-1);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--ink-soft);
+  opacity: 1;
+  cursor: not-allowed;
+}
 
 #rotate-ship { order: 1; }
 #reset-fleet { order: 2; }
@@ -764,13 +1005,6 @@ input:focus-visible,
 }
 
 .new-game-button:hover:not(:disabled) { background: var(--ink-soft); }
-
-.new-game-button:disabled {
-  background: var(--step-1);
-  color: var(--ink);
-  opacity: 0.4;
-  cursor: default;
-}
 
 .new-game-button.start-battle-button:not(:disabled) {
   background: var(--accent);
@@ -792,7 +1026,6 @@ input:focus-visible,
 /* Battle and after: the one remaining button sits beside the turn status. */
 .game-container[data-phase='battle'],
 .game-container[data-phase='game-over'] {
-  --battle-chrome: calc(var(--gutter-top) + var(--gutter-bottom) + 220px);
   grid-template-rows: auto minmax(0, 1fr);
   grid-template-areas:
     "status controls"
@@ -803,7 +1036,7 @@ input:focus-visible,
 .game-container[data-phase='battle'] .placement-controls,
 .game-container[data-phase='game-over'] .placement-controls {
   align-self: center;
-  margin: clamp(4px, 1.5vh, 16px) 0 clamp(12px, 3vh, 28px);
+  margin: var(--status-mt) 0 var(--status-mb);
 }
 
 /* Battle and after: nothing to rotate or reset. */
@@ -812,37 +1045,44 @@ input:focus-visible,
 .game-container[data-phase='game-over'] #rotate-ship,
 .game-container[data-phase='game-over'] #reset-fleet { display: none; }
 
+/* Mid-battle "New Game" is a way out, not the main action: a quiet outline. */
 .game-container[data-phase='battle'] .new-game-button,
 .game-container[data-phase='game-over'] .new-game-button {
+  min-height: 48px;
   margin-left: 0;
-  background: var(--step-1);
+  padding: 0 22px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line);
   color: var(--ink);
+  font-size: 16px;
 }
 
 .game-container[data-phase='battle'] .new-game-button:hover,
-.game-container[data-phase='game-over'] .new-game-button:hover { background: var(--step-2); }
+.game-container[data-phase='game-over'] .new-game-button:hover { background: var(--step-1); }
 
 /* ---------- Results ---------- */
 
 .results-screen,
 .history-screen {
   display: block;
-  max-width: 1180px;
+  max-width: var(--page-max);
   margin: 0 auto;
-  padding-top: clamp(8px, 4vh, 112px);
+  padding: clamp(8px, 4vh, 64px) 0 0;
+  align-content: start;
 }
 
+/* Same headline size as the menus, so moving between pages feels like one site. */
 .results-screen .game-mode-header h2,
-.history-screen .game-mode-header h2 { font-size: clamp(44px, min(7vw, 10vh), 104px); }
+.history-screen .game-mode-header h2 { font-size: clamp(40px, min(5.6vw, 10vh), 88px); }
 
 .results-headline:focus,
 .history-headline:focus { outline: none; }
 
 .results-groups {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(220px, 0.6fr);
   gap: 8px;
-  margin-top: clamp(20px, 4vh, 48px);
+  margin-top: clamp(16px, 3vh, 48px);
 }
 
 .results-group {
@@ -854,6 +1094,15 @@ input:focus-visible,
 }
 
 .results-group-title { font-size: 19px; font-weight: 600; }
+
+/* The match card is a single number: a dark tile with the time at its foot. */
+.results-group--match {
+  align-content: space-between;
+  background: var(--ink);
+  color: var(--ground);
+}
+
+.results-group--match .results-stat-label { color: rgba(238, 242, 244, 0.72); }
 
 .results-stats {
   display: grid;
@@ -878,7 +1127,18 @@ input:focus-visible,
   letter-spacing: -0.03em;
 }
 
-.results-stat-label { font-size: 15px; }
+.results-stat-label,
+.stats-card-label {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.results-stat-label { margin-top: 6px; }
 
 .results-stat--meter,
 .stats-card--meter { padding-bottom: 20px; }
@@ -918,7 +1178,7 @@ input:focus-visible,
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: clamp(20px, 4vh, 32px);
+  margin-top: clamp(16px, 3vh, 32px);
 }
 
 .results-new-game,
@@ -938,12 +1198,25 @@ input:focus-visible,
 .results-view-boards:hover { background: var(--step-2); }
 
 .results-boards {
+  /* Same idea as the game: board-wide columns on the page edges, sized from
+     the height left under the headline and the buttons. */
+  --rb: max(240px, min(var(--rb-max), (100% - var(--rb-gap)) / 2));
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 56px;
+  grid-template-columns: repeat(2, var(--rb));
+  justify-content: space-between;
+  column-gap: var(--rb-gap);
   row-gap: 32px;
-  margin-top: 48px;
+  margin-top: clamp(20px, 3vh, 40px);
 }
+
+/*
+ * The boards take the place of the stat cards rather than stacking under
+ * them, and they shrink to the height that is left, so the page still fits
+ * one screen on desktop.
+ */
+.results-screen:has(.results-boards:not([hidden])) .results-groups { display: none; }
+
+.results-boards .board-section { max-width: none; }
 
 .board--readonly .cell { cursor: default; }
 
@@ -997,22 +1270,22 @@ input:focus-visible,
 
 .history-screen .history-note { font-size: 15px; margin-bottom: 16px; }
 
+/* Eight cards: four across, two full rows, no orphans. */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
 
+/* Every card keeps room for a meter at its foot, so the numbers line up in a row. */
 .stats-card {
   display: grid;
   align-content: space-between;
   gap: clamp(12px, 2vh, 20px);
   min-height: clamp(120px, 18vh, 156px);
-  padding: 24px;
+  padding: 24px 24px 44px;
   background: var(--step-1);
 }
-
-.stats-card-label { font-size: 15px; }
 
 .stats-card-value {
   font-size: clamp(40px, 6vh, 52px);
@@ -1021,7 +1294,7 @@ input:focus-visible,
   letter-spacing: -0.035em;
 }
 
-.stats-card--meter { padding-bottom: 48px; }
+.stats-card--meter { padding-bottom: 44px; }
 
 .stats-grid--empty .stats-card-value { opacity: 0.3; }
 
@@ -1040,7 +1313,7 @@ input:focus-visible,
 }
 
 .stats-reset:hover,
-.history-clear:hover { color: var(--accent); }
+.history-clear:hover { text-decoration-thickness: 2px; }
 
 .history-list {
   display: grid;
@@ -1055,20 +1328,35 @@ input:focus-visible,
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 16px;
-  padding: 20px 24px;
+  padding: 20px 24px 20px 28px;
   background: var(--step-1);
+  /* The outcome is a stripe on the left: ink for a win, signal orange for a loss. */
+  box-shadow: inset 4px 0 0 var(--steel);
 }
 
-.history-row--victory { background: var(--ink); color: var(--ground); }
+.history-row--victory { box-shadow: inset 4px 0 0 var(--ink); }
+.history-row--defeat { box-shadow: inset 4px 0 0 var(--accent); }
 
 .history-row-main { display: grid; gap: 2px; }
 .history-row-outcome { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
-.history-row-meta { font-size: 15px; }
-.history-row-numbers { font-size: 16px; font-weight: 500; text-align: right; }
+.history-row-meta { font-size: 15px; color: var(--ink-soft); }
+.history-row-numbers {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  text-align: right;
+}
 
-/* Empty history: the drawn miniature goes, the words stay. */
-.history-empty { display: grid; gap: 8px; padding: 40px 0; font-size: 19px; }
-.history-empty-board { display: none; }
+/* Empty history: a small slice of an untouched board, drawn like the real one. */
+.history-empty { display: grid; justify-items: start; padding: clamp(24px, 5vh, 56px) 0; }
+.history-empty-board { width: min(360px, 100%); height: auto; }
+.history-empty-cell { fill: var(--step-1); rx: 0; }
+.history-empty-hull { fill: var(--steel); stroke: var(--steel-edge); stroke-width: 1.5; stroke-linejoin: round; }
+.history-empty-deck { fill: #56656e; }
+.history-empty-bridge { fill: #c9d2d7; stroke: var(--steel-edge); stroke-width: 1; }
+.history-empty-miss { fill: #8c9ba4; }
+.history-empty-target { fill: none; stroke: var(--accent); stroke-width: 2; stroke-dasharray: 4 3; rx: 0; }
 
 /* ---------- Dialog ---------- */
 
@@ -1079,18 +1367,19 @@ input:focus-visible,
   display: grid;
   place-items: center;
   padding: var(--gutter);
-  background: rgba(12, 18, 21, 0.55);
+  background: rgba(13, 26, 34, 0.55);
 }
 
 .confirm-dialog {
   width: min(460px, 100%);
   padding: 32px;
   background: var(--ground);
+  border-top: 3px solid var(--accent);
   box-shadow: var(--float);
 }
 
 .confirm-title { font-size: 30px; font-weight: 600; line-height: 1.1; letter-spacing: -0.03em; }
-.confirm-message { margin-top: 12px; }
+.confirm-message { margin-top: 12px; color: var(--ink-soft); }
 
 .confirm-actions { display: flex; gap: 8px; margin-top: 32px; }
 
@@ -1160,6 +1449,11 @@ input:focus-visible,
   to { transform: scaleX(1); }
 }
 
+@keyframes signal-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
 @keyframes overlay-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes overlay-out { from { opacity: 1; } to { opacity: 0; } }
 
@@ -1215,6 +1509,11 @@ input:focus-visible,
   .fleet-ship.selectable:active { transform: scale(0.97); }
   .game-mode-button:active { transform: scale(0.995); }
 
+  :is(.placement-button, .new-game-button, .results-new-game, .results-view-boards,
+    .confirm-button, .lobby-join-button, .sound-mute-button):active:not(:disabled) { transform: translateY(1px); }
+
+  .lobby-code::after { animation: signal-blink 1.6s var(--ease-out) infinite; }
+
   .stats-segments--reveal { animation: stats-reveal var(--dur-base) var(--ease-out) backwards; }
 
   .records-enter { animation: records-in var(--dur-base) var(--ease-out) var(--dur-exit) backwards; }
@@ -1253,8 +1552,14 @@ input:focus-visible,
 
 /* ---------- Narrow screens ---------- */
 
+@media (max-width: 1100px) {
+  .results-groups { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .results-group--match { grid-column: 1 / -1; }
+}
+
 @media (max-width: 900px) {
-  .game-mode-menu { grid-template-columns: minmax(0, 1fr); row-gap: 32px; }
+  .game-mode-menu { grid-template-columns: minmax(0, 1fr); row-gap: 32px; align-content: start; }
+  .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .game-mode-header p { max-width: 40ch; }
   .game-layout { column-gap: 32px; }
 }
@@ -1272,6 +1577,42 @@ input:focus-visible,
 .game-container[data-phase='placement'] .placement-controls { margin-top: 20px; }
 
 .game-container[data-phase='placement'] #turn-status { font-size: 26px; letter-spacing: -0.025em; }
+
+/*
+ * Placement on a wide screen: the status runs along the top, the board sits
+ * where your board will be in battle (left edge, under the back button) and
+ * the fleet and buttons fill the column to its right, ending on the right
+ * page edge. The board takes all the height under the status.
+ */
+@media (min-width: 1000px) {
+  .game-container[data-phase='placement'] {
+    --board-col: max(320px, min(var(--placement-board), (100cqw - var(--board-gap)) * 0.55));
+    max-width: var(--page-max);
+    grid-template-columns: var(--board-col) minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas:
+      "status status"
+      "pb pf"
+      "pb controls";
+    column-gap: var(--board-gap);
+  }
+
+  .game-container[data-phase='placement'] .game-layout { display: contents; }
+  .game-container[data-phase='placement'] .board-section { max-width: none; }
+  .game-container[data-phase='placement'] .fleet-section { max-width: none; }
+  .game-container[data-phase='placement'] .placement-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "rotate reset"
+      "ready ready";
+    align-self: start;
+    margin-top: 24px;
+  }
+  .game-container[data-phase='placement'] #rotate-ship { grid-area: rotate; }
+  .game-container[data-phase='placement'] #reset-fleet { grid-area: reset; }
+  .game-container[data-phase='placement'] #new-game { grid-area: ready; margin-left: 0; }
+}
 #enemy-fleet .fleet-ship { flex-direction: row-reverse; justify-content: flex-end; }
 
 dl, dt, dd { margin: 0; }

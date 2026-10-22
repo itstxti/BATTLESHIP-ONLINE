@@ -5,7 +5,7 @@
 
   .entry-content p { font-size: 18px; margin-top: 24px; }
 
-  .game-mode-menu { padding-top: 16px; }
+  .game-mode-menu { padding: 16px 0 0; row-gap: 28px; }
   .game-mode-header h2 { font-size: clamp(38px, 11.5vw, 56px); }
   .game-mode-header p { margin-top: 16px; font-size: 17px; }
   .game-mode-button { padding: 22px 20px; }
@@ -90,10 +90,12 @@
   .results-boards { grid-template-columns: minmax(0, 1fr); }
   .results-groups { grid-template-columns: minmax(0, 1fr); margin-top: 32px; }
   .results-actions > * { flex: 1 0 100%; }
-  .results-stat-value { font-size: 38px; }
+  .results-stat-value { font-size: 34px; }
+  .results-group { padding: 20px; }
+  .history-row-numbers { font-size: 13px; }
 
   .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .stats-card { min-height: 128px; padding: 18px; }
+  .stats-card { min-height: 128px; padding: 18px 18px 40px; }
   .stats-card-value { font-size: 40px; }
   .stats-card--meter { --meter-inset: 18px; }
   .stats-card--meter { padding-bottom: 40px; }
@@ -106,7 +108,8 @@
 }
 
 @media (hover: none) {
-  .game-mode-button:hover { background: var(--step-1); color: var(--ink); }
+  .game-mode-button:hover { background: var(--step-1); box-shadow: inset 3px 0 0 var(--step-2); color: var(--ink); }
+  .game-mode-button:hover .game-mode-description { color: var(--ink-soft); }
   .game-mode-button:hover .game-mode-arrow { transform: none; }
   .cell.available:hover::before { background: var(--step-1); }
 }

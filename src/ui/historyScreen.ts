@@ -166,8 +166,6 @@ function renderRow(record: MatchRecord, index: number): HTMLElement {
 
   item.style.setProperty('--i', String(index));
 
-  item.style.setProperty('--i', String(index));
-
   if (record.mode === 'local') {
     item.classList.add('history-row--local');
   }
@@ -216,14 +214,16 @@ export function renderHistoryScreen(
   headline.tabIndex = -1;
 
   header.append(
-    element('span', 'game-mode-eyebrow', 'HISTORY'),
+    element('span', 'game-mode-eyebrow', 'LOGBOOK'),
     headline,
     element(
       'p',
       'history-note',
       records.length === 0
         ? 'No matches yet. Finish a game and it will show up here.'
-        : `Last ${Math.min(records.length, HISTORY_LIMIT)} matches`
+        : Math.min(records.length, HISTORY_LIMIT) === 1
+          ? 'Your last match'
+          : `Last ${Math.min(records.length, HISTORY_LIMIT)} matches`
     )
   );
 
@@ -244,9 +244,6 @@ export function renderHistoryScreen(
 
   list.setAttribute('aria-label', 'Match history, newest first');
 
-  records.forEach((record, index) => {
-    list.append(renderRow(record, index));
-  });
   records.forEach((record, index) => {
     list.append(renderRow(record, index));
   });
