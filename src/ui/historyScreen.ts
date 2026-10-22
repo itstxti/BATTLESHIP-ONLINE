@@ -214,7 +214,7 @@ export function renderHistoryScreen(
   headline.tabIndex = -1;
 
   header.append(
-    element('span', 'game-mode-eyebrow', 'HISTORY'),
+    element('span', 'game-mode-eyebrow', 'LOGBOOK'),
     headline,
     element(
       'p',

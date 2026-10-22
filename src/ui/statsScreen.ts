@@ -364,7 +364,7 @@ export function renderStatsScreen(
   const header = element('div', 'game-mode-header');
 
   header.append(
-    element('span', 'game-mode-eyebrow', 'STATISTICS'),
+    element('span', 'game-mode-eyebrow', 'YOUR RECORD'),
     headline
   );
 
