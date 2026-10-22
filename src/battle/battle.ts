@@ -120,7 +120,7 @@ export function handleEnemyShot(
       audio.playSfx('sunk');
 
       setTurnStatus(
-        `You sunk the enemy ${ship.name}! Shoot again.`,
+        `You sunk the enemy boat! Shoot again.`,
         'player'
       );
     } else {
