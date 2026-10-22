@@ -1,13 +1,22 @@
 :root {
   --font: "Geist", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* Coordinates, codes and small labels: the chart-table voice. */
+  --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 
-  --ground: #f1f3f4;
-  --step-1: #e3e7e9;
-  --step-2: #d3d9dc;
-  --ink: #0c1215;
-  --ink-soft: #4a565d;
+  /* Cool, slightly blue greys that sit with the steel ships. */
+  --ground: #eef2f4;
+  --step-1: #e0e7eb;
+  --step-2: #ccd6dc;
+  --line: rgba(13, 26, 34, 0.14);
+  --ink: #0d1a22;
+  --ink-soft: #45555f;
+  --steel: #6b7b85;
+  --steel-edge: #1f2a30;
   --accent: #ff5a36;
-  --float: 0 16px 48px rgba(12, 18, 21, 0.16);
+  --float: 0 16px 48px rgba(13, 26, 34, 0.18);
+
+  /* One content width for every page, so headlines and the top bar line up. */
+  --page-max: 1240px;
 
   --gutter: clamp(24px, 4vw, 64px);
   --gutter-top: clamp(16px, 3vh, 32px);
@@ -94,7 +103,12 @@ input:focus-visible,
   display: flex;
   align-items: flex-end;
   padding: var(--gutter);
-  background: var(--ink);
+  background-color: var(--ink);
+  background-image:
+    linear-gradient(rgba(238, 242, 244, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(238, 242, 244, 0.05) 1px, transparent 1px);
+  background-size: clamp(48px, 6vw, 88px) clamp(48px, 6vw, 88px);
+  background-position: var(--gutter) var(--gutter);
   color: var(--ground);
   cursor: pointer;
   transition:
@@ -122,10 +136,23 @@ input:focus-visible,
 }
 
 .entry-content p {
+  display: flex;
+  align-items: center;
+  gap: 14px;
   margin-top: 32px;
-  font-size: 20px;
+  font-family: var(--font-mono);
+  font-size: 15px;
   font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   color: var(--accent);
+}
+
+.entry-content p::before {
+  content: "";
+  width: 32px;
+  height: 2px;
+  background: currentColor;
 }
 
 /* ---------- Top bar ---------- */
@@ -136,7 +163,29 @@ input:focus-visible,
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
+  max-width: var(--page-max);
   min-height: 48px;
+  margin: 0 auto;
+}
+
+.game-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 12px;
+  margin-right: auto;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* A tiny top-down hull, the same shape and steel as the ships on the board. */
+.game-brand-mark {
+  width: 26px;
+  height: 10px;
+  background: var(--steel);
+  clip-path: polygon(0 50%, 22% 0, 100% 0, 100% 100%, 22% 100%);
 }
 
 .game-topbar-actions {
@@ -160,6 +209,7 @@ input:focus-visible,
 }
 
 .game-icon-button:hover { background: var(--step-1); }
+.game-icon-button:focus-visible { outline-offset: -2px; }
 .game-icon-button:active { background: var(--step-2); }
 
 .game-icon-button[aria-pressed='true'] {
@@ -191,7 +241,7 @@ input:focus-visible,
   width: 288px;
   padding: 24px;
   background: #fff;
-  box-shadow: var(--float);
+  box-shadow: 0 0 0 1px var(--line), var(--float);
 }
 
 .sound-panel-header span { font-size: 17px; font-weight: 600; }
@@ -203,6 +253,8 @@ input:focus-visible,
   justify-content: space-between;
   font-size: 15px;
 }
+
+.sound-control-label span:last-child { font-family: var(--font-mono); font-size: 14px; color: var(--ink-soft); }
 
 .sound-control input[type="range"] {
   width: 100%;
@@ -228,10 +280,12 @@ input:focus-visible,
   column-gap: clamp(40px, 5vw, 96px);
   row-gap: 40px;
   align-items: start;
+  /* Menus sit a little above the middle instead of hugging the top bar. */
+  align-content: center;
   width: 100%;
-  max-width: 1320px;
+  max-width: var(--page-max);
   margin: 0 auto;
-  padding-top: clamp(16px, 8vh, 112px);
+  padding: clamp(16px, 4vh, 48px) 0 clamp(16px, 10vh, 120px);
 }
 
 .game-mode-header h2 {
@@ -247,7 +301,29 @@ input:focus-visible,
   font-size: 19px;
 }
 
-.game-mode-eyebrow,
+/* A small mono label over each headline, led by a short signal-orange rule. */
+.game-mode-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: clamp(14px, 2.4vh, 24px);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.game-mode-eyebrow::before {
+  content: "";
+  flex: none;
+  width: 24px;
+  height: 2px;
+  background: var(--accent);
+}
+
 .game-mode-number { display: none; }
 
 .game-mode-options,
@@ -267,17 +343,24 @@ input:focus-visible,
   border: 0;
   border-radius: 0;
   background: var(--step-1);
+  /* A thin edge on the left that turns signal orange on hover. */
+  box-shadow: inset 3px 0 0 var(--step-2);
   color: var(--ink);
   text-align: left;
   transition: background-color var(--dur-fast) var(--ease-out),
-    color var(--dur-fast) var(--ease-out);
+    color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
 }
 
 .game-mode-button:hover,
 .game-mode-button:focus-visible {
   background: var(--ink);
+  box-shadow: inset 3px 0 0 var(--accent);
   color: var(--ground);
 }
+
+.game-mode-button:hover .game-mode-description,
+.game-mode-button:focus-visible .game-mode-description { color: rgba(238, 242, 244, 0.78); }
 
 .game-mode-content { display: grid; gap: 6px; }
 
@@ -288,17 +371,24 @@ input:focus-visible,
   letter-spacing: -0.025em;
 }
 
-.game-mode-description { font-size: 16px; line-height: 1.4; }
+.game-mode-description {
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  transition: color var(--dur-fast) var(--ease-out);
+}
 
 .game-mode-arrow {
-  font-size: 28px;
+  font-size: 26px;
+  line-height: 1;
   transition: transform var(--dur-base) var(--ease-out);
 }
 
 .game-mode-button:hover .game-mode-arrow { transform: translateX(6px); }
 
 .game-mode-button.disabled { opacity: 0.4; cursor: default; }
-.game-mode-button.disabled:hover { background: var(--step-1); color: var(--ink); }
+.game-mode-button.disabled:hover { background: var(--step-1); box-shadow: inset 3px 0 0 var(--step-2); color: var(--ink); }
+.game-mode-button.disabled:hover .game-mode-description { color: var(--ink-soft); }
 .game-mode-button.disabled:hover .game-mode-arrow { transform: none; }
 
 .game-mode-status { margin-left: auto; font-size: 14px; font-weight: 600; }
@@ -317,19 +407,28 @@ input:focus-visible,
   border: 0;
   border-radius: 0;
   background: var(--step-1);
-  font-size: 28px;
-  font-weight: 600;
-  letter-spacing: 0.16em;
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-family: var(--font-mono);
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
 }
 
+/* The ring sits inside the field so it lines up with the Join button. */
+.lobby-input:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+}
+
 .lobby-input::placeholder {
-  color: var(--ink);
+  color: var(--ink-soft);
+  font-family: var(--font);
   font-size: 17px;
   font-weight: 500;
   letter-spacing: 0;
   text-transform: none;
-  opacity: 0.55;
+  opacity: 1;
 }
 
 .lobby-join-button {
@@ -346,16 +445,18 @@ input:focus-visible,
 }
 
 .lobby-join-button:hover:not(:disabled) { background: var(--accent); color: var(--ink); }
-.lobby-join-button:disabled { opacity: 0.35; cursor: default; }
 
 .lobby-code {
+  position: relative;
   padding: clamp(24px, 4vh, 36px) 24px;
   background: var(--step-1);
-  font-size: clamp(44px, min(8vw, 12vh), 104px);
-  font-weight: 600;
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-family: var(--font-mono);
+  font-size: clamp(44px, min(8vw, 12vh), 96px);
+  font-weight: 500;
   line-height: 1;
-  letter-spacing: 0.14em;
-  text-indent: 0.14em;
+  letter-spacing: 0.1em;
+  text-indent: 0.1em;
   user-select: all;
 }
 
@@ -368,11 +469,23 @@ input:focus-visible,
   text-underline-offset: 4px;
 }
 
-.lobby-link:hover { color: var(--accent); }
+.lobby-link:hover { text-decoration-thickness: 2px; }
+
+/* Waiting for the friend: a slow signal light in the corner of the code. */
+.lobby-code::after {
+  content: "";
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 10px;
+  height: 10px;
+  background: var(--accent);
+}
 
 .lobby-error {
   padding: 16px 20px;
-  background: rgba(255, 90, 54, 0.18);
+  background: rgba(255, 90, 54, 0.14);
+  box-shadow: inset 3px 0 0 var(--accent);
   font-size: 16px;
   font-weight: 500;
 }
@@ -392,7 +505,7 @@ input:focus-visible,
      columns so the fleets line up under boards that shrank to fit. */
   --battle-chrome: calc(var(--gutter-top) + var(--gutter-bottom) + 280px);
   /* Widest a board can be in its column (resolved against this container). */
-  --board-col: min(560px, (100cqw - var(--board-gap)) / 2);
+  --board-col: min(600px, (100cqw - var(--board-gap)) / 2);
 
   container-type: inline-size;
   display: grid;
@@ -403,7 +516,7 @@ input:focus-visible,
     "layout layout"
     "controls controls";
   width: 100%;
-  max-width: clamp(640px, (100dvh - var(--battle-chrome)) * 2 + var(--board-gap), 1180px);
+  max-width: clamp(640px, (100dvh - var(--battle-chrome)) * 2 + var(--board-gap), 1260px);
   min-height: 0;
   margin: 0 auto;
 }
@@ -446,7 +559,7 @@ input:focus-visible,
 .game-layout > :nth-child(3) { grid-area: eb; }
 .game-layout > :nth-child(4) { grid-area: ef; }
 
-.board-section { width: 100%; max-width: 560px; }
+.board-section { width: 100%; max-width: 600px; }
 
 /* In the game the board section takes its row's height and the board fits it. */
 .game-layout .board-section {
@@ -460,12 +573,28 @@ input:focus-visible,
 
 .board-section h2,
 .results-board-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin-bottom: 14px;
   font-size: 19px;
   line-height: 28px;
   font-weight: 600;
   letter-spacing: -0.01em;
 }
+
+/* The board you can fire at gets a signal-orange marker; the other one steps back. */
+.board-section h2::before {
+  content: "";
+  flex: none;
+  width: 10px;
+  height: 10px;
+  background: var(--step-2);
+  transition: background-color var(--dur-base) var(--ease-out);
+}
+
+.game-container[data-phase='battle'] .board-section:has(.cell.available) h2::before { background: var(--accent); }
+.game-container[data-phase='battle'] .board-section:not(:has(.cell.available)) h2 { color: var(--ink-soft); }
 
 /* Board */
 
@@ -485,7 +614,8 @@ input:focus-visible,
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-family: var(--font-mono);
+  font-size: 12px;
   font-weight: 500;
   color: var(--ink-soft);
 }
@@ -713,7 +843,12 @@ input:focus-visible,
 
 .fleet-ship.selectable { cursor: pointer; }
 .fleet-ship.selectable:hover { background: var(--step-2); }
-.fleet-ship.placed { opacity: 0.45; }
+/* Placed: an outline instead of a faded fill, so the name stays readable (AA). */
+.fleet-ship.placed {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--ink-soft);
+}
 
 .fleet-ship.selected {
   background: var(--ink);
@@ -721,10 +856,10 @@ input:focus-visible,
   opacity: 1;
 }
 
-.fleet-ship.sunk { background: transparent; }
-.fleet-ship:not(.selected) .ship-segment { background: #6b7b85; }
+.fleet-ship.sunk { background: transparent; box-shadow: inset 0 0 0 1px var(--line); color: var(--ink-soft); }
+.fleet-ship:not(.selected) .ship-segment { background: var(--steel); }
 .fleet-ship.sunk .ship-segment { background: var(--accent); }
-.fleet-ship.sunk .fleet-ship-name { text-decoration: line-through; opacity: 0.6; }
+.fleet-ship.sunk .fleet-ship-name { text-decoration: line-through; }
 
 /* ---------- Controls ---------- */
 
@@ -751,7 +886,22 @@ input:focus-visible,
 
 .placement-button { background: var(--step-1); color: var(--ink); }
 .placement-button:hover:not(:disabled) { background: var(--step-2); }
-.placement-button:disabled { opacity: 0.35; cursor: default; }
+
+/* Reset is the least important action: an outline, not a fill. */
+#reset-fleet { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+#reset-fleet:hover:not(:disabled) { background: var(--step-1); }
+
+/* Disabled reads as "not yet", not as a faded secondary button. */
+.placement-button:disabled,
+.new-game-button:disabled,
+.lobby-join-button:disabled,
+.confirm-button:disabled {
+  background: var(--step-1);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--ink-soft);
+  opacity: 1;
+  cursor: not-allowed;
+}
 
 #rotate-ship { order: 1; }
 #reset-fleet { order: 2; }
@@ -764,13 +914,6 @@ input:focus-visible,
 }
 
 .new-game-button:hover:not(:disabled) { background: var(--ink-soft); }
-
-.new-game-button:disabled {
-  background: var(--step-1);
-  color: var(--ink);
-  opacity: 0.4;
-  cursor: default;
-}
 
 .new-game-button.start-battle-button:not(:disabled) {
   background: var(--accent);
@@ -812,37 +955,44 @@ input:focus-visible,
 .game-container[data-phase='game-over'] #rotate-ship,
 .game-container[data-phase='game-over'] #reset-fleet { display: none; }
 
+/* Mid-battle "New Game" is a way out, not the main action: a quiet outline. */
 .game-container[data-phase='battle'] .new-game-button,
 .game-container[data-phase='game-over'] .new-game-button {
+  min-height: 48px;
   margin-left: 0;
-  background: var(--step-1);
+  padding: 0 22px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line);
   color: var(--ink);
+  font-size: 16px;
 }
 
 .game-container[data-phase='battle'] .new-game-button:hover,
-.game-container[data-phase='game-over'] .new-game-button:hover { background: var(--step-2); }
+.game-container[data-phase='game-over'] .new-game-button:hover { background: var(--step-1); }
 
 /* ---------- Results ---------- */
 
 .results-screen,
 .history-screen {
   display: block;
-  max-width: 1180px;
+  max-width: var(--page-max);
   margin: 0 auto;
-  padding-top: clamp(8px, 4vh, 112px);
+  padding: clamp(8px, 4vh, 64px) 0 0;
+  align-content: start;
 }
 
+/* Same headline size as the menus, so moving between pages feels like one site. */
 .results-screen .game-mode-header h2,
-.history-screen .game-mode-header h2 { font-size: clamp(44px, min(7vw, 10vh), 104px); }
+.history-screen .game-mode-header h2 { font-size: clamp(40px, min(5.6vw, 10vh), 88px); }
 
 .results-headline:focus,
 .history-headline:focus { outline: none; }
 
 .results-groups {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(220px, 0.6fr);
   gap: 8px;
-  margin-top: clamp(20px, 4vh, 48px);
+  margin-top: clamp(16px, 3vh, 48px);
 }
 
 .results-group {
@@ -854,6 +1004,15 @@ input:focus-visible,
 }
 
 .results-group-title { font-size: 19px; font-weight: 600; }
+
+/* The match card is a single number: a dark tile with the time at its foot. */
+.results-group--match {
+  align-content: space-between;
+  background: var(--ink);
+  color: var(--ground);
+}
+
+.results-group--match .results-stat-label { color: rgba(238, 242, 244, 0.72); }
 
 .results-stats {
   display: grid;
@@ -878,7 +1037,18 @@ input:focus-visible,
   letter-spacing: -0.03em;
 }
 
-.results-stat-label { font-size: 15px; }
+.results-stat-label,
+.stats-card-label {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.results-stat-label { margin-top: 6px; }
 
 .results-stat--meter,
 .stats-card--meter { padding-bottom: 20px; }
@@ -918,7 +1088,7 @@ input:focus-visible,
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: clamp(20px, 4vh, 32px);
+  margin-top: clamp(16px, 3vh, 32px);
 }
 
 .results-new-game,
@@ -942,7 +1112,18 @@ input:focus-visible,
   grid-template-columns: repeat(2, minmax(0, 1fr));
   column-gap: 56px;
   row-gap: 32px;
-  margin-top: 48px;
+  margin-top: clamp(20px, 3vh, 40px);
+}
+
+/*
+ * The boards take the place of the stat cards rather than stacking under
+ * them, and they shrink to the height that is left, so the page still fits
+ * one screen on desktop.
+ */
+.results-screen:has(.results-boards:not([hidden])) .results-groups { display: none; }
+
+.results-boards .board-section {
+  max-width: clamp(260px, 100dvh - 470px, 560px);
 }
 
 .board--readonly .cell { cursor: default; }
@@ -997,22 +1178,22 @@ input:focus-visible,
 
 .history-screen .history-note { font-size: 15px; margin-bottom: 16px; }
 
+/* Eight cards: four across, two full rows, no orphans. */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
 
+/* Every card keeps room for a meter at its foot, so the numbers line up in a row. */
 .stats-card {
   display: grid;
   align-content: space-between;
   gap: clamp(12px, 2vh, 20px);
   min-height: clamp(120px, 18vh, 156px);
-  padding: 24px;
+  padding: 24px 24px 44px;
   background: var(--step-1);
 }
-
-.stats-card-label { font-size: 15px; }
 
 .stats-card-value {
   font-size: clamp(40px, 6vh, 52px);
@@ -1021,7 +1202,7 @@ input:focus-visible,
   letter-spacing: -0.035em;
 }
 
-.stats-card--meter { padding-bottom: 48px; }
+.stats-card--meter { padding-bottom: 44px; }
 
 .stats-grid--empty .stats-card-value { opacity: 0.3; }
 
@@ -1040,7 +1221,7 @@ input:focus-visible,
 }
 
 .stats-reset:hover,
-.history-clear:hover { color: var(--accent); }
+.history-clear:hover { text-decoration-thickness: 2px; }
 
 .history-list {
   display: grid;
@@ -1055,20 +1236,35 @@ input:focus-visible,
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 16px;
-  padding: 20px 24px;
+  padding: 20px 24px 20px 28px;
   background: var(--step-1);
+  /* The outcome is a stripe on the left: ink for a win, signal orange for a loss. */
+  box-shadow: inset 4px 0 0 var(--steel);
 }
 
-.history-row--victory { background: var(--ink); color: var(--ground); }
+.history-row--victory { box-shadow: inset 4px 0 0 var(--ink); }
+.history-row--defeat { box-shadow: inset 4px 0 0 var(--accent); }
 
 .history-row-main { display: grid; gap: 2px; }
 .history-row-outcome { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
-.history-row-meta { font-size: 15px; }
-.history-row-numbers { font-size: 16px; font-weight: 500; text-align: right; }
+.history-row-meta { font-size: 15px; color: var(--ink-soft); }
+.history-row-numbers {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  text-align: right;
+}
 
-/* Empty history: the drawn miniature goes, the words stay. */
-.history-empty { display: grid; gap: 8px; padding: 40px 0; font-size: 19px; }
-.history-empty-board { display: none; }
+/* Empty history: a small slice of an untouched board, drawn like the real one. */
+.history-empty { display: grid; justify-items: start; padding: clamp(24px, 5vh, 56px) 0; }
+.history-empty-board { width: min(360px, 100%); height: auto; }
+.history-empty-cell { fill: var(--step-1); rx: 0; }
+.history-empty-hull { fill: var(--steel); stroke: var(--steel-edge); stroke-width: 1.5; stroke-linejoin: round; }
+.history-empty-deck { fill: #56656e; }
+.history-empty-bridge { fill: #c9d2d7; stroke: var(--steel-edge); stroke-width: 1; }
+.history-empty-miss { fill: #8c9ba4; }
+.history-empty-target { fill: none; stroke: var(--accent); stroke-width: 2; stroke-dasharray: 4 3; rx: 0; }
 
 /* ---------- Dialog ---------- */
 
@@ -1079,18 +1275,19 @@ input:focus-visible,
   display: grid;
   place-items: center;
   padding: var(--gutter);
-  background: rgba(12, 18, 21, 0.55);
+  background: rgba(13, 26, 34, 0.55);
 }
 
 .confirm-dialog {
   width: min(460px, 100%);
   padding: 32px;
   background: var(--ground);
+  border-top: 3px solid var(--accent);
   box-shadow: var(--float);
 }
 
 .confirm-title { font-size: 30px; font-weight: 600; line-height: 1.1; letter-spacing: -0.03em; }
-.confirm-message { margin-top: 12px; }
+.confirm-message { margin-top: 12px; color: var(--ink-soft); }
 
 .confirm-actions { display: flex; gap: 8px; margin-top: 32px; }
 
@@ -1160,6 +1357,11 @@ input:focus-visible,
   to { transform: scaleX(1); }
 }
 
+@keyframes signal-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
 @keyframes overlay-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes overlay-out { from { opacity: 1; } to { opacity: 0; } }
 
@@ -1215,6 +1417,11 @@ input:focus-visible,
   .fleet-ship.selectable:active { transform: scale(0.97); }
   .game-mode-button:active { transform: scale(0.995); }
 
+  :is(.placement-button, .new-game-button, .results-new-game, .results-view-boards,
+    .confirm-button, .lobby-join-button, .sound-mute-button):active:not(:disabled) { transform: translateY(1px); }
+
+  .lobby-code::after { animation: signal-blink 1.6s var(--ease-out) infinite; }
+
   .stats-segments--reveal { animation: stats-reveal var(--dur-base) var(--ease-out) backwards; }
 
   .records-enter { animation: records-in var(--dur-base) var(--ease-out) var(--dur-exit) backwards; }
@@ -1253,8 +1460,14 @@ input:focus-visible,
 
 /* ---------- Narrow screens ---------- */
 
+@media (max-width: 1100px) {
+  .results-groups { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .results-group--match { grid-column: 1 / -1; }
+}
+
 @media (max-width: 900px) {
-  .game-mode-menu { grid-template-columns: minmax(0, 1fr); row-gap: 32px; }
+  .game-mode-menu { grid-template-columns: minmax(0, 1fr); row-gap: 32px; align-content: start; }
+  .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .game-mode-header p { max-width: 40ch; }
   .game-layout { column-gap: 32px; }
 }
