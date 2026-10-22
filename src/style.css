@@ -524,47 +524,169 @@ input:focus-visible,
 .cell.disabled { cursor: default; }
 .cell.ship.movable { cursor: grab; }
 
-/* Ships: one continuous bar across the cells it covers. */
+/*
+ * Ships: every cell draws its slice of one silhouette (bow, hull, stern),
+ * edge to edge so the slices join across the grid gaps. The water square
+ * moves to the cell background, ::before draws the ship and ::after
+ * stays free for the shot marks on top.
+ */
 
-.cell.hull::before { background: var(--ink); }
-
-.cell.hull-h::before { inset: 2px 0; }
-.cell.hull-h.hull-bow::before { left: 2px; }
-.cell.hull-h.hull-stern::before { right: 2px; }
-
-.cell.hull-v::before { inset: 0 2px; }
-.cell.hull-v.hull-bow::before { top: 2px; }
-.cell.hull-v.hull-stern::before { bottom: 2px; }
-
-/* Shots */
-
-.cell.miss::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  width: 22%;
-  height: 22%;
-  margin: auto;
-  border-radius: 50%;
-  background: var(--ink-soft);
+.cell.hull,
+.cell.placement-preview,
+.cell.placement-invalid {
+  --hull: var(--ink);
+  --deck: #27343b;
+  --fit: #74838b;
+  background: linear-gradient(var(--step-1), var(--step-1)) center / calc(100% - 4px) calc(100% - 4px) no-repeat;
 }
 
-.cell.hit::before,
-.cell.sunk::before { background: var(--accent); }
+.cell.hull-h, .cell.preview-h { --shape: polygon(0 22%, 100% 22%, 100% 78%, 0 78%); }
+.cell.hull-h.hull-bow, .cell.preview-h.preview-bow {
+  --shape: polygon(5% 50%, 15% 36%, 31% 26%, 54% 22%, 100% 22%, 100% 78%, 54% 78%, 31% 74%, 15% 64%);
+}
+.cell.hull-h.hull-stern, .cell.preview-h.preview-stern {
+  --shape: polygon(0 22%, 84% 22%, 92% 27%, 95% 37%, 95% 63%, 92% 73%, 84% 78%, 0 78%);
+}
 
-.cell.sunk::after {
+.cell.hull-v, .cell.preview-v { --shape: polygon(22% 0, 78% 0, 78% 100%, 22% 100%); }
+.cell.hull-v.hull-bow, .cell.preview-v.preview-bow {
+  --shape: polygon(50% 5%, 64% 15%, 74% 31%, 78% 54%, 78% 100%, 22% 100%, 22% 54%, 26% 31%, 36% 15%);
+}
+.cell.hull-v.hull-stern, .cell.preview-v.preview-stern {
+  --shape: polygon(22% 0, 78% 0, 78% 84%, 73% 92%, 63% 95%, 37% 95%, 27% 92%, 22% 84%);
+}
+
+.cell.hull::before {
+  inset: 0;
+  clip-path: var(--shape);
+  background-color: var(--hull);
+}
+
+/* Overlap the neighbouring slice by a pixel so no seam shows at the joins. */
+.cell.hull-h::before { left: -1px; right: -1px; }
+.cell.hull-h.hull-bow::before { left: 0; }
+.cell.hull-h.hull-stern::before { right: 0; }
+.cell.hull-v::before { top: -1px; bottom: -1px; }
+.cell.hull-v.hull-bow::before { top: 0; }
+.cell.hull-v.hull-stern::before { bottom: 0; }
+
+/* Deck details: a centre deck, turrets with a barrel toward the bow, a bridge. */
+
+.cell.hull-h::before {
+  background-image:
+    radial-gradient(circle closest-side, var(--fit) 0 62%, transparent 68%),
+    linear-gradient(var(--fit), var(--fit)),
+    linear-gradient(to bottom, transparent 37%, var(--deck) 37% 63%, transparent 63%);
+  background-size: 34% 34%, 32% 8%, 100% 100%;
+  background-position: 54% 50%, 20% 50%, 0 0;
+  background-repeat: no-repeat;
+}
+.cell.hull-v::before {
+  background-image:
+    radial-gradient(circle closest-side, var(--fit) 0 62%, transparent 68%),
+    linear-gradient(var(--fit), var(--fit)),
+    linear-gradient(to right, transparent 37%, var(--deck) 37% 63%, transparent 63%);
+  background-size: 34% 34%, 8% 32%, 100% 100%;
+  background-position: 50% 54%, 50% 20%, 0 0;
+  background-repeat: no-repeat;
+}
+
+/* The bow and stern keep only the deck, set back from the tip. */
+.cell.hull-h.hull-bow::before { background-size: 0 0, 0 0, 60% 100%; background-position: 0 0, 0 0, 100% 0; }
+.cell.hull-v.hull-bow::before { background-size: 0 0, 0 0, 100% 60%; background-position: 0 0, 0 0, 0 100%; }
+.cell.hull-h.hull-stern::before { background-size: 30% 30%, 28% 8%, 80% 100%; background-position: 46% 50%, 14% 50%, 0 0; }
+.cell.hull-v.hull-stern::before { background-size: 30% 30%, 8% 28%, 100% 80%; background-position: 50% 46%, 50% 14%, 0 0; }
+
+.cell.hull-h.hull-bridge::before {
+  background-image:
+    linear-gradient(var(--deck), var(--deck)),
+    linear-gradient(var(--fit), var(--fit)),
+    linear-gradient(to bottom, transparent 37%, var(--deck) 37% 63%, transparent 63%);
+  background-size: 16% 16%, 50% 38%, 100% 100%;
+  background-position: 50% 50%, 50% 50%, 0 0;
+}
+.cell.hull-v.hull-bridge::before {
+  background-image:
+    linear-gradient(var(--deck), var(--deck)),
+    linear-gradient(var(--fit), var(--fit)),
+    linear-gradient(to right, transparent 37%, var(--deck) 37% 63%, transparent 63%);
+  background-size: 16% 16%, 38% 50%, 100% 100%;
+  background-position: 50% 50%, 50% 50%, 0 0;
+}
+
+/* Carrier: a flat flight deck with a dashed centre line and an island to one side. */
+.cell.hull-carrier.hull-h::before {
+  background-image:
+    linear-gradient(to right, var(--fit) 0 55%, transparent 55%),
+    linear-gradient(to bottom, transparent 30%, var(--deck) 30% 70%, transparent 70%);
+  background-size: 50% 5%, 100% 100%;
+  background-position: 0 50%, 0 0;
+  background-repeat: repeat-x, no-repeat;
+}
+.cell.hull-carrier.hull-v::before {
+  background-image:
+    linear-gradient(to bottom, var(--fit) 0 55%, transparent 55%),
+    linear-gradient(to right, transparent 30%, var(--deck) 30% 70%, transparent 70%);
+  background-size: 5% 50%, 100% 100%;
+  background-position: 50% 0, 0 0;
+  background-repeat: repeat-y, no-repeat;
+}
+.cell.hull-carrier.hull-h.hull-bridge::before {
+  background-image:
+    linear-gradient(var(--fit), var(--fit)),
+    linear-gradient(to bottom, transparent 30%, var(--deck) 30% 70%, transparent 70%);
+  background-size: 46% 22%, 100% 100%;
+  background-position: 50% 29%, 0 0;
+  background-repeat: no-repeat;
+}
+.cell.hull-carrier.hull-v.hull-bridge::before {
+  background-image:
+    linear-gradient(var(--fit), var(--fit)),
+    linear-gradient(to right, transparent 30%, var(--deck) 30% 70%, transparent 70%);
+  background-size: 22% 46%, 100% 100%;
+  background-position: 71% 50%, 0 0;
+  background-repeat: no-repeat;
+}
+
+.cell.hull-carrier.hull-h.hull-bow::before { background-size: 0 0, 60% 100%; background-position: 0 0, 100% 0; }
+.cell.hull-carrier.hull-v.hull-bow::before { background-size: 0 0, 100% 60%; background-position: 0 0, 0 100%; }
+
+/* A sunk ship greys out and breaks: bow and stern tilt away from the hull. */
+.cell.hull.sunk {
+  --hull: #78858c;
+  --deck: #8e9aa0;
+  --fit: #aab3b8;
+}
+.cell.hull-h.sunk.hull-bow::before { transform: rotate(-7deg) translateY(4%); }
+.cell.hull-h.sunk.hull-stern::before { transform: rotate(7deg) translateY(4%); }
+.cell.hull-v.sunk.hull-bow::before { transform: rotate(7deg) translateX(4%); }
+.cell.hull-v.sunk.hull-stern::before { transform: rotate(-7deg) translateX(4%); }
+
+/* Shots: a splash ring for a miss, a burst for a hit, a cross once sunk. */
+
+.cell.miss::after,
+.cell.hit::after {
   content: "";
   position: absolute;
   inset: 0;
-  width: 24%;
-  height: 24%;
   margin: auto;
+  background: center / contain no-repeat;
+  pointer-events: none;
+}
+
+.cell.miss::after { width: 68%; height: 68%; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='30' fill='none' stroke='%234a565d' stroke-width='6' stroke-opacity='.55'/%3E%3Ccircle cx='50' cy='50' r='13' fill='%234a565d'/%3E%3C/svg%3E"); }
+.cell.hit::after { width: 78%; height: 78%; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50 4 59 28 77 23 72 41 94 50 72 59 76 76 59 72 50 96 41 72 23 77 28 59 8 50 28 41 25 25 41 28' fill='%23ff5a36' stroke='%230c1215' stroke-width='3' stroke-linejoin='round'/%3E%3Cpolygon points='62 29 60 44 74 50 60 56 62 71 50 62 38 71 40 56 26 50 40 44 38 29 50 38' fill='%23ffd166'/%3E%3C/svg%3E"); }
+.cell.hit.sunk::after { width: 64%; height: 64%; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M28 28 72 72M72 28 28 72' stroke='%230c1215' stroke-width='22' stroke-linecap='round'/%3E%3Cpath d='M28 28 72 72M72 28 28 72' stroke='%23ff5a36' stroke-width='11' stroke-linecap='round'/%3E%3C/svg%3E"); }
+
+/* Placement preview: the same silhouette, translucent; orange when it does not fit. */
+
+.cell.placement-preview::before,
+.cell.placement-invalid::before {
+  inset: 0;
+  clip-path: var(--shape, none);
   background: var(--ink);
+  opacity: 0.4;
 }
-
-/* Placement preview */
-
-.cell.placement-preview::before { background: var(--ink); opacity: 0.4; }
 .cell.placement-invalid::before { background: var(--accent); opacity: 0.6; }
 
 /* ---------- Fleet ---------- */
@@ -620,12 +742,25 @@ input:focus-visible,
     color var(--dur-fast) var(--ease-out);
 }
 
-.fleet-ship-visual { display: flex; gap: 2px; }
+/* A small side-on silhouette, one segment per cell: pointed bow, square stern. */
+.fleet-ship-visual { display: flex; }
 
 .ship-segment {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   background: currentColor;
+  clip-path: polygon(0 22%, 100% 22%, 100% 78%, 0 78%);
+}
+.ship-segment:first-child {
+  clip-path: polygon(5% 50%, 15% 36%, 31% 26%, 54% 22%, 100% 22%, 100% 78%, 54% 78%, 31% 74%, 15% 64%);
+}
+.ship-segment:last-child {
+  clip-path: polygon(0 22%, 84% 22%, 92% 27%, 95% 37%, 95% 63%, 92% 73%, 84% 78%, 0 78%);
+}
+/* The bridge sits on the middle segment, as on the board. */
+.ship-segment:nth-child(2):nth-last-child(2),
+.ship-segment:nth-child(3):not(:last-child) {
+  clip-path: polygon(0 22%, 25% 22%, 25% 4%, 75% 4%, 75% 22%, 100% 22%, 100% 78%, 0 78%);
 }
 
 .fleet-ship-name { line-height: 1.2; }
@@ -1119,8 +1254,8 @@ input:focus-visible,
 
   #turn-status.status-swap { animation: status-swap var(--dur-base) var(--ease-out); }
 
-  .cell.shot-animation::before { animation: shot-pop 360ms var(--ease-out); }
-  .cell.sunk-animation::before { animation: shot-pop 520ms var(--ease-out); }
+  .cell.shot-animation::after { animation: shot-pop 360ms var(--ease-out); }
+  .cell.sunk-animation::after { animation: shot-pop 520ms var(--ease-out); }
 
   .cell.hull-enter::before {
     animation: hull-in 260ms var(--ease-out) backwards;

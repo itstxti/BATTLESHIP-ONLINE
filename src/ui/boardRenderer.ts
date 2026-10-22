@@ -97,7 +97,12 @@ export function clearPlacementPreview(
   for (const cell of cells) {
     cell.classList.remove(
       'placement-preview',
-      'placement-invalid'
+      'placement-invalid',
+      'preview-h',
+      'preview-v',
+      'preview-bow',
+      'preview-mid',
+      'preview-stern'
     );
   }
 }
@@ -140,7 +145,7 @@ export function renderPlacementPreview(
     );
 
   for (
-    const position of positions
+    const [part, position] of positions.entries()
   ) {
     if (
       position.row < 0 ||
@@ -174,10 +179,22 @@ export function renderPlacementPreview(
       continue;
     }
 
+    /*
+     * Shape classes so the preview draws
+     * the same silhouette as a placed ship.
+     */
     cell.classList.add(
       valid
         ? 'placement-preview'
-        : 'placement-invalid'
+        : 'placement-invalid',
+      orientation === 'vertical'
+        ? 'preview-v'
+        : 'preview-h',
+      part === 0
+        ? 'preview-bow'
+        : part === positions.length - 1
+          ? 'preview-stern'
+          : 'preview-mid'
     );
   }
 }
