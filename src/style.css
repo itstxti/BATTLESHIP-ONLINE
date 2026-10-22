@@ -9,7 +9,9 @@
   --accent: #ff5a36;
   --float: 0 16px 48px rgba(12, 18, 21, 0.16);
 
-  --gutter: 24px;
+  --gutter: clamp(24px, 4vw, 64px);
+  --gutter-top: clamp(16px, 3vh, 32px);
+  --gutter-bottom: clamp(24px, 4vh, 48px);
   --z-topbar: 100;
   --z-popover: 200;
   --z-dialog: 300;
@@ -63,14 +65,24 @@ input:focus-visible,
   outline-offset: 3px;
 }
 
+/* Top bar, then the current screen filling what is left of the viewport. */
 #app {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
   min-height: 100vh;
   min-height: 100dvh;
   padding:
-    max(20px, env(safe-area-inset-top))
+    max(var(--gutter-top), env(safe-area-inset-top))
     max(var(--gutter), env(safe-area-inset-right))
-    max(40px, env(safe-area-inset-bottom))
+    max(var(--gutter-bottom), env(safe-area-inset-bottom))
     max(var(--gutter), env(safe-area-inset-left));
+}
+
+/* While playing the screen is exactly one viewport tall, so the boards can size to it. */
+#app:has(> .game-container:not([hidden])) {
+  height: 100vh;
+  height: 100dvh;
 }
 
 /* ---------- Entry ---------- */
@@ -118,7 +130,7 @@ input:focus-visible,
 
 /* ---------- Top bar ---------- */
 
-.game-header { margin-bottom: 8px; }
+.game-header { margin-bottom: clamp(4px, 1vh, 8px); }
 
 .game-topbar {
   display: flex;
@@ -213,21 +225,24 @@ input:focus-visible,
 .game-mode-menu {
   display: grid;
   grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-  column-gap: 64px;
+  column-gap: clamp(40px, 5vw, 96px);
   row-gap: 40px;
   align-items: start;
-  padding-top: clamp(24px, 9vh, 112px);
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding-top: clamp(16px, 8vh, 112px);
 }
 
 .game-mode-header h2 {
-  font-size: clamp(40px, 5.6vw, 88px);
+  font-size: clamp(40px, min(5.6vw, 10vh), 88px);
   font-weight: 600;
   line-height: 0.98;
   letter-spacing: -0.04em;
 }
 
 .game-mode-header p {
-  margin-top: 28px;
+  margin-top: clamp(16px, 3vh, 28px);
   max-width: 34ch;
   font-size: 19px;
 }
@@ -248,7 +263,7 @@ input:focus-visible,
   align-items: center;
   gap: 16px;
   width: 100%;
-  padding: 28px;
+  padding: clamp(20px, 3.4vh, 28px) 28px;
   border: 0;
   border-radius: 0;
   background: var(--step-1);
@@ -334,9 +349,9 @@ input:focus-visible,
 .lobby-join-button:disabled { opacity: 0.35; cursor: default; }
 
 .lobby-code {
-  padding: 36px 24px;
+  padding: clamp(24px, 4vh, 36px) 24px;
   background: var(--step-1);
-  font-size: clamp(44px, 8vw, 104px);
+  font-size: clamp(44px, min(8vw, 12vh), 104px);
   font-weight: 600;
   line-height: 1;
   letter-spacing: 0.14em;
@@ -364,16 +379,43 @@ input:focus-visible,
 
 /* ---------- Game ---------- */
 
+/*
+ * The game fills the screen below the top bar: status, then the boards
+ * (which take whatever height is left), then the fleets and the controls.
+ * Each board is as wide as its column allows but never taller than the
+ * space its row gets, so nothing needs a vertical scroll.
+ */
 .game-container {
-  max-width: 1180px;
+  --board-title: 42px;
+  --board-gap: clamp(32px, 4vw, 56px);
+  /* Rough height of everything that is not a board; it only narrows the
+     columns so the fleets line up under boards that shrank to fit. */
+  --battle-chrome: calc(var(--gutter-top) + var(--gutter-bottom) + 280px);
+  /* Widest a board can be in its column (resolved against this container). */
+  --board-col: min(560px, (100cqw - var(--board-gap)) / 2);
+
+  container-type: inline-size;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "status status"
+    "layout layout"
+    "controls controls";
+  width: 100%;
+  max-width: clamp(640px, (100dvh - var(--battle-chrome)) * 2 + var(--board-gap), 1180px);
+  min-height: 0;
   margin: 0 auto;
 }
 
-.game-status { margin: 16px 0 28px; }
+.game-status {
+  grid-area: status;
+  margin: clamp(4px, 1.5vh, 16px) 0 clamp(12px, 3vh, 28px);
+}
 
 #turn-status {
   display: block;
-  font-size: clamp(30px, 4vw, 52px);
+  font-size: clamp(28px, min(4vw, 6vh), 52px);
   font-weight: 600;
   line-height: 1.05;
   letter-spacing: -0.035em;
@@ -384,13 +426,18 @@ input:focus-visible,
 #turn-status.enemy-turn { color: var(--ink-soft); }
 
 .game-layout {
+  grid-area: layout;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* The board row grows with the free height, but never past what the column
+     width allows, so the fleets stay right under the boards. */
+  grid-template-rows: minmax(240px, calc(var(--board-col) + var(--board-title))) auto;
   grid-template-areas:
     "pb eb"
     "pf ef";
-  column-gap: 56px;
-  row-gap: 20px;
+  align-content: start;
+  column-gap: var(--board-gap);
+  row-gap: clamp(12px, 2vh, 20px);
   align-items: start;
 }
 
@@ -401,10 +448,21 @@ input:focus-visible,
 
 .board-section { width: 100%; max-width: 560px; }
 
+/* In the game the board section takes its row's height and the board fits it. */
+.game-layout .board-section {
+  container-type: size;
+  align-self: stretch;
+}
+
+.game-layout .board-section > * {
+  width: min(100cqw, 100cqh - var(--board-title));
+}
+
 .board-section h2,
 .results-board-title {
   margin-bottom: 14px;
   font-size: 19px;
+  line-height: 28px;
   font-weight: 600;
   letter-spacing: -0.01em;
 }
@@ -459,47 +517,122 @@ input:focus-visible,
 .cell.disabled { cursor: default; }
 .cell.ship.movable { cursor: grab; }
 
-/* Ships: one continuous bar across the cells it covers. */
+/*
+ * Ships: a flat, top-down plan of each ship in steel tones with thin
+ * outlines. Every cell draws its slice (bow, hull, stern, bridge) as an
+ * SVG stretched to the cell, edge to edge so the slices join into one
+ * silhouette. The water square moves to the cell background, ::before
+ * draws the ship and ::after stays free for the shot marks on top.
+ */
 
-.cell.hull::before { background: var(--ink); }
+.cell.hull,
+.cell.placement-preview,
+.cell.placement-invalid {
+  background: linear-gradient(var(--water), var(--water)) center / calc(100% - 4px) calc(100% - 4px) no-repeat;
+}
 
-.cell.hull-h::before { inset: 2px 0; }
-.cell.hull-h.hull-bow::before { left: 2px; }
-.cell.hull-h.hull-stern::before { right: 2px; }
+.cell {
+  --water: var(--step-1);
+  --burnt: #a3321c;
+  --charred: #2b3135;
+}
 
-.cell.hull-v::before { inset: 0 2px; }
-.cell.hull-v.hull-bow::before { top: 2px; }
-.cell.hull-v.hull-stern::before { bottom: 2px; }
+.cell.hull::before {
+  inset: 0;
+  background: transparent center / 100% 100% no-repeat;
+}
 
-/* Shots */
+/* Overlap the neighbouring slice by a pixel so no seam shows at the joins. */
+.cell.hull-h::before { left: -1px; right: -1px; }
+.cell.hull-h.hull-bow::before { left: 0; }
+.cell.hull-h.hull-stern::before { right: 0; }
+.cell.hull-v::before { top: -1px; bottom: -1px; }
+.cell.hull-v.hull-bow::before { top: 0; }
+.cell.hull-v.hull-stern::before { bottom: 0; }
 
-.cell.miss::after {
+.cell.hull.hull-h.hull-bow::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100Z' fill='%236b7b85'/%3E%3Cpath d='M48 50H100' fill='none' stroke='%2346555e' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.hull-carrier.hull-h.hull-bow::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100Z' fill='%236b7b85'/%3E%3Crect x='50' y='33' width='50' height='34' fill='%2358676f'/%3E%3Cpath d='M54 50H100' fill='none' stroke='%23c9d1d5' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.hull-h.hull-mid::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 26H100V74H0Z' fill='%236b7b85'/%3E%3Cpath d='M0 50H44M57 50H100' fill='none' stroke='%2346555e' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M28 50H44' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Crect x='44' y='43' width='13' height='14' fill='%2393a1a9' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.hull-carrier.hull-h.hull-mid::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 26H100V74H0Z' fill='%236b7b85'/%3E%3Crect x='0' y='33' width='100' height='34' fill='%2358676f'/%3E%3Cpath d='M4 50H100' fill='none' stroke='%23c9d1d5' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.hull-h.hull-mid.hull-bridge::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 26H100V74H0Z' fill='%236b7b85'/%3E%3Cpath d='M0 50H28M74 50H100' fill='none' stroke='%2346555e' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Crect x='28' y='36' width='46' height='28' fill='%2393a1a9' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M40 43V57M51 43V57M62 43V57' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.hull-carrier.hull-h.hull-mid.hull-bridge::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 26H100V74H0Z' fill='%236b7b85'/%3E%3Crect x='0' y='33' width='100' height='34' fill='%2358676f'/%3E%3Cpath d='M4 50H100' fill='none' stroke='%23c9d1d5' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Crect x='34' y='27' width='30' height='8' fill='%2393a1a9' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.hull-h.hull-stern::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0Z' fill='%236b7b85'/%3E%3Cpath d='M0 50H40' fill='none' stroke='%2346555e' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M28 50H44' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Crect x='44' y='43' width='13' height='14' fill='%2393a1a9' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M84 31V69' fill='none' stroke='%2346555e' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.hull-carrier.hull-h.hull-stern::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0Z' fill='%236b7b85'/%3E%3Crect x='0' y='33' width='88' height='34' fill='%2358676f'/%3E%3Cpath d='M4 50H88' fill='none' stroke='%23c9d1d5' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.hull-v.hull-bow::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100Z' fill='%236b7b85'/%3E%3Cpath d='M48 50H100' fill='none' stroke='%2346555e' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.hull-carrier.hull-v.hull-bow::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100Z' fill='%236b7b85'/%3E%3Crect x='50' y='33' width='50' height='34' fill='%2358676f'/%3E%3Cpath d='M54 50H100' fill='none' stroke='%23c9d1d5' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.hull-v.hull-mid::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M0 26H100V74H0Z' fill='%236b7b85'/%3E%3Cpath d='M0 50H44M57 50H100' fill='none' stroke='%2346555e' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M28 50H44' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Crect x='44' y='43' width='13' height='14' fill='%2393a1a9' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.hull-carrier.hull-v.hull-mid::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M0 26H100V74H0Z' fill='%236b7b85'/%3E%3Crect x='0' y='33' width='100' height='34' fill='%2358676f'/%3E%3Cpath d='M4 50H100' fill='none' stroke='%23c9d1d5' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.hull-v.hull-mid.hull-bridge::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M0 26H100V74H0Z' fill='%236b7b85'/%3E%3Cpath d='M0 50H28M74 50H100' fill='none' stroke='%2346555e' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Crect x='28' y='36' width='46' height='28' fill='%2393a1a9' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M40 43V57M51 43V57M62 43V57' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.hull-carrier.hull-v.hull-mid.hull-bridge::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M0 26H100V74H0Z' fill='%236b7b85'/%3E%3Crect x='0' y='33' width='100' height='34' fill='%2358676f'/%3E%3Cpath d='M4 50H100' fill='none' stroke='%23c9d1d5' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Crect x='34' y='27' width='30' height='8' fill='%2393a1a9' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.hull-v.hull-stern::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0Z' fill='%236b7b85'/%3E%3Cpath d='M0 50H40' fill='none' stroke='%2346555e' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M28 50H44' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Crect x='44' y='43' width='13' height='14' fill='%2393a1a9' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M84 31V69' fill='none' stroke='%2346555e' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.hull-carrier.hull-v.hull-stern::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0Z' fill='%236b7b85'/%3E%3Crect x='0' y='33' width='88' height='34' fill='%2358676f'/%3E%3Cpath d='M4 50H88' fill='none' stroke='%23c9d1d5' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0' fill='none' stroke='%231f2a30' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-h.hull-bow::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100Z' fill='%234b5156'/%3E%3Cpath d='M48 50H100' fill='none' stroke='%23363c40' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-carrier.hull-h.hull-bow::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100Z' fill='%234b5156'/%3E%3Crect x='50' y='33' width='50' height='34' fill='%2340464a'/%3E%3Cpath d='M54 50H100' fill='none' stroke='%236f767a' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-h.hull-mid::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 26H100V74H0Z' fill='%234b5156'/%3E%3Cpath d='M0 50H44M57 50H100' fill='none' stroke='%23363c40' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M28 50H44' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Crect x='44' y='43' width='13' height='14' fill='%235f666b' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-carrier.hull-h.hull-mid::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 26H100V74H0Z' fill='%234b5156'/%3E%3Crect x='0' y='33' width='100' height='34' fill='%2340464a'/%3E%3Cpath d='M4 50H100' fill='none' stroke='%236f767a' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-h.hull-mid.hull-bridge::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 26H100V74H0Z' fill='%234b5156'/%3E%3Cpath d='M0 50H28M74 50H100' fill='none' stroke='%23363c40' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Crect x='28' y='36' width='46' height='28' fill='%235f666b' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M40 43V57M51 43V57M62 43V57' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-carrier.hull-h.hull-mid.hull-bridge::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 26H100V74H0Z' fill='%234b5156'/%3E%3Crect x='0' y='33' width='100' height='34' fill='%2340464a'/%3E%3Cpath d='M4 50H100' fill='none' stroke='%236f767a' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Crect x='34' y='27' width='30' height='8' fill='%235f666b' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-h.hull-stern::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0Z' fill='%234b5156'/%3E%3Cpath d='M0 50H40' fill='none' stroke='%23363c40' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M28 50H44' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Crect x='44' y='43' width='13' height='14' fill='%235f666b' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M84 31V69' fill='none' stroke='%23363c40' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-carrier.hull-h.hull-stern::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0Z' fill='%234b5156'/%3E%3Crect x='0' y='33' width='88' height='34' fill='%2340464a'/%3E%3Cpath d='M4 50H88' fill='none' stroke='%236f767a' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-v.hull-bow::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100Z' fill='%234b5156'/%3E%3Cpath d='M48 50H100' fill='none' stroke='%23363c40' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-carrier.hull-v.hull-bow::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100Z' fill='%234b5156'/%3E%3Crect x='50' y='33' width='50' height='34' fill='%2340464a'/%3E%3Cpath d='M54 50H100' fill='none' stroke='%236f767a' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Cpath d='M100 26H54C30 26 12 36 3 50C12 64 30 74 54 74H100' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-v.hull-mid::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M0 26H100V74H0Z' fill='%234b5156'/%3E%3Cpath d='M0 50H44M57 50H100' fill='none' stroke='%23363c40' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M28 50H44' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Crect x='44' y='43' width='13' height='14' fill='%235f666b' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-carrier.hull-v.hull-mid::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M0 26H100V74H0Z' fill='%234b5156'/%3E%3Crect x='0' y='33' width='100' height='34' fill='%2340464a'/%3E%3Cpath d='M4 50H100' fill='none' stroke='%236f767a' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-v.hull-mid.hull-bridge::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M0 26H100V74H0Z' fill='%234b5156'/%3E%3Cpath d='M0 50H28M74 50H100' fill='none' stroke='%23363c40' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Crect x='28' y='36' width='46' height='28' fill='%235f666b' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M40 43V57M51 43V57M62 43V57' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-carrier.hull-v.hull-mid.hull-bridge::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M0 26H100V74H0Z' fill='%234b5156'/%3E%3Crect x='0' y='33' width='100' height='34' fill='%2340464a'/%3E%3Cpath d='M4 50H100' fill='none' stroke='%236f767a' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Crect x='34' y='27' width='30' height='8' fill='%235f666b' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M0 26H100M0 74H100' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-v.hull-stern::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0Z' fill='%234b5156'/%3E%3Cpath d='M0 50H40' fill='none' stroke='%23363c40' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M28 50H44' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Crect x='44' y='43' width='13' height='14' fill='%235f666b' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M84 31V69' fill='none' stroke='%23363c40' stroke-width='1' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+.cell.hull.sunk.hull-carrier.hull-v.hull-stern::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg transform='matrix%280 1 1 0 0 0%29'%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0Z' fill='%234b5156'/%3E%3Crect x='0' y='33' width='88' height='34' fill='%2340464a'/%3E%3Cpath d='M4 50H88' fill='none' stroke='%236f767a' stroke-width='1' vector-effect='non-scaling-stroke' stroke-dasharray='6 6'/%3E%3Cpath d='M0 26H88Q95 26 95 33V67Q95 74 88 74H0' fill='none' stroke='%23101416' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/g%3E%3C/svg%3E"); }
+
+/*
+ * Shots. Each state differs in fill, shape and colour so it reads even in
+ * greyscale: a miss keeps the water with a small muted dot; a hit fills the
+ * cell with a burnt red and a light impact mark; a sunk ship turns the cell
+ * charcoal, chars the hull and crosses it out.
+ */
+
+.cell.hit { --water: var(--burnt); }
+.cell.hit.sunk { --water: var(--charred); }
+.cell.hit:not(.hull)::before { background: var(--water); }
+.cell.hit:not(.hull) { background: none; }
+
+.cell.miss::after,
+.cell.hit::after {
   content: "";
   position: absolute;
   inset: 0;
-  width: 22%;
-  height: 22%;
   margin: auto;
-  border-radius: 50%;
-  background: var(--ink-soft);
+  background: center / contain no-repeat;
+  pointer-events: none;
 }
 
-.cell.hit::before,
-.cell.sunk::before { background: var(--accent); }
+.cell.miss::after { width: 50%; height: 50%; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='16' fill='%238c9ba4'/%3E%3C/svg%3E"); }
+.cell.hit::after { width: 72%; height: 72%; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='31' fill='none' stroke='%23ffe3d9' stroke-width='5' stroke-opacity='.55'/%3E%3Ccircle cx='50' cy='50' r='17' fill='%23ffe3d9' stroke='%235c1609' stroke-width='2'/%3E%3C/svg%3E"); }
+.cell.hit.sunk::after { width: 52%; height: 52%; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M24 24 76 76M76 24 24 76' stroke='%23ff8a6e' stroke-width='10' stroke-linecap='square'/%3E%3C/svg%3E"); }
 
-.cell.sunk::after {
-  content: "";
-  position: absolute;
+/* Placement preview: the hull outline, translucent; orange when it does not fit. */
+
+.cell.hull-h, .cell.preview-h { --shape: polygon(0 26%, 100% 26%, 100% 74%, 0 74%); }
+.cell.preview-h.preview-bow {
+  --shape: polygon(3% 50%, 12% 38%, 30% 28%, 54% 26%, 100% 26%, 100% 74%, 54% 74%, 30% 72%, 12% 62%);
+}
+.cell.preview-h.preview-stern {
+  --shape: polygon(0 26%, 88% 26%, 93% 28%, 95% 33%, 95% 67%, 93% 72%, 88% 74%, 0 74%);
+}
+.cell.hull-v, .cell.preview-v { --shape: polygon(26% 0, 74% 0, 74% 100%, 26% 100%); }
+.cell.preview-v.preview-bow {
+  --shape: polygon(50% 3%, 62% 12%, 72% 30%, 74% 54%, 74% 100%, 26% 100%, 26% 54%, 28% 30%, 38% 12%);
+}
+.cell.preview-v.preview-stern {
+  --shape: polygon(26% 0, 74% 0, 74% 88%, 72% 93%, 67% 95%, 33% 95%, 28% 93%, 26% 88%);
+}
+
+.cell.placement-preview::before,
+.cell.placement-invalid::before {
   inset: 0;
-  width: 24%;
-  height: 24%;
-  margin: auto;
-  background: var(--ink);
+  clip-path: var(--shape, none);
+  background: #6b7b85;
+  opacity: 0.55;
 }
-
-/* Placement preview */
-
-.cell.placement-preview::before { background: var(--ink); opacity: 0.4; }
 .cell.placement-invalid::before { background: var(--accent); opacity: 0.6; }
 
 /* ---------- Fleet ---------- */
@@ -555,12 +688,25 @@ input:focus-visible,
     color var(--dur-fast) var(--ease-out);
 }
 
-.fleet-ship-visual { display: flex; gap: 2px; }
+/* A small side-on silhouette, one segment per cell: pointed bow, square stern. */
+.fleet-ship-visual { display: flex; }
 
 .ship-segment {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   background: currentColor;
+  clip-path: polygon(0 22%, 100% 22%, 100% 78%, 0 78%);
+}
+.ship-segment:first-child {
+  clip-path: polygon(5% 50%, 15% 36%, 31% 26%, 54% 22%, 100% 22%, 100% 78%, 54% 78%, 31% 74%, 15% 64%);
+}
+.ship-segment:last-child {
+  clip-path: polygon(0 22%, 84% 22%, 92% 27%, 95% 37%, 95% 63%, 92% 73%, 84% 78%, 0 78%);
+}
+/* The bridge sits on the middle segment, as on the board. */
+.ship-segment:nth-child(2):nth-last-child(2),
+.ship-segment:nth-child(3):not(:last-child) {
+  clip-path: polygon(0 22%, 25% 22%, 25% 4%, 75% 4%, 75% 22%, 100% 22%, 100% 78%, 0 78%);
 }
 
 .fleet-ship-name { line-height: 1.2; }
@@ -576,16 +722,18 @@ input:focus-visible,
 }
 
 .fleet-ship.sunk { background: transparent; }
+.fleet-ship:not(.selected) .ship-segment { background: #6b7b85; }
 .fleet-ship.sunk .ship-segment { background: var(--accent); }
 .fleet-ship.sunk .fleet-ship-name { text-decoration: line-through; opacity: 0.6; }
 
 /* ---------- Controls ---------- */
 
 .placement-controls {
+  grid-area: controls;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 32px;
+  margin-top: clamp(16px, 3vh, 32px);
 }
 
 .placement-button,
@@ -634,13 +782,29 @@ input:focus-visible,
 /* ---------- Phases ---------- */
 
 /* Placing: only your board, centred. */
-.game-container[data-phase='placement'] { max-width: 560px; }
 .game-container[data-phase='placement'] .game-layout {
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas: "pb" "pf";
 }
 .game-container[data-phase='placement'] .game-layout > :nth-child(3),
 .game-container[data-phase='placement'] .game-layout > :nth-child(4) { display: none; }
+
+/* Battle and after: the one remaining button sits beside the turn status. */
+.game-container[data-phase='battle'],
+.game-container[data-phase='game-over'] {
+  --battle-chrome: calc(var(--gutter-top) + var(--gutter-bottom) + 220px);
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas:
+    "status controls"
+    "layout layout";
+  column-gap: 24px;
+}
+
+.game-container[data-phase='battle'] .placement-controls,
+.game-container[data-phase='game-over'] .placement-controls {
+  align-self: center;
+  margin: clamp(4px, 1.5vh, 16px) 0 clamp(12px, 3vh, 28px);
+}
 
 /* Battle and after: nothing to rotate or reset. */
 .game-container[data-phase='battle'] #rotate-ship,
@@ -665,10 +829,11 @@ input:focus-visible,
   display: block;
   max-width: 1180px;
   margin: 0 auto;
+  padding-top: clamp(8px, 4vh, 112px);
 }
 
 .results-screen .game-mode-header h2,
-.history-screen .game-mode-header h2 { font-size: clamp(44px, 7vw, 104px); }
+.history-screen .game-mode-header h2 { font-size: clamp(44px, min(7vw, 10vh), 104px); }
 
 .results-headline:focus,
 .history-headline:focus { outline: none; }
@@ -677,14 +842,14 @@ input:focus-visible,
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 8px;
-  margin-top: 48px;
+  margin-top: clamp(20px, 4vh, 48px);
 }
 
 .results-group {
   display: grid;
   align-content: start;
-  gap: 24px;
-  padding: 28px;
+  gap: clamp(16px, 3vh, 24px);
+  padding: clamp(20px, 3.4vh, 28px) 28px;
   background: var(--step-1);
 }
 
@@ -693,7 +858,7 @@ input:focus-visible,
 .results-stats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px 16px;
+  gap: clamp(16px, 2.6vh, 24px) 16px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -707,7 +872,7 @@ input:focus-visible,
 }
 
 .results-stat-value {
-  font-size: 44px;
+  font-size: clamp(34px, 5.4vh, 44px);
   font-weight: 600;
   line-height: 1;
   letter-spacing: -0.03em;
@@ -732,22 +897,28 @@ input:focus-visible,
 .results-stat--meter::before,
 .stats-card--meter::before { right: 0; background: var(--step-2); }
 
+/* The fill is a share of the track, not of the card, so 100% ends where the track does. */
 .results-stat--meter::after,
 .stats-card--meter::after {
-  width: calc(var(--meter, 0) * 1%);
+  width: calc((100% - 2 * var(--meter-inset, 0px)) * clamp(0, var(--meter, 0), 100) / 100);
   background: var(--ink);
 }
 
-.stats-card--meter { position: relative; }
+.stats-card--meter {
+  --meter-inset: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
 .stats-card--meter::before,
-.stats-card--meter::after { left: 24px; bottom: 24px; }
-.stats-card--meter::before { right: 24px; }
+.stats-card--meter::after { left: var(--meter-inset); bottom: var(--meter-inset); }
+.stats-card--meter::before { right: var(--meter-inset); }
 
 .results-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 32px;
+  margin-top: clamp(20px, 4vh, 32px);
 }
 
 .results-new-game,
@@ -782,7 +953,7 @@ input:focus-visible,
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin: 40px 0 24px;
+  margin: clamp(16px, 3vh, 40px) 0 clamp(16px, 2.5vh, 24px);
 }
 
 .stats-segments {
@@ -835,8 +1006,8 @@ input:focus-visible,
 .stats-card {
   display: grid;
   align-content: space-between;
-  gap: 20px;
-  min-height: 156px;
+  gap: clamp(12px, 2vh, 20px);
+  min-height: clamp(120px, 18vh, 156px);
   padding: 24px;
   background: var(--step-1);
 }
@@ -844,7 +1015,7 @@ input:focus-visible,
 .stats-card-label { font-size: 15px; }
 
 .stats-card-value {
-  font-size: 52px;
+  font-size: clamp(40px, 6vh, 52px);
   font-weight: 600;
   line-height: 1;
   letter-spacing: -0.035em;
@@ -860,7 +1031,7 @@ input:focus-visible,
 
 .stats-reset,
 .history-clear {
-  margin-top: 24px;
+  margin-top: clamp(8px, 2vh, 24px);
   padding: 10px 0;
   border: 0;
   background: none;
@@ -1030,8 +1201,8 @@ input:focus-visible,
 
   #turn-status.status-swap { animation: status-swap var(--dur-base) var(--ease-out); }
 
-  .cell.shot-animation::before { animation: shot-pop 360ms var(--ease-out); }
-  .cell.sunk-animation::before { animation: shot-pop 520ms var(--ease-out); }
+  .cell.shot-animation::after { animation: shot-pop 360ms var(--ease-out); }
+  .cell.sunk-animation::after { animation: shot-pop 520ms var(--ease-out); }
 
   .cell.hull-enter::before {
     animation: hull-in 260ms var(--ease-out) backwards;
@@ -1089,7 +1260,12 @@ input:focus-visible,
 }
 
 /* Placement: a smaller board so the board, the fleet and the buttons share one screen. */
-.game-container[data-phase='placement'] { max-width: 480px; }
+.game-container[data-phase='placement'] {
+  --board-title: 0px;
+  --board-col: 100cqw;
+  max-width: 520px;
+}
+
 .game-container[data-phase='placement'] .board-section h2 { display: none; }
 .game-container[data-phase='placement'] .game-status { margin: 8px 0 16px; }
 .game-container[data-phase='placement'] #turn-status { font-size: clamp(28px, 3vw, 36px); }
