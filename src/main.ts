@@ -1685,7 +1685,7 @@ function handleLocalEvent(
 
         setTurnStatus(
           event.sunk
-            ? `You sunk the enemy ${event.sunk.name}! Shoot again.`
+            ? `You sunk the enemy boat! Shoot again.`
             : 'Hit! Shoot again.',
           'player'
         );
