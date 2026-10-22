@@ -225,25 +225,7 @@ input:focus-visible,
   letter-spacing: -0.01em;
 }
 
-.game-brand-mark {
-  width: 26px;
-  height: 16px;
-  background: var(--steel);
-  clip-path: polygon(
-    0 55%,
-    15% 100%,
-    85% 100%,
-    100% 55%,
-    75% 55%,
-    75% 35%,
-    60% 35%,
-    60% 10%,
-    40% 10%,
-    40% 35%,
-    25% 35%,
-    25% 55%
-  );
-}
+
 
 .game-topbar-actions {
   display: flex;
