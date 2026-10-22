@@ -1685,7 +1685,7 @@ function handleLocalEvent(
 
         setTurnStatus(
           event.sunk
-            ? `You sunk the enemy boat! Shoot again.`
+            ? `Ship sunk! Shoot again!`
             : 'Hit! Shoot again.',
           'player'
         );
@@ -2453,7 +2453,7 @@ function handleOnlineEvent(
 
         setTurnStatus(
           event.sunk
-            ? `You sunk the enemy boat! Shoot again.`
+            ? `Ship sunk! Shoot again!`
             : 'Hit! Shoot again.',
           'player'
         );
